@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from loguru import logger
+from ..baml_client.types import ExperimentWithFilename
 
 
 def save_experiment_plans(
