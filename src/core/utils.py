@@ -7,6 +7,11 @@ from loguru import logger
 from ..baml_client import types
 from ..core.models import ExperimentPlan
 
+import base64
+import mimetypes
+
+from ..baml_client.types import ToolResult
+
 
 def load_experiment_plans(filepath: Path) -> List[ExperimentPlan]:
     """Load experiment plans from a JSON file."""
@@ -46,3 +51,25 @@ def load_experiment_plans(filepath: Path) -> List[ExperimentPlan]:
     except (json.JSONDecodeError, KeyError) as e:
         logger.error(f"Failed to load experiment plans from {filepath}: {e}")
         return []
+
+
+def tool_read_file(file_path: Path) -> ToolResult:
+    """Read a file's content. If it's a PDF, return base64-encoded content; otherwise, return text."""
+    name = "tool_read_file"
+    logger.info(f"Reading file: {file_path}")
+    try:
+        if not file_path.exists():
+            raise FileNotFoundError(f"File {file_path} not found")
+
+        mime_type, _ = mimetypes.guess_type(str(file_path))
+        if mime_type == "application/pdf":
+            with open(file_path, "rb") as f:
+                content = f.read()
+            result = base64.b64encode(content).decode("utf-8")
+        else:
+            result = file_path.read_text()
+        logger.info(f"Successfully read file: {file_path}")
+        return ToolResult(name=name, success=True, output=result)
+    except Exception as e:
+        logger.error(f"Error reading file {file_path}: {e}")
+        return ToolResult(name=name, success=False, error=str(e))
