@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from loguru import logger
+from ..baml_client import types
 from ..core.models import ExperimentPlan
 
 
@@ -17,7 +18,10 @@ def save_experiment_plans(
         formatted_plans = [
             {
                 "experiment": plan.filename,
-                "tools": [tool.__dict__ for tool in plan.experiment],
+                "tools": [
+                    {"type": type(tool).__name__, **tool.__dict__}
+                    for tool in plan.experiment
+                ],
                 "approved": False,
             }
             for plan in plans
@@ -33,7 +37,7 @@ def save_experiment_plans(
         return {"success": False, "error": str(e)}
 
 
-def load_experiment_plans(filepath: Path) -> List[dict]:
+def load_experiment_plans(filepath: Path) -> List[ExperimentPlan]:
     """Load experiment plans from a JSON file."""
     logger.info(f"Loading experiment plans from {filepath}")
     if not filepath.exists():
@@ -41,10 +45,30 @@ def load_experiment_plans(filepath: Path) -> List[dict]:
         return []
     try:
         with filepath.open("r") as f:
-            plans = json.load(f)
+            plans_data = json.load(f)
         logger.info(
-            f"Successfully loaded {len(plans)} experiment plans from {filepath}"
+            f"Successfully loaded {len(plans_data)} experiment plans from {filepath}"
         )
+        plans = []
+        for plan_data in plans_data:
+            tools = []
+            for tool_dict in plan_data.get("tools", []):
+                type_name = tool_dict.pop("type", None)
+                if type_name and hasattr(types, type_name):
+                    tool_class = getattr(types, type_name)
+                    try:
+                        tool = tool_class(**tool_dict)
+                        tools.append(tool)
+                    except Exception as e:
+                        logger.warning(f"Failed to instantiate {type_name}: {e}")
+                        tools.append("unknown")
+                else:
+                    tools.append("unknown")
+            plans.append(
+                ExperimentPlan(
+                    filename=plan_data["experiment"], experiment=tools
+                )
+            )
         return plans
     except (json.JSONDecodeError, KeyError) as e:
         logger.error(f"Failed to load experiment plans from {filepath}: {e}")
