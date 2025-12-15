@@ -4,11 +4,10 @@ import json
 from pathlib import Path
 
 from loguru import logger
-from ..baml_client.types import ExperimentWithFilename
 
 
 def save_experiment_plans(
-    plans: List[ExperimentWithFilename], filepath: Path
+    plans: List[Dict[str, Any]], filepath: Path
 ) -> Dict[str, Union[bool, str]]:
     """Save experiment plans to a JSON file."""
     logger.info(f"Saving experiment plans to {filepath}")
