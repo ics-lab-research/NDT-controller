@@ -80,7 +80,8 @@ def handle_experiment_mode(
                 single_experiment = orchestrator_response.experiments[0]
 
                 single_plan = call_exp_planner(
-                    str(single_experiment.experiment), filename=single_experiment.filename
+                    str(single_experiment.experiment),
+                    filename=single_experiment.filename,
                 )
                 yield AgentResponse(response="Plan generated.")
 
