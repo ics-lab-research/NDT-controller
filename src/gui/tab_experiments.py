@@ -24,7 +24,7 @@ from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, read_file
 
 
-def create_json_viewer_tab(project_manager: ProjectManager) -> gr.Tab:
+def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     if isinstance(metadata, ExperimentsMetadata):
         plans_path = metadata.plans_path
