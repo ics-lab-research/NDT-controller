@@ -56,7 +56,7 @@ def respond_stream(
     # Add response placeholder
     history.append({"role": "assistant", "content": ""})
     yield history, ""
-    
+
     thinking_added = False
 
     # Convert history to conversation messages, excluding the new messages
@@ -68,11 +68,14 @@ def respond_stream(
         if agent_response.thinking and agent_response.thinking.strip():
             if not thinking_added:
                 # Insert thinking message before response
-                history.insert(-1, {
-                    "role": "assistant",
-                    "content": agent_response.thinking,
-                    "metadata": {"title": "🧠 Thinking"},
-                })
+                history.insert(
+                    -1,
+                    {
+                        "role": "assistant",
+                        "content": agent_response.thinking,
+                        "metadata": {"title": "🧠 Thinking"},
+                    },
+                )
                 thinking_added = True
                 yield history, ""
             else:
