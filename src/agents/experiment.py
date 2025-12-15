@@ -68,17 +68,19 @@ def handle_experiment_mode(
         #     yield AgentResponse(response="Done")
 
         if router_final.action == ExpAction.SINGLE_SCAN:
-            yield AgentResponse(thinking="Done")
+            yield AgentResponse(response="Performing single scan.")
 
             orchestrator_response = call_exp_orchestrator(user_message)
+            yield AgentResponse(response="Called exp_orchestrator.")
 
             if orchestrator_response.number_of_scans == 1:
+                yield AgentResponse(response="Number of scans is 1, calling exp_planner.")
                 single_experiment = orchestrator_response.experiments[0]
 
                 single_plan = call_exp_planner(
                     user_message, filename=single_experiment.filename
                 )
-                yield AgentResponse(thinking="Done")
+                yield AgentResponse(response="Plan generated.")
 
                 metadata = project_manager.get_mode_metadata(
                     project_manager.current_mode
