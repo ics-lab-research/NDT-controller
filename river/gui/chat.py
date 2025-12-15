@@ -9,40 +9,6 @@ from ..core.llm import get_agent_response
 from .utils import build_conversation_history
 
 
-def update_files(files):
-    """Update the files display and visibility."""
-    if not files:
-        return gr.update(value=None, visible=False), gr.update(visible=True)
-    files_list = files if isinstance(files, list) else [files]
-    return gr.update(value=files_list, visible=True), gr.update(visible=False)
-
-
-def handle_file_upload(files, ctx):
-    """Handle file upload by adding docs to context and updating display."""
-    handle_upload(files, ctx)
-    display_updates = update_files(files)
-    return display_updates[0], display_updates[1], ctx
-
-
-def handle_file_change(files, ctx):
-    """Handle when files are removed via X button."""
-    file_paths = []
-    if files:
-        file_list = files if isinstance(files, list) else [files]
-        file_paths = [f.name for f in file_list]
-    ctx.set_uploaded_docs(file_paths)
-    display_updates = update_files(files)
-    return display_updates[0], display_updates[1], ctx
-
-
-def handle_upload(files: Union[Any, List[Any]] | None, ctx: ProjectManager):
-    """Handle file uploads by adding their paths to the project context."""
-    file_paths = []
-    if files:
-        file_list = files if isinstance(files, list) else [files]
-        file_paths = [f.name for f in file_list]
-    logger.debug("Uploaded file paths: {}", file_paths)
-    ctx.add_docs(file_paths)
 
 
 def respond_stream(
@@ -93,7 +59,7 @@ def create_chat_interface(
     project_manager: ProjectManager,
     current_context: gr.State,
 ) -> Tuple[
-    gr.Chatbot, gr.UploadButton, gr.Files, gr.Textbox, gr.Dropdown, gr.Button
+    gr.Chatbot, gr.Textbox, gr.Dropdown, gr.Button
 ]:
     """Create the chat interface components."""
     chatbot = gr.Chatbot(
@@ -106,27 +72,6 @@ def create_chat_interface(
     )
 
     with gr.Row():
-        with gr.Column(scale=1):
-            upload_button = gr.UploadButton(
-                "📎 Attach Files",
-                file_types=[
-                    "image/*",
-                    ".pdf",
-                    ".txt",
-                    ".doc",
-                    ".docx",
-                ],
-                # NOTE: same height with Textbox, I don't know why?
-                elem_classes="upload-button",
-            )
-
-            # TODO: use it later
-            uploaded_files = gr.Files(
-                label="Uploaded Files",
-                interactive=True,
-                visible=False,
-            )
-
         msg = gr.Textbox(
             placeholder="Type your message here...",
             show_label=False,
@@ -144,25 +89,13 @@ def create_chat_interface(
     with gr.Row():
         clear = gr.Button("Clear")
 
-    # upload_button.upload(
-    #     fn=handle_file_upload,
-    #     inputs=[upload_button, current_context],
-    #     outputs=[uploaded_files, upload_button, current_context],
-    # )
-
-    uploaded_files.change(
-        fn=handle_file_change,
-        inputs=[uploaded_files, current_context],
-        outputs=[uploaded_files, upload_button, current_context],
-    )
-
     clear.click(
         fn=clear_chat,
         inputs=None,
-        outputs=[chatbot, msg, uploaded_files],
+        outputs=[chatbot, msg],
     )
 
-    return chatbot, upload_button, uploaded_files, msg, mode_dropdown, clear
+    return chatbot, msg, mode_dropdown, clear
 
 
 def handle_mode_change(mode: str, ctx: ProjectManager) -> ProjectManager:
@@ -177,6 +110,6 @@ def handle_mode_change(mode: str, ctx: ProjectManager) -> ProjectManager:
         return ctx
 
 
-def clear_chat() -> Tuple[List, str, Dict[str, Any]]:
+def clear_chat() -> Tuple[List, str]:
     """Clear the chat interface."""
-    return [], "", gr.update(value=None, visible=False)
+    return [], ""
