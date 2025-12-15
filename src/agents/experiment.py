@@ -1,7 +1,5 @@
 from typing import Generator, List
 
-from datetime import datetime
-import time
 
 from loguru import logger
 
@@ -13,14 +11,8 @@ from .experiment_api import (
     call_exp_planner,
     call_exp_router,
 )
-from .experiment_execution import execute_single_plan, execute_multiple_plans
 from ..agents.experiment_planning import save_experiment_plans
-from ..tools.labview_controller import (
-    tool_connect_to_vi,
-    tool_get_vi_status,
-    tool_run_open_vi,
-    tool_handle_save_dialog,
-)
+from ..core.models import ExperimentPlan
 
 
 def handle_experiment_mode(
@@ -92,13 +84,7 @@ def handle_experiment_mode(
                     raise ValueError("Metadata is not ExperimentsMetadata")
                 plans_path = metadata.plans_path
                 save_status = save_experiment_plans(
-                    [
-                        {
-                            "experiment": single_experiment,
-                            "tools": single_plan,
-                            "approved": False,
-                        }
-                    ],
+                    single_plan,
                     plans_path,
                 )
 
@@ -129,7 +115,7 @@ def handle_experiment_mode(
                 )
                 plans_to_save.append(
                     {
-                        "experiment": experiment,
+                        "experiment": experiment.filename,
                         "tools": plan,
                         "approved": False,
                     }
