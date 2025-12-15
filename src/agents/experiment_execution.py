@@ -12,6 +12,7 @@ from ..baml_client.types import (
     SelectTabTool,
     SetButtonStateTool,
     SetNumericControlTool,
+    ToolResult,
 )
 from ..core.models import (
     ExperimentsMetadata,
@@ -37,7 +38,7 @@ HARDWARE_SETTLE_DELAY = 5
 BUTTON_STATE_DELAY = 1
 
 
-def reinit_system(project_manager: ProjectManager) -> Optional[str]:
+def reinit_system(project_manager: ProjectManager) -> str | None:
     """Reinitialize the system between experiments."""
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     if not isinstance(metadata, ExperimentsMetadata):
