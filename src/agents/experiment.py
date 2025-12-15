@@ -143,5 +143,7 @@ def handle_experiment_mode(
                     action=f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
                 )
 
-        else:
-            pass
+        elif router_final.action == ExpAction.Ask:
+            yield AgentResponse(
+                response="Please provide more details or clarify your request."
+            )
