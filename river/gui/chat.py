@@ -144,11 +144,11 @@ def create_chat_interface(
     with gr.Row():
         clear = gr.Button("Clear")
 
-    upload_button.upload(
-        fn=handle_file_upload,
-        inputs=[upload_button, current_context],
-        outputs=[uploaded_files, upload_button, current_context],
-    )
+    # upload_button.upload(
+    #     fn=handle_file_upload,
+    #     inputs=[upload_button, current_context],
+    #     outputs=[uploaded_files, upload_button, current_context],
+    # )
 
     uploaded_files.change(
         fn=handle_file_change,
