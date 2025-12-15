@@ -9,8 +9,6 @@ from ..core.llm import get_agent_response
 from .utils import build_conversation_history
 
 
-
-
 def respond_stream(
     message: str,
     history: ChatHistory,
@@ -58,9 +56,7 @@ def respond_stream(
 def create_chat_interface(
     project_manager: ProjectManager,
     current_context: gr.State,
-) -> Tuple[
-    gr.Chatbot, gr.Textbox, gr.Dropdown, gr.Button
-]:
+) -> Tuple[gr.Chatbot, gr.Textbox, gr.Dropdown, gr.Button]:
     """Create the chat interface components."""
     chatbot = gr.Chatbot(
         type="messages",
