@@ -37,5 +37,5 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     else:
         json_content = "Error: Invalid metadata type for experiments mode"
     with gr.Tab("JSON Viewer") as tab:
-        gr.Code(value=json_content, language="json", lines=20)
+        gr.Code(value=json_content, language="json", max_lines=30)
     return tab
