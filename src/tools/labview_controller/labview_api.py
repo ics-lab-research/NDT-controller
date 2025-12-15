@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, Union
 
-
+from ...baml_client.types import ToolResult
 from .labview_controller import LabVIEWController
 
 # --- Global controller instance ---
