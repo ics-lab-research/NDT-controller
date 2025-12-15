@@ -109,7 +109,7 @@ def handle_experiment_mode(
             yield AgentResponse(thinking="Called exp_orchestrator.")
 
             experiments = orchestrator_response.experiments
-            plans_to_save = []
+            plans_to_save: List[ExperimentPlan] = []
             for experiment in experiments:
                 yield AgentResponse(
                     thinking=f"Generating plan for {experiment.filename}..."
