@@ -8,26 +8,13 @@ from ..baml_client.types import ExperimentWithFilename
 
 
 def save_experiment_plans(
-    plans: List[Dict[str, Any]], filepath: Path
+    plans: List[ExperimentWithFilename], filepath: Path
 ) -> Dict[str, Union[bool, str]]:
     """Save experiment plans to a JSON file."""
     logger.info(f"Saving experiment plans to {filepath}")
     try:
-        plans_to_save = []
-        for plan in plans:
-            if "experiment" in plan:
-                filename = plan["experiment"].filename
-            else:
-                filename = plan["filename"]
-            plans_to_save.append(
-                {
-                    "filename": filename,
-                    "tools": plan["tools"],
-                    "approved": plan["approved"],
-                }
-            )
         with filepath.open("w") as f:
-            json.dump(plans_to_save, f, indent=4)
+            json.dump(plans, f, indent=4)
         logger.info(
             f"Successfully saved {len(plans)} experiment plans to {filepath}"
         )
