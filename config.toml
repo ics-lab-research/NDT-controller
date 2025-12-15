@@ -1,0 +1,32 @@
+[paths]
+idea = "IDEA"
+experiments = "EXPERIMENTS"
+data_science = "DATA-SCIENCE"
+reporting = "REPORTING"
+
+[idea]
+system_spec_path = "SYSTEM.md"
+idea_output_path = "idea.md"
+experiment_plan_path = "experiment_plan.md"
+data_science_plan_path = "data_science_plan.md"
+
+[experiments]
+exp_constraint_path = "LABVIEW.md"
+data_dir_path = "data"
+plans_path = "labview_experiment_plans.json"
+vi_path = "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
+
+[data_science]
+temp_dir_path = "temp"
+
+[reporting]
+latex_dir_path = "latex"
+output_pdf_path = "output.pdf"
+main_tex_path = "main.tex"
+introduction_tex_path = "introduction.tex"
+abstract_tex_path = "abstract.tex"
+experimental_setup_tex_path = "experimental_setup.tex"
+results_tex_path = "results.tex"
+methodology_tex_path = "methodology.tex"
+conclusion_tex_path = "conclusion.tex"
+references_bib_path = "references.bib"

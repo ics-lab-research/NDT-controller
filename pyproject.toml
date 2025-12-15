@@ -1,0 +1,57 @@
+[project]
+name = "river"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "dotenv>=0.9.9",
+  "loguru>=0.7.3",
+  "baml-py==0.214.0",
+  "pydantic>=2.11.7",
+  "gradio>=5.48.0",
+  "aider-chat>=0.86.1",
+  "watchdog>=6.0.0",
+  "pywin32>=311; sys_platform == 'win32'",
+  "pywinauto>=0.6.9; sys_platform == 'win32'",
+  "gradio-pdf>=0.0.22",
+  "colorama>=0.4.6",
+  "matplotlib>=3.10.7",
+  "nptdms>=1.10.0",
+  "scikit-learn>=1.7.2",
+  "h5py>=3.15.1",
+  "umap-learn>=0.5.9.post2",
+  "seaborn>=0.13.2",
+  "flask>=3.1.2",
+  "zeroconf>=0.148.0",
+  # "tensorflow>=2.18.1",
+]
+
+# [tool.uv.sources]
+# torch = [{ index = "pytorch-cpu" }]
+# torchvision = [{ index = "pytorch-cpu" }]
+
+# [[tool.uv.index]]
+# name = "pytorch-cpu"
+# url = "https://download.pytorch.org/whl/cpu"
+# explicit = true
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+  "catppuccin-jupyterlab>=0.2.4",
+  "jupyterlab>=4.4.9",
+  "jupyterlab-vim>=4.1.4",
+]
+
+[project.scripts]
+river = "river.main:gui"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+"river" = ["**/*.txt", "**/*.json"]
