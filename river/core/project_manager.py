@@ -5,12 +5,9 @@ from typing import Dict, List
 import tomllib
 from loguru import logger
 from .models import (
-    DataScienceMetadata,
     ExperimentsMetadata,
-    IdeaMetadata,
     Mode,
     ModeMetadata,
-    ReportingMetadata,
 )
 from ..tools.file_operations import tool_read_file
 
@@ -47,23 +44,6 @@ class ProjectManager:
         """Get the uploaded document paths."""
         return self._uploaded_docs
 
-    def _get_idea_metadata(self, paths) -> IdeaMetadata:
-        idea_base = paths.get("idea", "IDEA")
-        return IdeaMetadata(
-            system_spec_path=self._pwd_path
-            / idea_base
-            / self._config["idea"]["system_spec_path"],
-            idea_output_path=self._pwd_path
-            / idea_base
-            / self._config["idea"]["idea_output_path"],
-            experiment_plan_path=self._pwd_path
-            / idea_base
-            / self._config["idea"]["experiment_plan_path"],
-            data_science_plan_path=self._pwd_path
-            / idea_base
-            / self._config["idea"]["data_science_plan_path"],
-        )
-
     def _get_experiments_metadata(self, paths) -> ExperimentsMetadata:
         experiments_base = paths.get("experiments", "EXPERIMENTS")
         return ExperimentsMetadata(
@@ -79,73 +59,19 @@ class ProjectManager:
             vi_path=Path(self._config["experiments"]["vi_path"]),
         )
 
-    def _get_data_science_metadata(self, paths) -> DataScienceMetadata:
-        data_science_base = paths.get("data_science", "DATA-SCIENCE")
-        return DataScienceMetadata(
-            temp_dir_path=self._pwd_path
-            / data_science_base
-            / self._config["data_science"]["temp_dir_path"],
-        )
-
-    def _get_reporting_metadata(self, paths) -> ReportingMetadata:
-        reporting_base = paths.get("reporting", "REPORTING")
-        return ReportingMetadata(
-            latex_dir_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"],
-            output_pdf_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["output_pdf_path"],
-            main_tex_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"]
-            / self._config["reporting"]["main_tex_path"],
-            introduction_tex_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"]
-            / self._config["reporting"]["introduction_tex_path"],
-            abstract_tex_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"]
-            / self._config["reporting"]["abstract_tex_path"],
-            experimental_setup_tex_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"]
-            / self._config["reporting"]["experimental_setup_tex_path"],
-            results_tex_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"]
-            / self._config["reporting"]["results_tex_path"],
-            methodology_tex_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"]
-            / self._config["reporting"]["methodology_tex_path"],
-            conclusion_tex_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"]
-            / self._config["reporting"]["conclusion_tex_path"],
-            references_bib_path=self._pwd_path
-            / reporting_base
-            / self._config["reporting"]["latex_dir_path"]
-            / self._config["reporting"]["references_bib_path"],
-        )
-
     def _get_all_mode_metadata(self) -> Dict[Mode, ModeMetadata]:
         """Get metadata for all modes, with paths loaded from config."""
         paths = self._config.get("paths", {})
         return {
-            Mode.IDEA: self._get_idea_metadata(paths),
             Mode.EXPERIMENTS: self._get_experiments_metadata(paths),
-            Mode.DATA_SCIENCE: self._get_data_science_metadata(paths),
-            Mode.REPORTING: self._get_reporting_metadata(paths),
         }
 
     def get_mode_metadata(self, mode: Mode) -> ModeMetadata:
         """Get metadata for the specified mode."""
-        all_metadata = self._get_all_mode_metadata()
-        if mode not in all_metadata:
-            raise ValueError(f"Unknown mode: {mode}")
+        if mode != Mode.EXPERIMENTS:
+            raise ValueError(f"Only EXPERIMENTS mode is supported: {mode}")
 
+        all_metadata = self._get_all_mode_metadata()
         return all_metadata[mode]
 
     # TODO: should contain description of file
@@ -208,7 +134,7 @@ class ProjectManager:
     @classmethod
     def create_default(
         cls,
-        mode: Mode = Mode.IDEA,
+        mode: Mode = Mode.EXPERIMENTS,
     ) -> "ProjectManager":
         """Create a default project context with all necessary files and directories."""
         context = cls(
@@ -222,20 +148,19 @@ class ProjectManager:
     def ensure_mode_specific_paths(self):
         """Ensure all mode-specific directories and files exist."""
         logger.info("Ensuring mode-specific paths exist")
-        all_metadata = self._get_all_mode_metadata()
-        for metadata in all_metadata.values():
-            for field in dataclasses.fields(metadata):
-                if field.name == "vi_path":
-                    continue
-                paths = getattr(metadata, field.name)
-                # Normalize to a list if it's a single Path
-                if isinstance(paths, Path):
-                    paths = [paths]
-                for path in paths:
-                    if path.suffix:  # It's a file (has extension)
-                        self._ensure_file_exists(path)
-                    else:  # It's a directory
-                        self._ensure_directory_exists(path)
+        metadata = self._get_experiments_metadata(self._config.get("paths", {}))
+        for field in dataclasses.fields(metadata):
+            if field.name == "vi_path":
+                continue
+            paths = getattr(metadata, field.name)
+            # Normalize to a list if it's a single Path
+            if isinstance(paths, Path):
+                paths = [paths]
+            for path in paths:
+                if path.suffix:  # It's a file (has extension)
+                    self._ensure_file_exists(path)
+                else:  # It's a directory
+                    self._ensure_directory_exists(path)
         logger.info("Mode-specific paths ensured")
 
 
