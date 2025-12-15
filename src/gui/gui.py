@@ -61,7 +61,6 @@ def create_main_interface() -> gr.Blocks:
 
         # NOTE: set mode to test
         project_manager.set_mode(Mode.EXPERIMENTS)
-
         current_context = gr.State(project_manager)
 
         with gr.Row():
@@ -91,9 +90,7 @@ def create_main_interface() -> gr.Blocks:
                             msg,
                             mode_dropdown,
                             clear,
-                        ) = create_chat_interface(
-                            project_manager, current_context
-                        )
+                        ) = create_chat_interface(project_manager)
 
                     # Sidebar with tabs (hidden by default)
                     sidebar_column = create_sidebar(

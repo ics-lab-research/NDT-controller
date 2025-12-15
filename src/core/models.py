@@ -29,7 +29,7 @@ ExperimentTool = Union[
 ]
 
 
-@dataclass(frozen=True)
+@dataclass
 class ExperimentPlan:
     filename: str
     experiment: List[ExperimentTool]
