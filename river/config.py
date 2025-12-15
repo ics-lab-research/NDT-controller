@@ -6,7 +6,7 @@ from loguru import logger
 
 def load_config():
     """Load configuration from config.toml and set environment variables."""
-    config_path = Path(__file__).parent.parent / "config.toml"
+    config_path = Path.cwd() / "config.toml"
     if not config_path.exists():
         logger.error(f"Config file not found: {config_path}")
         raise FileNotFoundError(f"Config file not found: {config_path}")
