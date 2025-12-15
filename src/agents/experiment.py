@@ -77,7 +77,8 @@ def handle_experiment_mode(
                 )
 
                 single_plan = ExperimentPlan(
-                    filename=single_experiment.filename, experiment=experiment_tools
+                    filename=single_experiment.filename,
+                    experiment=experiment_tools,
                 )
                 yield AgentResponse(response="Plan generated.")
 
