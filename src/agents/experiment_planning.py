@@ -13,8 +13,19 @@ def save_experiment_plans(
     """Save experiment plans to a JSON file."""
     logger.info(f"Saving experiment plans to {filepath}")
     try:
+        plans_to_save = []
+        for plan in plans:
+            if "experiment" in plan:
+                filename = plan["experiment"].filename
+            else:
+                filename = plan["filename"]
+            plans_to_save.append({
+                "filename": filename,
+                "tools": plan["tools"],
+                "approved": plan["approved"],
+            })
         with filepath.open("w") as f:
-            json.dump(plans, f, indent=4)
+            json.dump(plans_to_save, f, indent=4)
         logger.info(
             f"Successfully saved {len(plans)} experiment plans to {filepath}"
         )

@@ -94,7 +94,7 @@ def handle_experiment_mode(
                 save_status = save_experiment_plans(
                     [
                         {
-                            "filename": single_experiment.filename,
+                            "experiment": single_experiment,
                             "tools": single_plan,
                             "approved": False,
                         }
@@ -129,7 +129,7 @@ def handle_experiment_mode(
                 )
                 plans_to_save.append(
                     {
-                        "filename": experiment.filename,
+                        "experiment": experiment,
                         "tools": plan,
                         "approved": False,
                     }
