@@ -30,10 +30,12 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
             json_content = read_file(plans_path)
+            if len(json_content) > 10000:
+                json_content = json_content[:10000] + "\n... (truncated)"
         else:
             json_content = "Error: plans_path is not a Path object"
     else:
         json_content = "Error: Invalid metadata type for experiments mode"
     with gr.Tab("JSON Viewer") as tab:
-        gr.Code(value=json_content, language="json")
+        gr.Code(value=json_content, language="json", lines=20)
     return tab
