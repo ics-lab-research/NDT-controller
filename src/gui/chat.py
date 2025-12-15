@@ -54,7 +54,6 @@ def respond_stream(
 
 def create_chat_interface(
     project_manager: ProjectManager,
-    current_context: gr.State,
 ) -> Tuple[gr.Chatbot, gr.Textbox, gr.Dropdown, gr.Button]:
     """Create the chat interface components."""
     chatbot = gr.Chatbot(
