@@ -10,10 +10,6 @@ from ..core.project_manager import init_project_context
 from ..core.models import Mode
 
 custom_css = """
-.upload-button {
-    height: 60px !important;
-}
-  
 .gradio-container {
     height: 100vh !important;
     display: flex;
@@ -87,14 +83,11 @@ def create_main_interface() -> gr.Blocks:
                     with gr.Column(scale=1):
                         gr.Markdown("""
                         - Choose your interaction mode from the dropdown menu
-                        - Attach files using the 📎 button if needed (supports images, PDFs, and documents)
                         - Type your message and press Enter to send
                         """)
 
                         (
                             chatbot,
-                            upload_button,
-                            uploaded_files,
                             msg,
                             mode_dropdown,
                             clear,
@@ -118,7 +111,7 @@ def create_main_interface() -> gr.Blocks:
             ],
         )
 
-        clear.click(clear_chat, outputs=[chatbot, msg, uploaded_files])
+        clear.click(clear_chat, outputs=[chatbot, msg])
 
         mode_dropdown.select(
             handle_mode_change,
