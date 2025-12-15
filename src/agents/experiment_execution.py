@@ -54,7 +54,11 @@ def reinit_system(project_manager: ProjectManager) -> str | None:
         status_result = tool_get_numeric_indicator("Completed")
         if not status_result.success:
             return status_result.error
-        if status_result.output and status_result.output.get("value") == "1.0":
+        if (
+            status_result.output
+            and isinstance(status_result.output, dict)
+            and status_result.output.get("value") == "1.0"
+        ):
             logger.info("Scan completed!")
             break
 
