@@ -6,7 +6,7 @@ import time
 from loguru import logger
 
 from ..baml_client.types import ConversationMessage, ExpAction
-from ..core.models import AgentResponse
+from ..core.models import AgentResponse, ExperimentsMetadata
 from ..core.project_manager import ProjectManager
 from .experiment_api import (
     call_exp_orchestrator,
@@ -82,6 +82,8 @@ def handle_experiment_mode(
                 metadata = project_manager.get_mode_metadata(
                     project_manager.current_mode
                 )
+                if not isinstance(metadata, ExperimentsMetadata):
+                    raise ValueError("Metadata is not ExperimentsMetadata")
                 plans_path = metadata.plans_path
                 save_experiment_plans(
                     [
