@@ -8,9 +8,6 @@ from .labview_controller import LabVIEWController
 controller = LabVIEWController()
 
 
-# --- LLM Function Calling Interface ---
-
-
 def tool_run_open_vi(run_vi: bool = True) -> ToolResult:
     """
     Run open_vi.py in a subprocess to open and run the VI file.
