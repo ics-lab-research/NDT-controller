@@ -12,7 +12,9 @@ def save_experiment_plans(plans: List[dict], filepath: Path) -> None:
     try:
         with filepath.open("w") as f:
             json.dump(plans, f, indent=4)
-        logger.info(f"Successfully saved {len(plans)} experiment plans to {filepath}")
+        logger.info(
+            f"Successfully saved {len(plans)} experiment plans to {filepath}"
+        )
     except Exception as e:
         logger.error(f"Failed to save experiment plans to {filepath}: {e}")
         raise
@@ -27,7 +29,9 @@ def load_experiment_plans(filepath: Path) -> List[dict]:
     try:
         with filepath.open("r") as f:
             plans = json.load(f)
-        logger.info(f"Successfully loaded {len(plans)} experiment plans from {filepath}")
+        logger.info(
+            f"Successfully loaded {len(plans)} experiment plans from {filepath}"
+        )
         return plans
     except (json.JSONDecodeError, KeyError) as e:
         logger.error(f"Failed to load experiment plans from {filepath}: {e}")
