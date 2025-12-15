@@ -25,9 +25,7 @@ from ..core.utils import load_experiment_plans, read_file
 
 
 def create_json_viewer_tab(project_manager: ProjectManager) -> gr.Tab:
-    json_content = read_file(
-        project_manager.experiments_metadata.experiment_plans_path
-    )
+    json_content = read_file(project_manager)
     with gr.Tab("JSON Viewer") as tab:
         gr.Code(value=json_content, language="json")
     return tab
