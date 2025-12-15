@@ -1,25 +1,25 @@
-from typing import Any, Dict, List, Union
+from typing import Dict, List, Union
 
 import json
 from pathlib import Path
 
 from loguru import logger
-from ..baml_client.types import ExperimentWithFilename
+from ..core.models import ExperimentPlan
 
 
 def save_experiment_plans(
-    plans: List[ExperimentWithFilename], filepath: Path
+    plans: List[ExperimentPlan],
+    filepath: Path,
 ) -> Dict[str, Union[bool, str]]:
     """Save experiment plans to a JSON file."""
     logger.info(f"Saving experiment plans to {filepath}")
     try:
         formatted_plans = [
             {
-                "experiment": plan.experiment,
-                "tools": plan.tools,
+                "experiment": plan.filename,
+                "tools": plan,
                 "approved": False,
             }
-            for plan in plans
         ]
         with filepath.open("w") as f:
             json.dump(formatted_plans, f, indent=4)
