@@ -19,20 +19,25 @@ def respond_stream(
     # Add response placeholder
     history.append({"role": "assistant", "content": ""})
     yield history, ""
-
+    
     thinking_added = False
-
+    action_added = False
+    
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history[:-2])
-
+    
     for agent_response in get_agent_response(
         message, conversation_history, ctx
     ):
+        if agent_response.response:
+            # Update response message
+            history[-1]["content"] = agent_response.response
+            yield history, ""
+        
         if agent_response.thinking and agent_response.thinking.strip():
             if not thinking_added:
-                # Insert thinking message before response
-                history.insert(
-                    -1,
+                # Append thinking message
+                history.append(
                     {
                         "role": "assistant",
                         "content": agent_response.thinking,
@@ -43,13 +48,25 @@ def respond_stream(
                 yield history, ""
             else:
                 # Update existing thinking message
-                history[-2]["content"] = agent_response.thinking
+                history[-1]["content"] = agent_response.thinking
                 yield history, ""
-
-        if agent_response.response:
-            # Update response message
-            history[-1]["content"] = agent_response.response
-            yield history, ""
+        
+        if agent_response.action and agent_response.action.strip():
+            if not action_added:
+                # Append action message
+                history.append(
+                    {
+                        "role": "assistant",
+                        "content": agent_response.action,
+                        "metadata": {"title": "Action"},
+                    },
+                )
+                action_added = True
+                yield history, ""
+            else:
+                # Update existing action message
+                history[-1]["content"] = agent_response.action
+                yield history, ""
 
 
 def create_chat_interface(
