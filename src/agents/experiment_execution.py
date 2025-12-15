@@ -100,7 +100,9 @@ def is_approved(tools: List[ExperimentTool]) -> bool:
     return False
 
 
-def execute_tool(tool: ExperimentTool, project_manager: ProjectManager) -> ToolResult:
+def execute_tool(
+    tool: ExperimentTool, project_manager: ProjectManager
+) -> ToolResult:
     """Execute a single experiment tool."""
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     if not isinstance(metadata, ExperimentsMetadata):
