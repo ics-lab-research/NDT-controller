@@ -1,8 +1,8 @@
 import dataclasses
+import os
 import shutil
 from pathlib import Path
 from typing import Dict, List
-import tomllib
 from loguru import logger
 from .models import (
     ExperimentsMetadata,
@@ -25,9 +25,6 @@ class ProjectManager:
         self._current_mode = current_mode
         self._pwd_path = pwd_path
         self._uploaded_docs = uploaded_docs or []
-        self._config = tomllib.loads(
-            (self._pwd_path / "config.toml").read_text(encoding="utf-8")
-        )
 
     @property
     def current_mode(self) -> Mode:
@@ -44,26 +41,23 @@ class ProjectManager:
         """Get the uploaded document paths."""
         return self._uploaded_docs
 
-    def _get_experiments_metadata(self, paths) -> ExperimentsMetadata:
-        experiments_base = paths.get("experiments", "EXPERIMENTS")
+    def _get_experiments_metadata(self) -> ExperimentsMetadata:
+        experiments_base = os.environ.get("RIVER_EXPERIMENTS_BASE", "EXPERIMENTS")
+        exp_constraint_path = os.environ.get("RIVER_EXPERIMENTS_EXP_CONSTRAINT_PATH", "LABVIEW.md")
+        data_dir_path = os.environ.get("RIVER_EXPERIMENTS_DATA_DIR_PATH", "data")
+        plans_path = os.environ.get("RIVER_EXPERIMENTS_PLANS_PATH", "labview_experiment_plans.json")
+        vi_path_str = os.environ.get("RIVER_EXPERIMENTS_VI_PATH", "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi")
         return ExperimentsMetadata(
-            exp_constraint_path=self._pwd_path
-            / experiments_base
-            / self._config["experiments"]["exp_constraint_path"],
-            data_dir_path=self._pwd_path
-            / experiments_base
-            / self._config["experiments"]["data_dir_path"],
-            plans_path=self._pwd_path
-            / experiments_base
-            / self._config["experiments"]["plans_path"],
-            vi_path=Path(self._config["experiments"]["vi_path"]),
+            exp_constraint_path=self._pwd_path / experiments_base / exp_constraint_path,
+            data_dir_path=self._pwd_path / experiments_base / data_dir_path,
+            plans_path=self._pwd_path / experiments_base / plans_path,
+            vi_path=Path(vi_path_str),
         )
 
     def _get_all_mode_metadata(self) -> Dict[Mode, ModeMetadata]:
-        """Get metadata for all modes, with paths loaded from config."""
-        paths = self._config.get("paths", {})
+        """Get metadata for all modes, with paths loaded from environment variables."""
         return {
-            Mode.EXPERIMENTS: self._get_experiments_metadata(paths),
+            Mode.EXPERIMENTS: self._get_experiments_metadata(),
         }
 
     def get_mode_metadata(self, mode: Mode) -> ModeMetadata:
@@ -148,7 +142,7 @@ class ProjectManager:
     def ensure_mode_specific_paths(self):
         """Ensure all mode-specific directories and files exist."""
         logger.info("Ensuring mode-specific paths exist")
-        metadata = self._get_experiments_metadata(self._config.get("paths", {}))
+        metadata = self._get_experiments_metadata()
         for field in dataclasses.fields(metadata):
             if field.name == "vi_path":
                 continue
