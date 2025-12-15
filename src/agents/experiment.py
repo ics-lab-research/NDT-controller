@@ -14,6 +14,7 @@ from .experiment_api import (
     call_exp_router,
 )
 from .experiment_execution import execute_single_plan, execute_multiple_plans
+from ..agents.experiment_planning import save_experiment_plans
 from ..tools.labview_controller import (
     tool_connect_to_vi,
     tool_get_vi_status,
@@ -78,7 +79,9 @@ def handle_experiment_mode(
                 single_plan = call_exp_planner(
                     user_message, filename=single_experiment.filename
                 )
-                execute_single_plan(single_plan, project_manager)
+                metadata = project_manager.get_mode_metadata(project_manager.current_mode)
+                plans_path = metadata.plans_path
+                save_experiment_plans([{"filename": single_experiment.filename, "tools": [tool.__dict__ for tool in single_plan], "approved": False}], plans_path)
 
             yield AgentResponse(response="Done")
 
