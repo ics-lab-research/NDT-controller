@@ -84,7 +84,7 @@ def handle_experiment_mode(
                     raise ValueError("Metadata is not ExperimentsMetadata")
                 plans_path = metadata.plans_path
                 save_status = save_experiment_plans(
-                    single_plan,
+                    [single_plan],
                     plans_path,
                 )
 
