@@ -53,28 +53,32 @@ def respond_stream(
     """Handle chat responses with streaming."""
     # Add user message to history
     history.append({"role": "user", "content": message})
-    # Add thinking placeholder
-    history.append(
-        {
-            "role": "assistant",
-            "content": "",
-            "metadata": {"title": "🧠 Thinking"},
-        }
-    )
     # Add response placeholder
     history.append({"role": "assistant", "content": ""})
     yield history, ""
+    
+    thinking_added = False
 
     # Convert history to conversation messages, excluding the new messages
-    conversation_history = build_conversation_history(history[:-3])
+    conversation_history = build_conversation_history(history[:-2])
 
     for agent_response in get_agent_response(
         message, conversation_history, ctx
     ):
-        if agent_response.thinking:
-            # Update thinking message
-            history[-2]["content"] = agent_response.thinking
-            yield history, ""
+        if agent_response.thinking and agent_response.thinking.strip():
+            if not thinking_added:
+                # Insert thinking message before response
+                history.insert(-1, {
+                    "role": "assistant",
+                    "content": agent_response.thinking,
+                    "metadata": {"title": "🧠 Thinking"},
+                })
+                thinking_added = True
+                yield history, ""
+            else:
+                # Update existing thinking message
+                history[-2]["content"] = agent_response.thinking
+                yield history, ""
 
         if agent_response.response:
             # Update response message
