@@ -17,7 +17,7 @@ def save_experiment_plans(
         formatted_plans = [
             {
                 "experiment": plan.filename,
-                "tools": plan,
+                "tools": plan.experiment,
                 "approved": False,
             }
             for plan in plans
