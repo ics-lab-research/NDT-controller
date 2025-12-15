@@ -43,32 +43,32 @@ def handle_experiment_mode(
         if router_final.action == ExpAction.ASK_CLARIFICATION:
             pass
 
-        elif router_final.action == ExpAction.BASIC_CONTROL:
-            single_plan = call_exp_planner(user_message)
+        # elif router_final.action == ExpAction.BASIC_CONTROL:
+        #     single_plan = call_exp_planner(user_message)
 
-            tool_connect_to_vi(
-                vi_path=r"D:\PECT LLM\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
-            )
-            time.sleep(5)  # wait for VI to load
-            running = tool_get_vi_status()["running"]
-            print(running)
+        #     tool_connect_to_vi(
+        #         vi_path=r"D:\PECT LLM\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
+        #     )
+        #     time.sleep(5)  # wait for VI to load
+        #     running = tool_get_vi_status()["running"]
+        #     print(running)
 
-            # BUG: running return False when VI is running
-            if not running:
-                execute_single_plan(single_plan, project_manager)
-            else:
-                tool_connect_to_vi(
-                    vi_path=r"D:\PECT LLM\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
-                )
-                tool_run_open_vi(run_vi=True)
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                tool_handle_save_dialog(
-                    r"D:\other-repos\river\EXPERIMENTS\data", timestamp
-                )
+        #     # BUG: running return False when VI is running
+        #     if not running:
+        #         execute_single_plan(single_plan, project_manager)
+        #     else:
+        #         tool_connect_to_vi(
+        #             vi_path=r"D:\PECT LLM\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
+        #         )
+        #         tool_run_open_vi(run_vi=True)
+        #         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        #         tool_handle_save_dialog(
+        #             r"D:\other-repos\river\EXPERIMENTS\data", timestamp
+        #         )
 
-                execute_single_plan(single_plan, project_manager)
+        #         execute_single_plan(single_plan, project_manager)
 
-            yield AgentResponse(response="Done")
+        #     yield AgentResponse(response="Done")
 
         elif router_final.action == ExpAction.SINGLE_SCAN:
             orchestrator_response = call_exp_orchestrator(user_message)
@@ -96,19 +96,19 @@ def handle_experiment_mode(
 
             yield AgentResponse(response="Done")
 
-        elif router_final.action == ExpAction.MULTIPLE_SCAN:
-            all_plans = []
+        # elif router_final.action == ExpAction.MULTIPLE_SCAN:
+        #     all_plans = []
 
-            orchestrator_response = call_exp_orchestrator(user_message)
+        #     orchestrator_response = call_exp_orchestrator(user_message)
 
-            experiments = orchestrator_response.experiments
-            for experiment in experiments:
-                plan = call_exp_planner(
-                    user_message=str(experiment.experiment),
-                    filename=experiment.filename,
-                )
-                all_plans.append(plan)
+        #     experiments = orchestrator_response.experiments
+        #     for experiment in experiments:
+        #         plan = call_exp_planner(
+        #             user_message=str(experiment.experiment),
+        #             filename=experiment.filename,
+        #         )
+        #         all_plans.append(plan)
 
-            execute_multiple_plans(all_plans, project_manager)
+        #     execute_multiple_plans(all_plans, project_manager)
 
-            yield AgentResponse(response="Done")
+        #     yield AgentResponse(response="Done")
