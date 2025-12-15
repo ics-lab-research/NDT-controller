@@ -68,14 +68,14 @@ def handle_experiment_mode(
         #     yield AgentResponse(response="Done")
 
         if router_final.action == ExpAction.SINGLE_SCAN:
-            yield AgentResponse(response="Performing single scan.")
+            yield AgentResponse(thinking="Performing single scan.")
 
             orchestrator_response = call_exp_orchestrator(user_message)
-            yield AgentResponse(response="Called exp_orchestrator.")
+            yield AgentResponse(thinking="Called exp_orchestrator.")
 
             if orchestrator_response.number_of_scans == 1:
                 yield AgentResponse(
-                    response="Number of scans is 1, calling exp_planner..."
+                    thinking="Number of scans is 1, calling exp_planner..."
                 )
                 single_experiment = orchestrator_response.experiments[0]
 
@@ -103,31 +103,29 @@ def handle_experiment_mode(
 
                 if save_status["success"]:
                     yield AgentResponse(
-                        response="Experiment plans saved successfully."
+                        action="Experiment plans saved successfully."
                     )
                 else:
                     yield AgentResponse(
-                        response=f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
+                        action=f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
                     )
 
-            yield AgentResponse(action="Done")
+        elif router_final.action == ExpAction.MULTIPLE_SCAN:
+            all_plans = []
 
-        # elif router_final.action == ExpAction.MULTIPLE_SCAN:
-        #     all_plans = []
+            orchestrator_response = call_exp_orchestrator(user_message)
 
-        #     orchestrator_response = call_exp_orchestrator(user_message)
+            experiments = orchestrator_response.experiments
+            for experiment in experiments:
+                plan = call_exp_planner(
+                    user_message=str(experiment.experiment),
+                    filename=experiment.filename,
+                )
+                all_plans.append(plan)
 
-        #     experiments = orchestrator_response.experiments
-        #     for experiment in experiments:
-        #         plan = call_exp_planner(
-        #             user_message=str(experiment.experiment),
-        #             filename=experiment.filename,
-        #         )
-        #         all_plans.append(plan)
+            execute_multiple_plans(all_plans, project_manager)
 
-        #     execute_multiple_plans(all_plans, project_manager)
-
-        #     yield AgentResponse(response="Done")
+            yield AgentResponse(response="Done")
 
         else:
             pass
