@@ -44,5 +44,5 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         data = [["Error", "Invalid metadata type for experiments mode"]]
         headers = ["Status", "Message"]
     with gr.Tab("Plans Viewer") as tab:
-        gr.Dataframe(value=data, headers=headers, max_rows=10)
+        gr.Dataframe(value=data, headers=headers)
     return tab
