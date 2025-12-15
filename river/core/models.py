@@ -3,7 +3,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
-from baml_py import BamlSyncStream
 
 from ..baml_client.types import (
     ConnectToViTool,
@@ -96,59 +95,10 @@ ModeMetadata = Union[
 class AgentResponse:
     """Unified response structure for all agents."""
 
-    # response: BamlSyncStream[str, str] | str | None = None
     response: str | None = None
     thinking: str | None = None
     metadata: Dict[str, Any] | None = None
     actions: List[str] | None = None
-
-    # def __post_init__(self):
-    #     if self.metadata is None:
-    #         self.metadata = {}
-    #     if self.actions is None:
-    #         self.actions = []
-    #     if self.thinking is None:
-    #         self.thinking = ""
-
-    # def add_action(self, action: str):
-    #     """Add an action to the response."""
-    #     if self.actions is None:
-    #         self.actions = []
-    #     self.actions.append(action)
-
-    # def add_thinking(self, thinking: str):
-    #     """Add thinking content to the response."""
-    #     if self.thinking is None:
-    #         self.thinking = ""
-    #     self.thinking += thinking
-
-    # @classmethod
-    # def from_exp_orchestrator(
-    #     cls, resp: ExpOrchestratorOutput
-    # ) -> "AgentResponse":
-    #     """Create AgentResponse from ExpOrchestratorOutput."""
-    #     experiments = [
-    #         {"experiment": exp.experiment, "filename": exp.filename}
-    #         for exp in resp.experiments
-    #     ]
-
-    #     return cls(
-    #         response=resp.response or "",
-    #         metadata={
-    #             "number_of_scans": resp.number_of_scans,
-    #             "experiments": experiments,
-    #         },
-    #     )
-
-    # @classmethod
-    # def from_exp_router(cls, resp: ExpRouterOutput) -> "AgentResponse":
-    #     """Create AgentResponse from ExpOrchestratorOutput."""
-    #     return cls(
-    #         response=resp.response or "",
-    #         metadata={
-    #             "action": resp.action,
-    #         },
-    #     )
 
 
 # Type alias for chat history using OpenAI-style message format

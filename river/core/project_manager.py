@@ -17,7 +17,7 @@ class ProjectManager:
 
     def __init__(
         self,
-        current_mode: Mode = Mode.IDEA,
+        current_mode: Mode = Mode.EXPERIMENTS,
         pwd_path: Path = Path.cwd(),
         uploaded_docs: List[str] | None = None,
     ):
