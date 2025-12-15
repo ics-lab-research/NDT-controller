@@ -4,7 +4,7 @@ import sys
 from dotenv import load_dotenv
 from loguru import logger
 
-from river.gui import create_main_interface
+from ndt.gui import create_main_interface
 
 load_dotenv()
 
