@@ -1,7 +1,6 @@
-from typing import Any, Dict, Generator, List, Tuple, Union
+from typing import Generator, List, Tuple
 
 import gradio as gr
-from loguru import logger
 
 from ..core.models import ChatHistory, Mode
 from ..core.project_manager import ProjectManager
