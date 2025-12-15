@@ -42,13 +42,26 @@ class ProjectManager:
         return self._uploaded_docs
 
     def _get_experiments_metadata(self) -> ExperimentsMetadata:
-        experiments_base = os.environ.get("RIVER_EXPERIMENTS_BASE", "EXPERIMENTS")
-        exp_constraint_path = os.environ.get("RIVER_EXPERIMENTS_EXP_CONSTRAINT_PATH", "LABVIEW.md")
-        data_dir_path = os.environ.get("RIVER_EXPERIMENTS_DATA_DIR_PATH", "data")
-        plans_path = os.environ.get("RIVER_EXPERIMENTS_PLANS_PATH", "labview_experiment_plans.json")
-        vi_path_str = os.environ.get("RIVER_EXPERIMENTS_VI_PATH", "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi")
+        experiments_base = os.environ.get(
+            "RIVER_EXPERIMENTS_BASE", "EXPERIMENTS"
+        )
+        exp_constraint_path = os.environ.get(
+            "RIVER_EXPERIMENTS_EXP_CONSTRAINT_PATH", "LABVIEW.md"
+        )
+        data_dir_path = os.environ.get(
+            "RIVER_EXPERIMENTS_DATA_DIR_PATH", "data"
+        )
+        plans_path = os.environ.get(
+            "RIVER_EXPERIMENTS_PLANS_PATH", "labview_experiment_plans.json"
+        )
+        vi_path_str = os.environ.get(
+            "RIVER_EXPERIMENTS_VI_PATH",
+            "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi",
+        )
         return ExperimentsMetadata(
-            exp_constraint_path=self._pwd_path / experiments_base / exp_constraint_path,
+            exp_constraint_path=self._pwd_path
+            / experiments_base
+            / exp_constraint_path,
             data_dir_path=self._pwd_path / experiments_base / data_dir_path,
             plans_path=self._pwd_path / experiments_base / plans_path,
             vi_path=Path(vi_path_str),
