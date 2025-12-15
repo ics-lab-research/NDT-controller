@@ -13,8 +13,16 @@ def save_experiment_plans(
     """Save experiment plans to a JSON file."""
     logger.info(f"Saving experiment plans to {filepath}")
     try:
+        formatted_plans = [
+            {
+                "experiment": plan.experiment,
+                "tools": plan.tools,
+                "approved": False,
+            }
+            for plan in plans
+        ]
         with filepath.open("w") as f:
-            json.dump(plans, f, indent=4)
+            json.dump(formatted_plans, f, indent=4)
         logger.info(
             f"Successfully saved {len(plans)} experiment plans to {filepath}"
         )
