@@ -60,7 +60,9 @@ def load_experiment_plans(filepath: Path) -> List[ExperimentPlan]:
                         tool = tool_class(**tool_dict)
                         tools.append(tool)
                     except Exception as e:
-                        logger.warning(f"Failed to instantiate {type_name}: {e}")
+                        logger.warning(
+                            f"Failed to instantiate {type_name}: {e}"
+                        )
                         tools.append("unknown")
                 else:
                     tools.append("unknown")
