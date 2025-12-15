@@ -25,8 +25,15 @@ from ..core.utils import load_experiment_plans, read_file
 
 
 def create_json_viewer_tab(project_manager: ProjectManager) -> gr.Tab:
-    plans_path = project_manager.get_mode_metadata(Mode.EXPERIMENTS).plans_path
-    json_content = read_file(plans_path)
+    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+    if isinstance(metadata, ExperimentsMetadata):
+        plans_path = metadata.plans_path
+        if isinstance(plans_path, Path):
+            json_content = read_file(plans_path)
+        else:
+            json_content = "Error: plans_path is not a Path object"
+    else:
+        json_content = "Error: Invalid metadata type for experiments mode"
     with gr.Tab("JSON Viewer") as tab:
         gr.Code(value=json_content, language="json")
     return tab
