@@ -20,35 +20,23 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["CachedContexts","ConnectToViTool","ConversationMessage","ConversationState","EditFileTool","ExpOrchestratorOutput","ExpRouterOutput","ExperimentWithFilename","FileChange","HandleSaveDialogTool","IntentClassifierOutput","PressButtonTool","RunOpenViTool","SearchReplaceBlock","SearchReplaceTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","ToolResult",]
+          ["ConnectToViTool","ConversationMessage","ExpOrchestratorOutput","ExpRouterOutput","ExperimentWithFilename","HandleSaveDialogTool","PressButtonTool","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","ToolResult",]
         ), enums=set(
-          ["ContextType","ExpAction","Intent",]
+          ["ExpAction",]
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
 
     # #########################################################################
-    # Generated enums 3
+    # Generated enums 1
     # #########################################################################
-
-    @property
-    def ContextType(self) -> "ContextTypeViewer":
-        return ContextTypeViewer(self)
 
     @property
     def ExpAction(self) -> "ExpActionViewer":
         return ExpActionViewer(self)
 
-    @property
-    def Intent(self) -> "IntentViewer":
-        return IntentViewer(self)
-
 
     # #########################################################################
-    # Generated classes 20
+    # Generated classes 13
     # #########################################################################
-
-    @property
-    def CachedContexts(self) -> "CachedContextsViewer":
-        return CachedContextsViewer(self)
 
     @property
     def ConnectToViTool(self) -> "ConnectToViToolViewer":
@@ -57,14 +45,6 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def ConversationMessage(self) -> "ConversationMessageViewer":
         return ConversationMessageViewer(self)
-
-    @property
-    def ConversationState(self) -> "ConversationStateViewer":
-        return ConversationStateViewer(self)
-
-    @property
-    def EditFileTool(self) -> "EditFileToolViewer":
-        return EditFileToolViewer(self)
 
     @property
     def ExpOrchestratorOutput(self) -> "ExpOrchestratorOutputViewer":
@@ -79,16 +59,8 @@ class TypeBuilder(type_builder.TypeBuilder):
         return ExperimentWithFilenameViewer(self)
 
     @property
-    def FileChange(self) -> "FileChangeViewer":
-        return FileChangeViewer(self)
-
-    @property
     def HandleSaveDialogTool(self) -> "HandleSaveDialogToolViewer":
         return HandleSaveDialogToolViewer(self)
-
-    @property
-    def IntentClassifierOutput(self) -> "IntentClassifierOutputViewer":
-        return IntentClassifierOutputViewer(self)
 
     @property
     def PressButtonTool(self) -> "PressButtonToolViewer":
@@ -97,14 +69,6 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def RunOpenViTool(self) -> "RunOpenViToolViewer":
         return RunOpenViToolViewer(self)
-
-    @property
-    def SearchReplaceBlock(self) -> "SearchReplaceBlockViewer":
-        return SearchReplaceBlockViewer(self)
-
-    @property
-    def SearchReplaceTool(self) -> "SearchReplaceToolViewer":
-        return SearchReplaceToolViewer(self)
 
     @property
     def SelectComboBoxTool(self) -> "SelectComboBoxToolViewer":
@@ -129,58 +93,8 @@ class TypeBuilder(type_builder.TypeBuilder):
 
 
 # #########################################################################
-# Generated enums 3
+# Generated enums 1
 # #########################################################################
-
-class ContextTypeAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.enum("ContextType")
-        self._values: typing.Set[str] = set([  "SYSTEM_SPECS",  "EXPERIMENT_PLAN",  "DATA_SCIENCE_PLAN",  "EXISTING_IDEA",  ])
-        self._vals = ContextTypeValues(self._bldr, self._values)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def values(self) -> "ContextTypeValues":
-        return self._vals
-
-
-class ContextTypeViewer(ContextTypeAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_values(self) -> typing.List[typing.Tuple[str, type_builder.EnumValueViewer]]:
-        return [(name, type_builder.EnumValueViewer(self._bldr.value(name))) for name in self._values]
-    
-
-class ContextTypeValues:
-    def __init__(self, enum_bldr: baml_py.EnumBuilder, values: typing.Set[str]):
-        self.__bldr = enum_bldr
-        self.__values = values # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def SYSTEM_SPECS(self) -> type_builder.EnumValueViewer:
-        return type_builder.EnumValueViewer(self.__bldr.value("SYSTEM_SPECS"))
-    
-    @property
-    def EXPERIMENT_PLAN(self) -> type_builder.EnumValueViewer:
-        return type_builder.EnumValueViewer(self.__bldr.value("EXPERIMENT_PLAN"))
-    
-    @property
-    def DATA_SCIENCE_PLAN(self) -> type_builder.EnumValueViewer:
-        return type_builder.EnumValueViewer(self.__bldr.value("DATA_SCIENCE_PLAN"))
-    
-    @property
-    def EXISTING_IDEA(self) -> type_builder.EnumValueViewer:
-        return type_builder.EnumValueViewer(self.__bldr.value("EXISTING_IDEA"))
-    
-    
-
 
 class ExpActionAst:
     def __init__(self, tb: type_builder.TypeBuilder):
@@ -232,107 +146,10 @@ class ExpActionValues:
     
 
 
-class IntentAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.enum("Intent")
-        self._values: typing.Set[str] = set([  "DISCUSS",  "GENERATE",  "FILE_WRITE",  ])
-        self._vals = IntentValues(self._bldr, self._values)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def values(self) -> "IntentValues":
-        return self._vals
-
-
-class IntentViewer(IntentAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_values(self) -> typing.List[typing.Tuple[str, type_builder.EnumValueViewer]]:
-        return [(name, type_builder.EnumValueViewer(self._bldr.value(name))) for name in self._values]
-    
-
-class IntentValues:
-    def __init__(self, enum_bldr: baml_py.EnumBuilder, values: typing.Set[str]):
-        self.__bldr = enum_bldr
-        self.__values = values # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def DISCUSS(self) -> type_builder.EnumValueViewer:
-        return type_builder.EnumValueViewer(self.__bldr.value("DISCUSS"))
-    
-    @property
-    def GENERATE(self) -> type_builder.EnumValueViewer:
-        return type_builder.EnumValueViewer(self.__bldr.value("GENERATE"))
-    
-    @property
-    def FILE_WRITE(self) -> type_builder.EnumValueViewer:
-        return type_builder.EnumValueViewer(self.__bldr.value("FILE_WRITE"))
-    
-    
-
-
 
 # #########################################################################
-# Generated classes 20
+# Generated classes 13
 # #########################################################################
-
-class CachedContextsAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("CachedContexts")
-        self._properties: typing.Set[str] = set([  "system_specs",  "experiment_plan",  "data_science_plan",  "existing_idea",  ])
-        self._props = CachedContextsProperties(self._bldr, self._properties)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def props(self) -> "CachedContextsProperties":
-        return self._props
-
-
-class CachedContextsViewer(CachedContextsAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
-        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
-    
-
-
-class CachedContextsProperties:
-    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
-        self.__bldr = bldr
-        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def system_specs(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("system_specs"))
-    
-    @property
-    def experiment_plan(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("experiment_plan"))
-    
-    @property
-    def data_science_plan(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("data_science_plan"))
-    
-    @property
-    def existing_idea(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("existing_idea"))
-    
-    
-
 
 class ConnectToViToolAst:
     def __init__(self, tb: type_builder.TypeBuilder):
@@ -416,96 +233,6 @@ class ConversationMessageProperties:
     @property
     def content(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("content"))
-    
-    
-
-
-class ConversationStateAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("ConversationState")
-        self._properties: typing.Set[str] = set([  "available_files",  "cached_contexts",  ])
-        self._props = ConversationStateProperties(self._bldr, self._properties)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def props(self) -> "ConversationStateProperties":
-        return self._props
-
-
-class ConversationStateViewer(ConversationStateAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
-        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
-    
-
-
-class ConversationStateProperties:
-    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
-        self.__bldr = bldr
-        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def available_files(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("available_files"))
-    
-    @property
-    def cached_contexts(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("cached_contexts"))
-    
-    
-
-
-class EditFileToolAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("EditFileTool")
-        self._properties: typing.Set[str] = set([  "tool_name",  "instruction",  "files",  ])
-        self._props = EditFileToolProperties(self._bldr, self._properties)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def props(self) -> "EditFileToolProperties":
-        return self._props
-
-
-class EditFileToolViewer(EditFileToolAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
-        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
-    
-
-
-class EditFileToolProperties:
-    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
-        self.__bldr = bldr
-        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def tool_name(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("tool_name"))
-    
-    @property
-    def instruction(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("instruction"))
-    
-    @property
-    def files(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("files"))
     
     
 
@@ -643,49 +370,6 @@ class ExperimentWithFilenameProperties:
     
 
 
-class FileChangeAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("FileChange")
-        self._properties: typing.Set[str] = set([  "file_path",  "blocks",  ])
-        self._props = FileChangeProperties(self._bldr, self._properties)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def props(self) -> "FileChangeProperties":
-        return self._props
-
-
-class FileChangeViewer(FileChangeAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
-        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
-    
-
-
-class FileChangeProperties:
-    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
-        self.__bldr = bldr
-        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def file_path(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("file_path"))
-    
-    @property
-    def blocks(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("blocks"))
-    
-    
-
-
 class HandleSaveDialogToolAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
@@ -729,77 +413,6 @@ class HandleSaveDialogToolProperties:
     @property
     def file_name(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("file_name"))
-    
-    
-
-
-class IntentClassifierOutputAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("IntentClassifierOutput")
-        self._properties: typing.Set[str] = set([  "intent",  "confidence",  "extracted_context",  "requires_external_docs",  "required_context_types",  "content_to_save",  "target_files",  "operation_type",  "reasoning",  ])
-        self._props = IntentClassifierOutputProperties(self._bldr, self._properties)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def props(self) -> "IntentClassifierOutputProperties":
-        return self._props
-
-
-class IntentClassifierOutputViewer(IntentClassifierOutputAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
-        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
-    
-
-
-class IntentClassifierOutputProperties:
-    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
-        self.__bldr = bldr
-        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def intent(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("intent"))
-    
-    @property
-    def confidence(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("confidence"))
-    
-    @property
-    def extracted_context(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("extracted_context"))
-    
-    @property
-    def requires_external_docs(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("requires_external_docs"))
-    
-    @property
-    def required_context_types(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("required_context_types"))
-    
-    @property
-    def content_to_save(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("content_to_save"))
-    
-    @property
-    def target_files(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("target_files"))
-    
-    @property
-    def operation_type(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("operation_type"))
-    
-    @property
-    def reasoning(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("reasoning"))
     
     
 
@@ -886,96 +499,6 @@ class RunOpenViToolProperties:
     @property
     def run_vi(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("run_vi"))
-    
-    
-
-
-class SearchReplaceBlockAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("SearchReplaceBlock")
-        self._properties: typing.Set[str] = set([  "search",  "replace",  "language",  ])
-        self._props = SearchReplaceBlockProperties(self._bldr, self._properties)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def props(self) -> "SearchReplaceBlockProperties":
-        return self._props
-
-
-class SearchReplaceBlockViewer(SearchReplaceBlockAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
-        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
-    
-
-
-class SearchReplaceBlockProperties:
-    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
-        self.__bldr = bldr
-        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def search(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("search"))
-    
-    @property
-    def replace(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("replace"))
-    
-    @property
-    def language(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("language"))
-    
-    
-
-
-class SearchReplaceToolAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("SearchReplaceTool")
-        self._properties: typing.Set[str] = set([  "files_to_change",  "reasoning",  ])
-        self._props = SearchReplaceToolProperties(self._bldr, self._properties)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def props(self) -> "SearchReplaceToolProperties":
-        return self._props
-
-
-class SearchReplaceToolViewer(SearchReplaceToolAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
-        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
-    
-
-
-class SearchReplaceToolProperties:
-    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
-        self.__bldr = bldr
-        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def files_to_change(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("files_to_change"))
-    
-    @property
-    def reasoning(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("reasoning"))
     
     
 
@@ -1218,4 +741,3 @@ class ToolResultProperties:
     
     
 
-

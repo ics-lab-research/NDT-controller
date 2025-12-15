@@ -21,24 +21,6 @@ from ..tools.labview_controller import (
     tool_handle_save_dialog,
 )
 
-# def process_router_action(
-#     action: ExpAction,
-#     user_message: str,
-#     metadata: IdeaMetadata,
-#     project_manager: ProjectManager,
-# ) -> tuple[str, bool]:
-#     """Process the router action and return message and continue flag."""
-#     if action == ExpAction.BASIC_CONTROL:
-#         return user_message, True
-#     elif action == ExpAction.LOAD_SAVED_PLAN:
-#         logger.info(f"Loading saved plan from {metadata.experiment_plan_path}")
-#         return tool_read_file(metadata.experiment_plan_path), True
-#     elif action == ExpAction.ASK_CLARIFICATION:
-#         return "", False
-#     else:
-#         logger.warning(f"Unknown action: {action}")
-#         return "", False
-
 
 def handle_experiment_mode(
     user_message: str,
@@ -116,51 +98,3 @@ def handle_experiment_mode(
             execute_multiple_plans(all_plans, project_manager)
 
             yield AgentResponse(response="Done")
-
-    # router_metadata = router_response.metadata or {}
-    # yield AgentResponse(response=router_response.response)
-
-    # metadata = project_manager.get_mode_metadata(Mode.IDEA)
-    # if not isinstance(metadata, IdeaMetadata):
-    #     raise ValueError("Expected IdeaMetadata for experiment plan check")
-
-    # action = router_metadata.get("action", ExpAction.ASK_CLARIFICATION)
-    # message, continue_flag = process_router_action(
-    #     action, user_message, metadata, project_manager
-    # )
-
-    # if action == ExpAction.LOAD_SAVED_PLAN:
-    #     yield AgentResponse(
-    #         actions=[
-    #             f"Retrieved existing experiment plan from {metadata.experiment_plan_path.name}"
-    #         ],
-    #     )
-
-    # if not continue_flag:
-    #     return
-
-    # orchestrator_response = call_exp_orchestrator(message, conversation_history)
-
-    # if not orchestrator_response or not orchestrator_response.metadata:
-    #     yield AgentResponse(response="No experiments identified.")
-    #     return
-
-    # experiments = orchestrator_response.metadata.get("experiments", [])
-    # if not experiments:
-    #     yield AgentResponse(response="No experiments to plan.")
-    #     return
-
-    # yield AgentResponse(
-    #     actions=[f"Planning {len(experiments)} experiment(s)..."],
-    # )
-
-    # all_plans = plan_experiments(experiments, project_manager)
-
-    # exp_metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
-    # if not isinstance(exp_metadata, ExperimentsMetadata):
-    #     raise ValueError("Not in experiments mode")
-    # save_experiment_plans(all_plans, exp_metadata.plans_path)
-
-    # yield AgentResponse(
-    #     actions=[f"Experiment plans saved to {exp_metadata.plans_path.name}"],
-    # )

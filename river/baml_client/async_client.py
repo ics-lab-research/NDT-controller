@@ -79,21 +79,6 @@ class BamlAsyncClient:
     def parse_stream(self):
       return self.__llm_stream_parser
     
-    async def Brainstormer(self, user_message: str,relevant_context: typing.Optional[str] = None,system_specs: typing.Optional[str] = None,experiment_plan: typing.Optional[str] = None,data_science_plan: typing.Optional[str] = None,existing_idea: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> str:
-        # Check if on_tick is provided
-        if 'on_tick' in baml_options:
-            # Use streaming internally when on_tick is provided
-            stream = self.stream.Brainstormer(user_message=user_message,relevant_context=relevant_context,system_specs=system_specs,experiment_plan=experiment_plan,data_science_plan=data_science_plan,existing_idea=existing_idea,
-                baml_options=baml_options)
-            return await stream.get_final_response()
-        else:
-            # Original non-streaming code
-            result = await self.__options.merge_options(baml_options).call_function_async(function_name="Brainstormer", args={
-                "user_message": user_message,"relevant_context": relevant_context,"system_specs": system_specs,"experiment_plan": experiment_plan,"data_science_plan": data_science_plan,"existing_idea": existing_idea,
-            })
-            return typing.cast(str, result.cast_to(types, types, stream_types, False, __runtime__))
     async def ExpOrchestrator(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
         baml_options: BamlCallOptions = {},
     ) -> types.ExpOrchestratorOutput:
@@ -139,66 +124,6 @@ class BamlAsyncClient:
                 "user_message": user_message,"conversation_history": conversation_history,
             })
             return typing.cast(types.ExpRouterOutput, result.cast_to(types, types, stream_types, False, __runtime__))
-    async def FileManager(self, content_to_save: str,target_files: typing.List[str],operation_type: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> types.SearchReplaceTool:
-        # Check if on_tick is provided
-        if 'on_tick' in baml_options:
-            # Use streaming internally when on_tick is provided
-            stream = self.stream.FileManager(content_to_save=content_to_save,target_files=target_files,operation_type=operation_type,
-                baml_options=baml_options)
-            return await stream.get_final_response()
-        else:
-            # Original non-streaming code
-            result = await self.__options.merge_options(baml_options).call_function_async(function_name="FileManager", args={
-                "content_to_save": content_to_save,"target_files": target_files,"operation_type": operation_type,
-            })
-            return typing.cast(types.SearchReplaceTool, result.cast_to(types, types, stream_types, False, __runtime__))
-    async def IntentClassifier(self, user_message: str,last_3_messages: typing.List["types.ConversationMessage"],conversation_state: types.ConversationState,
-        baml_options: BamlCallOptions = {},
-    ) -> types.IntentClassifierOutput:
-        # Check if on_tick is provided
-        if 'on_tick' in baml_options:
-            # Use streaming internally when on_tick is provided
-            stream = self.stream.IntentClassifier(user_message=user_message,last_3_messages=last_3_messages,conversation_state=conversation_state,
-                baml_options=baml_options)
-            return await stream.get_final_response()
-        else:
-            # Original non-streaming code
-            result = await self.__options.merge_options(baml_options).call_function_async(function_name="IntentClassifier", args={
-                "user_message": user_message,"last_3_messages": last_3_messages,"conversation_state": conversation_state,
-            })
-            return typing.cast(types.IntentClassifierOutput, result.cast_to(types, types, stream_types, False, __runtime__))
-    async def PECTExpert(self, user_message: str,relevant_context: typing.Optional[str] = None,external_docs: typing.Optional[typing.List[baml_py.Pdf]] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> str:
-        # Check if on_tick is provided
-        if 'on_tick' in baml_options:
-            # Use streaming internally when on_tick is provided
-            stream = self.stream.PECTExpert(user_message=user_message,relevant_context=relevant_context,external_docs=external_docs,
-                baml_options=baml_options)
-            return await stream.get_final_response()
-        else:
-            # Original non-streaming code
-            result = await self.__options.merge_options(baml_options).call_function_async(function_name="PECTExpert", args={
-                "user_message": user_message,"relevant_context": relevant_context,"external_docs": external_docs,
-            })
-            return typing.cast(str, result.cast_to(types, types, stream_types, False, __runtime__))
-    async def ReportingEditor(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]],available_files: typing.List[str],
-        baml_options: BamlCallOptions = {},
-    ) -> types.EditFileTool:
-        # Check if on_tick is provided
-        if 'on_tick' in baml_options:
-            # Use streaming internally when on_tick is provided
-            stream = self.stream.ReportingEditor(user_message=user_message,conversation_history=conversation_history,available_files=available_files,
-                baml_options=baml_options)
-            return await stream.get_final_response()
-        else:
-            # Original non-streaming code
-            result = await self.__options.merge_options(baml_options).call_function_async(function_name="ReportingEditor", args={
-                "user_message": user_message,"conversation_history": conversation_history,"available_files": available_files,
-            })
-            return typing.cast(types.EditFileTool, result.cast_to(types, types, stream_types, False, __runtime__))
     
 
 
@@ -208,18 +133,6 @@ class BamlStreamClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def Brainstormer(self, user_message: str,relevant_context: typing.Optional[str] = None,system_specs: typing.Optional[str] = None,experiment_plan: typing.Optional[str] = None,data_science_plan: typing.Optional[str] = None,existing_idea: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.BamlStream[str, str]:
-        ctx, result = self.__options.merge_options(baml_options).create_async_stream(function_name="Brainstormer", args={
-            "user_message": user_message,"relevant_context": relevant_context,"system_specs": system_specs,"experiment_plan": experiment_plan,"data_science_plan": data_science_plan,"existing_idea": existing_idea,
-        })
-        return baml_py.BamlStream[str, str](
-          result,
-          lambda x: typing.cast(str, x.cast_to(types, types, stream_types, True, __runtime__)),
-          lambda x: typing.cast(str, x.cast_to(types, types, stream_types, False, __runtime__)),
-          ctx,
-        )
     def ExpOrchestrator(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlStream[stream_types.ExpOrchestratorOutput, types.ExpOrchestratorOutput]:
@@ -256,54 +169,6 @@ class BamlStreamClient:
           lambda x: typing.cast(types.ExpRouterOutput, x.cast_to(types, types, stream_types, False, __runtime__)),
           ctx,
         )
-    def FileManager(self, content_to_save: str,target_files: typing.List[str],operation_type: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.BamlStream[stream_types.SearchReplaceTool, types.SearchReplaceTool]:
-        ctx, result = self.__options.merge_options(baml_options).create_async_stream(function_name="FileManager", args={
-            "content_to_save": content_to_save,"target_files": target_files,"operation_type": operation_type,
-        })
-        return baml_py.BamlStream[stream_types.SearchReplaceTool, types.SearchReplaceTool](
-          result,
-          lambda x: typing.cast(stream_types.SearchReplaceTool, x.cast_to(types, types, stream_types, True, __runtime__)),
-          lambda x: typing.cast(types.SearchReplaceTool, x.cast_to(types, types, stream_types, False, __runtime__)),
-          ctx,
-        )
-    def IntentClassifier(self, user_message: str,last_3_messages: typing.List["types.ConversationMessage"],conversation_state: types.ConversationState,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.BamlStream[stream_types.IntentClassifierOutput, types.IntentClassifierOutput]:
-        ctx, result = self.__options.merge_options(baml_options).create_async_stream(function_name="IntentClassifier", args={
-            "user_message": user_message,"last_3_messages": last_3_messages,"conversation_state": conversation_state,
-        })
-        return baml_py.BamlStream[stream_types.IntentClassifierOutput, types.IntentClassifierOutput](
-          result,
-          lambda x: typing.cast(stream_types.IntentClassifierOutput, x.cast_to(types, types, stream_types, True, __runtime__)),
-          lambda x: typing.cast(types.IntentClassifierOutput, x.cast_to(types, types, stream_types, False, __runtime__)),
-          ctx,
-        )
-    def PECTExpert(self, user_message: str,relevant_context: typing.Optional[str] = None,external_docs: typing.Optional[typing.List[baml_py.Pdf]] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.BamlStream[str, str]:
-        ctx, result = self.__options.merge_options(baml_options).create_async_stream(function_name="PECTExpert", args={
-            "user_message": user_message,"relevant_context": relevant_context,"external_docs": external_docs,
-        })
-        return baml_py.BamlStream[str, str](
-          result,
-          lambda x: typing.cast(str, x.cast_to(types, types, stream_types, True, __runtime__)),
-          lambda x: typing.cast(str, x.cast_to(types, types, stream_types, False, __runtime__)),
-          ctx,
-        )
-    def ReportingEditor(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]],available_files: typing.List[str],
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.BamlStream[stream_types.EditFileTool, types.EditFileTool]:
-        ctx, result = self.__options.merge_options(baml_options).create_async_stream(function_name="ReportingEditor", args={
-            "user_message": user_message,"conversation_history": conversation_history,"available_files": available_files,
-        })
-        return baml_py.BamlStream[stream_types.EditFileTool, types.EditFileTool](
-          result,
-          lambda x: typing.cast(stream_types.EditFileTool, x.cast_to(types, types, stream_types, True, __runtime__)),
-          lambda x: typing.cast(types.EditFileTool, x.cast_to(types, types, stream_types, False, __runtime__)),
-          ctx,
-        )
     
 
 class BamlHttpRequestClient:
@@ -312,13 +177,6 @@ class BamlHttpRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    async def Brainstormer(self, user_message: str,relevant_context: typing.Optional[str] = None,system_specs: typing.Optional[str] = None,experiment_plan: typing.Optional[str] = None,data_science_plan: typing.Optional[str] = None,existing_idea: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="Brainstormer", args={
-            "user_message": user_message,"relevant_context": relevant_context,"system_specs": system_specs,"experiment_plan": experiment_plan,"data_science_plan": data_science_plan,"existing_idea": existing_idea,
-        }, mode="request")
-        return result
     async def ExpOrchestrator(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
@@ -338,34 +196,6 @@ class BamlHttpRequestClient:
     ) -> baml_py.baml_py.HTTPRequest:
         result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExpRouter", args={
             "user_message": user_message,"conversation_history": conversation_history,
-        }, mode="request")
-        return result
-    async def FileManager(self, content_to_save: str,target_files: typing.List[str],operation_type: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="FileManager", args={
-            "content_to_save": content_to_save,"target_files": target_files,"operation_type": operation_type,
-        }, mode="request")
-        return result
-    async def IntentClassifier(self, user_message: str,last_3_messages: typing.List["types.ConversationMessage"],conversation_state: types.ConversationState,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="IntentClassifier", args={
-            "user_message": user_message,"last_3_messages": last_3_messages,"conversation_state": conversation_state,
-        }, mode="request")
-        return result
-    async def PECTExpert(self, user_message: str,relevant_context: typing.Optional[str] = None,external_docs: typing.Optional[typing.List[baml_py.Pdf]] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="PECTExpert", args={
-            "user_message": user_message,"relevant_context": relevant_context,"external_docs": external_docs,
-        }, mode="request")
-        return result
-    async def ReportingEditor(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]],available_files: typing.List[str],
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ReportingEditor", args={
-            "user_message": user_message,"conversation_history": conversation_history,"available_files": available_files,
         }, mode="request")
         return result
     
@@ -376,13 +206,6 @@ class BamlHttpStreamRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    async def Brainstormer(self, user_message: str,relevant_context: typing.Optional[str] = None,system_specs: typing.Optional[str] = None,experiment_plan: typing.Optional[str] = None,data_science_plan: typing.Optional[str] = None,existing_idea: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="Brainstormer", args={
-            "user_message": user_message,"relevant_context": relevant_context,"system_specs": system_specs,"experiment_plan": experiment_plan,"data_science_plan": data_science_plan,"existing_idea": existing_idea,
-        }, mode="stream")
-        return result
     async def ExpOrchestrator(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
@@ -404,34 +227,6 @@ class BamlHttpStreamRequestClient:
             "user_message": user_message,"conversation_history": conversation_history,
         }, mode="stream")
         return result
-    async def FileManager(self, content_to_save: str,target_files: typing.List[str],operation_type: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="FileManager", args={
-            "content_to_save": content_to_save,"target_files": target_files,"operation_type": operation_type,
-        }, mode="stream")
-        return result
-    async def IntentClassifier(self, user_message: str,last_3_messages: typing.List["types.ConversationMessage"],conversation_state: types.ConversationState,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="IntentClassifier", args={
-            "user_message": user_message,"last_3_messages": last_3_messages,"conversation_state": conversation_state,
-        }, mode="stream")
-        return result
-    async def PECTExpert(self, user_message: str,relevant_context: typing.Optional[str] = None,external_docs: typing.Optional[typing.List[baml_py.Pdf]] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="PECTExpert", args={
-            "user_message": user_message,"relevant_context": relevant_context,"external_docs": external_docs,
-        }, mode="stream")
-        return result
-    async def ReportingEditor(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]],available_files: typing.List[str],
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ReportingEditor", args={
-            "user_message": user_message,"conversation_history": conversation_history,"available_files": available_files,
-        }, mode="stream")
-        return result
     
 
-b = BamlAsyncClient(DoNotUseDirectlyCallManager({}))
+b = BamlAsyncClient(DoNotUseDirectlyCallManager({}))

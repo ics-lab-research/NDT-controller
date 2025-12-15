@@ -16,20 +16,11 @@ from . import stream_types
 
 type_map = {
 
-    "types.CachedContexts": types.CachedContexts,
-    "stream_types.CachedContexts": stream_types.CachedContexts,
-
     "types.ConnectToViTool": types.ConnectToViTool,
     "stream_types.ConnectToViTool": stream_types.ConnectToViTool,
 
     "types.ConversationMessage": types.ConversationMessage,
     "stream_types.ConversationMessage": stream_types.ConversationMessage,
-
-    "types.ConversationState": types.ConversationState,
-    "stream_types.ConversationState": stream_types.ConversationState,
-
-    "types.EditFileTool": types.EditFileTool,
-    "stream_types.EditFileTool": stream_types.EditFileTool,
 
     "types.ExpOrchestratorOutput": types.ExpOrchestratorOutput,
     "stream_types.ExpOrchestratorOutput": stream_types.ExpOrchestratorOutput,
@@ -40,26 +31,14 @@ type_map = {
     "types.ExperimentWithFilename": types.ExperimentWithFilename,
     "stream_types.ExperimentWithFilename": stream_types.ExperimentWithFilename,
 
-    "types.FileChange": types.FileChange,
-    "stream_types.FileChange": stream_types.FileChange,
-
     "types.HandleSaveDialogTool": types.HandleSaveDialogTool,
     "stream_types.HandleSaveDialogTool": stream_types.HandleSaveDialogTool,
-
-    "types.IntentClassifierOutput": types.IntentClassifierOutput,
-    "stream_types.IntentClassifierOutput": stream_types.IntentClassifierOutput,
 
     "types.PressButtonTool": types.PressButtonTool,
     "stream_types.PressButtonTool": stream_types.PressButtonTool,
 
     "types.RunOpenViTool": types.RunOpenViTool,
     "stream_types.RunOpenViTool": stream_types.RunOpenViTool,
-
-    "types.SearchReplaceBlock": types.SearchReplaceBlock,
-    "stream_types.SearchReplaceBlock": stream_types.SearchReplaceBlock,
-
-    "types.SearchReplaceTool": types.SearchReplaceTool,
-    "stream_types.SearchReplaceTool": stream_types.SearchReplaceTool,
 
     "types.SelectComboBoxTool": types.SelectComboBoxTool,
     "stream_types.SelectComboBoxTool": stream_types.SelectComboBoxTool,
@@ -77,10 +56,6 @@ type_map = {
     "stream_types.ToolResult": stream_types.ToolResult,
 
 
-    "types.ContextType": types.ContextType,
-
     "types.ExpAction": types.ExpAction,
-
-    "types.Intent": types.Intent,
 
 }

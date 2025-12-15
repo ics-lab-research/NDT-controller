@@ -37,14 +37,8 @@ def get_checks(checks: typing.Dict[CheckName, Check]) -> typing.List[Check]:
 def all_succeeded(checks: typing.Dict[CheckName, Check]) -> bool:
     return all(check.status == "succeeded" for check in get_checks(checks))
 # #########################################################################
-# Generated enums (3)
+# Generated enums (1)
 # #########################################################################
-
-class ContextType(str, Enum):
-    SYSTEM_SPECS = "SYSTEM_SPECS"
-    EXPERIMENT_PLAN = "EXPERIMENT_PLAN"
-    DATA_SCIENCE_PLAN = "DATA_SCIENCE_PLAN"
-    EXISTING_IDEA = "EXISTING_IDEA"
 
 class ExpAction(str, Enum):
     BASIC_CONTROL = "BASIC_CONTROL"
@@ -52,20 +46,9 @@ class ExpAction(str, Enum):
     MULTIPLE_SCAN = "MULTIPLE_SCAN"
     ASK_CLARIFICATION = "ASK_CLARIFICATION"
 
-class Intent(str, Enum):
-    DISCUSS = "DISCUSS"
-    GENERATE = "GENERATE"
-    FILE_WRITE = "FILE_WRITE"
-
 # #########################################################################
-# Generated classes (20)
+# Generated classes (13)
 # #########################################################################
-
-class CachedContexts(BaseModel):
-    system_specs: bool
-    experiment_plan: bool
-    data_science_plan: bool
-    existing_idea: bool
 
 class ConnectToViTool(BaseModel):
     tool_name: typing_extensions.Literal['connect_to_vi']
@@ -74,15 +57,6 @@ class ConnectToViTool(BaseModel):
 class ConversationMessage(BaseModel):
     role: typing.Union[typing_extensions.Literal['user'], typing_extensions.Literal['assistant']]
     content: str
-
-class ConversationState(BaseModel):
-    available_files: typing.List[str]
-    cached_contexts: "CachedContexts"
-
-class EditFileTool(BaseModel):
-    tool_name: typing_extensions.Literal['edit_file']
-    instruction: str
-    files: typing.List[str]
 
 class ExpOrchestratorOutput(BaseModel):
     number_of_scans: int
@@ -97,25 +71,10 @@ class ExperimentWithFilename(BaseModel):
     experiment: typing.Dict[str, str]
     filename: str
 
-class FileChange(BaseModel):
-    file_path: str
-    blocks: typing.List["SearchReplaceBlock"]
-
 class HandleSaveDialogTool(BaseModel):
     tool_name: typing_extensions.Literal['handle_save_dialog']
     save_directory: str
     file_name: str
-
-class IntentClassifierOutput(BaseModel):
-    intent: Intent
-    confidence: float
-    extracted_context: str
-    requires_external_docs: bool
-    required_context_types: typing.Optional[typing.List[ContextType]] = None
-    content_to_save: typing.Optional[str] = None
-    target_files: typing.Optional[typing.List[str]] = None
-    operation_type: typing.Optional[str] = None
-    reasoning: str
 
 class PressButtonTool(BaseModel):
     tool_name: typing_extensions.Literal['press_button']
@@ -124,15 +83,6 @@ class PressButtonTool(BaseModel):
 class RunOpenViTool(BaseModel):
     tool_name: typing_extensions.Literal['run_open_vi']
     run_vi: bool
-
-class SearchReplaceBlock(BaseModel):
-    search: str
-    replace: str
-    language: str
-
-class SearchReplaceTool(BaseModel):
-    files_to_change: typing.List["FileChange"]
-    reasoning: str
 
 class SelectComboBoxTool(BaseModel):
     tool_name: typing_extensions.Literal['select_combo_box']

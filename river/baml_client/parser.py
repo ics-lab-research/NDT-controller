@@ -24,12 +24,6 @@ class LlmResponseParser:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def Brainstormer(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> str:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="Brainstormer", llm_response=llm_response, mode="request")
-        return typing.cast(str, result)
-
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> types.ExpOrchestratorOutput:
@@ -48,30 +42,6 @@ class LlmResponseParser:
         result = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="request")
         return typing.cast(types.ExpRouterOutput, result)
 
-    def FileManager(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> types.SearchReplaceTool:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="FileManager", llm_response=llm_response, mode="request")
-        return typing.cast(types.SearchReplaceTool, result)
-
-    def IntentClassifier(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> types.IntentClassifierOutput:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="IntentClassifier", llm_response=llm_response, mode="request")
-        return typing.cast(types.IntentClassifierOutput, result)
-
-    def PECTExpert(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> str:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="PECTExpert", llm_response=llm_response, mode="request")
-        return typing.cast(str, result)
-
-    def ReportingEditor(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> types.EditFileTool:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ReportingEditor", llm_response=llm_response, mode="request")
-        return typing.cast(types.EditFileTool, result)
-
     
 
 class LlmStreamParser:
@@ -79,12 +49,6 @@ class LlmStreamParser:
 
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
-
-    def Brainstormer(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> str:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="Brainstormer", llm_response=llm_response, mode="stream")
-        return typing.cast(str, result)
 
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
@@ -104,28 +68,4 @@ class LlmStreamParser:
         result = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="stream")
         return typing.cast(stream_types.ExpRouterOutput, result)
 
-    def FileManager(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> stream_types.SearchReplaceTool:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="FileManager", llm_response=llm_response, mode="stream")
-        return typing.cast(stream_types.SearchReplaceTool, result)
-
-    def IntentClassifier(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> stream_types.IntentClassifierOutput:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="IntentClassifier", llm_response=llm_response, mode="stream")
-        return typing.cast(stream_types.IntentClassifierOutput, result)
-
-    def PECTExpert(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> str:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="PECTExpert", llm_response=llm_response, mode="stream")
-        return typing.cast(str, result)
-
-    def ReportingEditor(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> stream_types.EditFileTool:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ReportingEditor", llm_response=llm_response, mode="stream")
-        return typing.cast(stream_types.EditFileTool, result)
-
-    
+    

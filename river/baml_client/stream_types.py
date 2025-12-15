@@ -23,14 +23,8 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (20)
+# Generated classes (13)
 # #########################################################################
-
-class CachedContexts(BaseModel):
-    system_specs: typing.Optional[bool] = None
-    experiment_plan: typing.Optional[bool] = None
-    data_science_plan: typing.Optional[bool] = None
-    existing_idea: typing.Optional[bool] = None
 
 class ConnectToViTool(BaseModel):
     tool_name: typing.Optional[str] = None
@@ -39,15 +33,6 @@ class ConnectToViTool(BaseModel):
 class ConversationMessage(BaseModel):
     role: typing.Optional[typing.Union[str, str]] = None
     content: typing.Optional[str] = None
-
-class ConversationState(BaseModel):
-    available_files: typing.List[str]
-    cached_contexts: typing.Optional["CachedContexts"] = None
-
-class EditFileTool(BaseModel):
-    tool_name: typing.Optional[str] = None
-    instruction: typing.Optional[str] = None
-    files: typing.List[str]
 
 class ExpOrchestratorOutput(BaseModel):
     number_of_scans: typing.Optional[int] = None
@@ -62,25 +47,10 @@ class ExperimentWithFilename(BaseModel):
     experiment: typing.Dict[str, str]
     filename: typing.Optional[str] = None
 
-class FileChange(BaseModel):
-    file_path: typing.Optional[str] = None
-    blocks: typing.List["SearchReplaceBlock"]
-
 class HandleSaveDialogTool(BaseModel):
     tool_name: typing.Optional[str] = None
     save_directory: typing.Optional[str] = None
     file_name: typing.Optional[str] = None
-
-class IntentClassifierOutput(BaseModel):
-    intent: typing.Optional[types.Intent] = None
-    confidence: typing.Optional[float] = None
-    extracted_context: typing.Optional[str] = None
-    requires_external_docs: typing.Optional[bool] = None
-    required_context_types: typing.Optional[typing.List[types.ContextType]] = None
-    content_to_save: typing.Optional[str] = None
-    target_files: typing.Optional[typing.List[str]] = None
-    operation_type: typing.Optional[str] = None
-    reasoning: typing.Optional[str] = None
 
 class PressButtonTool(BaseModel):
     tool_name: typing.Optional[str] = None
@@ -89,15 +59,6 @@ class PressButtonTool(BaseModel):
 class RunOpenViTool(BaseModel):
     tool_name: typing.Optional[str] = None
     run_vi: typing.Optional[bool] = None
-
-class SearchReplaceBlock(BaseModel):
-    search: typing.Optional[str] = None
-    replace: typing.Optional[str] = None
-    language: typing.Optional[str] = None
-
-class SearchReplaceTool(BaseModel):
-    files_to_change: typing.List["FileChange"]
-    reasoning: typing.Optional[str] = None
 
 class SelectComboBoxTool(BaseModel):
     tool_name: typing.Optional[str] = None
