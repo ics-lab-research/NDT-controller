@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Literal, Union
 
 
 from ..baml_client.types import (
@@ -25,6 +25,7 @@ ExperimentTool = Union[
     PressButtonTool,
     SetButtonStateTool,
     SelectComboBoxTool,
+    Literal["unknown"],
 ]
 
 
