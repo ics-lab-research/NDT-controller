@@ -22,6 +22,7 @@ from ..baml_client.types import (
 )
 from ..core.models import ExperimentsMetadata, ExperimentTool, Mode
 from ..core.project_manager import ProjectManager
+from ..core.utils import load_experiment_plans
 
 
 class FileChangeHandler(FileSystemEventHandler):
