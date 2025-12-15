@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional, Union
 
 
 from .labview_controller import LabVIEWController
+from ...baml_client.types import ToolResult
 
 # --- Global controller instance ---
 # This is the single instance that manages the connection
