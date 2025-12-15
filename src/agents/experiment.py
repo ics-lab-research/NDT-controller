@@ -74,7 +74,9 @@ def handle_experiment_mode(
             yield AgentResponse(response="Called exp_orchestrator.")
 
             if orchestrator_response.number_of_scans == 1:
-                yield AgentResponse(response="Number of scans is 1, calling exp_planner.")
+                yield AgentResponse(
+                    response="Number of scans is 1, calling exp_planner."
+                )
                 single_experiment = orchestrator_response.experiments[0]
 
                 single_plan = call_exp_planner(
