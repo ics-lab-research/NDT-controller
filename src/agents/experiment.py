@@ -79,9 +79,20 @@ def handle_experiment_mode(
                 single_plan = call_exp_planner(
                     user_message, filename=single_experiment.filename
                 )
-                metadata = project_manager.get_mode_metadata(project_manager.current_mode)
+                metadata = project_manager.get_mode_metadata(
+                    project_manager.current_mode
+                )
                 plans_path = metadata.plans_path
-                save_experiment_plans([{"filename": single_experiment.filename, "tools": [tool.__dict__ for tool in single_plan], "approved": False}], plans_path)
+                save_experiment_plans(
+                    [
+                        {
+                            "filename": single_experiment.filename,
+                            "tools": [tool.__dict__ for tool in single_plan],
+                            "approved": False,
+                        }
+                    ],
+                    plans_path,
+                )
 
             yield AgentResponse(response="Done")
 
