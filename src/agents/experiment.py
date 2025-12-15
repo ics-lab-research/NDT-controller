@@ -40,9 +40,6 @@ def handle_experiment_mode(
         # try to process if they want to control system
         router_final = router_response.get_final_response()
 
-        if router_final.action == ExpAction.ASK_CLARIFICATION:
-            pass
-
         # elif router_final.action == ExpAction.BASIC_CONTROL:
         #     single_plan = call_exp_planner(user_message)
 
@@ -70,7 +67,9 @@ def handle_experiment_mode(
 
         #     yield AgentResponse(response="Done")
 
-        elif router_final.action == ExpAction.SINGLE_SCAN:
+        if router_final.action == ExpAction.SINGLE_SCAN:
+            yield AgentResponse(thinking="Done")
+
             orchestrator_response = call_exp_orchestrator(user_message)
 
             if orchestrator_response.number_of_scans == 1:
@@ -79,6 +78,8 @@ def handle_experiment_mode(
                 single_plan = call_exp_planner(
                     user_message, filename=single_experiment.filename
                 )
+                yield AgentResponse(thinking="Done")
+
                 metadata = project_manager.get_mode_metadata(
                     project_manager.current_mode
                 )
@@ -96,7 +97,7 @@ def handle_experiment_mode(
                     plans_path,
                 )
 
-            yield AgentResponse(response="Done")
+            yield AgentResponse(action="Done")
 
         # elif router_final.action == ExpAction.MULTIPLE_SCAN:
         #     all_plans = []
@@ -114,3 +115,6 @@ def handle_experiment_mode(
         #     execute_multiple_plans(all_plans, project_manager)
 
         #     yield AgentResponse(response="Done")
+
+        else:
+            pass
