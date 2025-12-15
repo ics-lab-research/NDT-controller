@@ -19,7 +19,7 @@ from ..baml_client.types import (
     SetButtonStateTool,
     SetNumericControlTool,
 )
-from ..core.models import ExperimentsMetadata, ExperimentTool, Mode
+from ..core.models import ExperimentPlan, ExperimentsMetadata, ExperimentTool, Mode
 from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, read_file
 
@@ -29,13 +29,15 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     if isinstance(metadata, ExperimentsMetadata):
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
-            json_content = read_file(plans_path)
-            if len(json_content) > 10000:
-                json_content = json_content[:10000] + "\n... (truncated)"
+            plans = load_experiment_plans(plans_path)
+            data = [[plan.filename, str(plan.experiment)] for plan in plans]
+            headers = ["Filename", "Experiment"]
         else:
-            json_content = "Error: plans_path is not a Path object"
+            data = [["Error", "plans_path is not a Path object"]]
+            headers = ["Status", "Message"]
     else:
-        json_content = "Error: Invalid metadata type for experiments mode"
-    with gr.Tab("JSON Viewer") as tab:
-        gr.Code(value=json_content, language="json", max_lines=30)
+        data = [["Error", "Invalid metadata type for experiments mode"]]
+        headers = ["Status", "Message"]
+    with gr.Tab("Plans Viewer") as tab:
+        gr.Dataframe(value=data, headers=headers, max_rows=10)
     return tab
