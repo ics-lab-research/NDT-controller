@@ -23,13 +23,13 @@ class LabVIEWController:
         self.vi_reference = None
         self.vi_path = None
 
-    def _handle_error(self, operation: str, error: Exception) -> Dict[str, Any]:
+    def handle_error(self, operation: str, error: Exception) -> Dict[str, Any]:
         """Standardized error handling."""
         error_msg = f"Failed to {operation}: {error}"
         logger.error(error_msg)
         return {"success": False, "error": error_msg}
 
-    def _success_response(self, message: str, **kwargs) -> Dict[str, Any]:
+    def success_response(self, message: str, **kwargs) -> Dict[str, Any]:
         """Standardized success response."""
         response = {"success": True, "message": message}
         response.update(kwargs)
@@ -40,29 +40,31 @@ class LabVIEWController:
         try:
             # If not running the VI and no path is set, just return success
             if not run_vi and self.vi_path is None:
-                return self._success_response(
+                return self.success_response(
                     "No VI path set and run_vi=False, skipping subprocess",
                     process_id=None,
                     run_vi=False,
                     vi_path=None,
                 )
-            
+
             current_dir = Path(__file__).parent
             open_vi_path = current_dir / "open_vi.py"
             if not open_vi_path.exists():
-                return self._handle_error(
+                return self.handle_error(
                     "find open_vi.py",
                     FileNotFoundError(
                         f"open_vi.py not found at {open_vi_path}"
                     ),
                 )
-            
+
             if self.vi_path is None:
-                return self._handle_error(
+                return self.handle_error(
                     "run open_vi.py subprocess",
-                    ValueError("VI path must be set in controller (use connect_to_existing_vi or set vi_path manually)")
+                    ValueError(
+                        "VI path must be set in controller (use connect_to_existing_vi or set vi_path manually)"
+                    ),
                 )
-            
+
             env = environ.copy()
             env["PYTHONIOENCODING"] = "ascii:replace"
             env["PYTHONLEGACYWINDOWSSTDIO"] = "1"
@@ -83,14 +85,14 @@ class LabVIEWController:
                     subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore
                 )
             process = subprocess.Popen(cmd, **popen_kwargs)
-            return self._success_response(
+            return self.success_response(
                 f"Started open_vi.py in subprocess with PID: {process.pid} (run_vi={run_vi})",
                 process_id=process.pid,
                 run_vi=run_vi,
                 vi_path=self.vi_path,
             )
         except Exception as e:
-            return self._handle_error("run open_vi.py subprocess", e)
+            return self.handle_error("run open_vi.py subprocess", e)
 
     def _validate_existing_connection(self, vi_path: str | None) -> bool:
         """Validate and update existing VI connection if valid."""
@@ -140,7 +142,9 @@ class LabVIEWController:
                 self.vi_reference = self.labview_app.GetVIReference(vi_path)
                 self.vi_path = vi_path
             except Exception as vi_error:
-                logger.error(f"Failed to get VI reference for {vi_path}: {vi_error}")
+                logger.error(
+                    f"Failed to get VI reference for {vi_path}: {vi_error}"
+                )
                 self.vi_reference = None
                 self.vi_path = None
                 return False
@@ -239,7 +243,9 @@ class LabVIEWController:
             logger.error(f"Failed to set button state '{button_name}': {e}")
             return False
 
-    def select_combo_box(self, combo_box_name: str, item: Union[str, int]) -> bool:
+    def select_combo_box(
+        self, combo_box_name: str, item: Union[str, int]
+    ) -> bool:
         """Select an item in a combo box control by index (int) or string value."""
         try:
             if not self.vi_reference:
@@ -372,7 +378,9 @@ class LabVIEWController:
     def _try_multiple_aborts(self, methods_tried: list[str]) -> bool:
         """Attempt multiple abort calls if needed."""
         if not self.vi_reference:
-            logger.warning("VI reference is None, cannot perform multiple aborts")
+            logger.warning(
+                "VI reference is None, cannot perform multiple aborts"
+            )
             return False
         for attempt in range(3):
             try:
@@ -460,4 +468,4 @@ class LabVIEWController:
             # Delegate the call to the imported function
             return handle_save_file_dialog(*args, **kwargs)
         except Exception as e:
-            return self._handle_error("handle save dialog", e)
+            return self.handle_error("handle save dialog", e)

@@ -29,7 +29,7 @@ dev = [
 ]
 
 [project.scripts]
-ndt = "ndt.main:gui"
+ndt = "src.main:gui"
 
 [tool.setuptools.packages.find]
 where = ["."]

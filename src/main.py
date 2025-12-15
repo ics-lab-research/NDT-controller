@@ -4,7 +4,7 @@ import sys
 from dotenv import load_dotenv
 from loguru import logger
 
-from ndt.gui import create_main_interface
+from src.gui import create_main_interface
 
 load_dotenv()
 
