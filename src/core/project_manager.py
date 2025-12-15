@@ -9,7 +9,7 @@ from .models import (
     Mode,
     ModeMetadata,
 )
-from ..tools.file_operations import tool_read_file
+from .utils import read_file
 
 
 class ProjectManager:
@@ -178,7 +178,7 @@ def get_exp_constraint_content(project_manager: ProjectManager) -> str:
         raise ValueError("Not in experiments mode")
     path = metadata.exp_constraint_path
     if path.exists():
-        content = tool_read_file(path)
+        content = read_file(path)
         logger.debug(f"Read content from {path}")
         return content
     logger.warning(f"Experiment constraint file does not exist: {path}")
