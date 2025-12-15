@@ -75,7 +75,7 @@ def handle_experiment_mode(
 
             if orchestrator_response.number_of_scans == 1:
                 yield AgentResponse(
-                    response="Number of scans is 1, calling exp_planner."
+                    response="Number of scans is 1, calling exp_planner..."
                 )
                 single_experiment = orchestrator_response.experiments[0]
 
