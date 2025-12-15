@@ -58,7 +58,7 @@ def respond_stream(
                     {
                         "role": "assistant",
                         "content": agent_response.action,
-                        "metadata": {"title": "Action"},
+                        "metadata": {"title": "⚡ Action"},
                     },
                 )
                 action_added = True
