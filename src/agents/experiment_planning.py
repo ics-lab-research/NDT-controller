@@ -19,11 +19,13 @@ def save_experiment_plans(
                 filename = plan["experiment"].filename
             else:
                 filename = plan["filename"]
-            plans_to_save.append({
-                "filename": filename,
-                "tools": plan["tools"],
-                "approved": plan["approved"],
-            })
+            plans_to_save.append(
+                {
+                    "filename": filename,
+                    "tools": plan["tools"],
+                    "approved": plan["approved"],
+                }
+            )
         with filepath.open("w") as f:
             json.dump(plans_to_save, f, indent=4)
         logger.info(
