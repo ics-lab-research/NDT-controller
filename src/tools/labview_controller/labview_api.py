@@ -19,8 +19,12 @@ def tool_run_open_vi(run_vi: bool = True) -> ToolResult:
     return ToolResult(
         name="tool_run_open_vi",
         success=result["success"],
-        output={k: str(v) for k, v in result.items() if k not in ["success", "error"]},
-        error=result.get("error")
+        output={
+            k: str(v)
+            for k, v in result.items()
+            if k not in ["success", "error"]
+        },
+        error=result.get("error"),
     )
 
 
@@ -32,15 +36,18 @@ def tool_connect_to_vi(vi_path: str | None = None) -> ToolResult:
         return ToolResult(
             name="tool_connect_to_vi",
             success=True,
-            output={"message": "Connected to LabVIEW VI successfully", "ready_for_control": "True"},
-            error=None
+            output={
+                "message": "Connected to LabVIEW VI successfully",
+                "ready_for_control": "True",
+            },
+            error=None,
         )
     else:
         return ToolResult(
             name="tool_connect_to_vi",
             success=False,
             output=None,
-            error="Connection failed"
+            error="Connection failed",
         )
 
 
@@ -51,21 +58,21 @@ def tool_press_button(button_name: str) -> ToolResult:
             name="tool_press_button",
             success=False,
             output=None,
-            error="No VI connection. Use connect_to_vi() first"
+            error="No VI connection. Use connect_to_vi() first",
         )
     if controller.press_button(button_name):
         return ToolResult(
             name="tool_press_button",
             success=True,
             output={"message": f"Button '{button_name}' pressed successfully"},
-            error=None
+            error=None,
         )
     else:
         return ToolResult(
             name="tool_press_button",
             success=False,
             output=None,
-            error=f"Button '{button_name}' press failed"
+            error=f"Button '{button_name}' press failed",
         )
 
 
@@ -76,7 +83,7 @@ def tool_set_button_state(button_name: str, state: bool) -> ToolResult:
             name="tool_set_button_state",
             success=False,
             output=None,
-            error="No VI connection. Use connect_to_vi() first"
+            error="No VI connection. Use connect_to_vi() first",
         )
     if controller.set_button_state(button_name, state):
         state_text = "pressed/on" if state else "released/off"
@@ -84,14 +91,14 @@ def tool_set_button_state(button_name: str, state: bool) -> ToolResult:
             name="tool_set_button_state",
             success=True,
             output={"message": f"Button '{button_name}' set to {state_text}"},
-            error=None
+            error=None,
         )
     else:
         return ToolResult(
             name="tool_set_button_state",
             success=False,
             output=None,
-            error=f"Failed to set button '{button_name}' state"
+            error=f"Failed to set button '{button_name}' state",
         )
 
 
@@ -102,21 +109,24 @@ def tool_set_numeric_control(control_name: str, value: float) -> ToolResult:
             name="tool_set_numeric_control",
             success=False,
             output=None,
-            error="No VI connection. Use connect_to_vi() first"
+            error="No VI connection. Use connect_to_vi() first",
         )
     if controller.set_control_value(control_name, float(value)):
         return ToolResult(
             name="tool_set_numeric_control",
             success=True,
-            output={"message": f"Control '{control_name}' set to {value}", "value_set": str(float(value))},
-            error=None
+            output={
+                "message": f"Control '{control_name}' set to {value}",
+                "value_set": str(float(value)),
+            },
+            error=None,
         )
     else:
         return ToolResult(
             name="tool_set_numeric_control",
             success=False,
             output=None,
-            error=f"Failed to set '{control_name}'"
+            error=f"Failed to set '{control_name}'",
         )
 
 
@@ -127,22 +137,25 @@ def tool_get_numeric_indicator(indicator_name: str) -> ToolResult:
             name="tool_get_numeric_indicator",
             success=False,
             output=None,
-            error="No VI connection. Use connect_to_vi() first"
+            error="No VI connection. Use connect_to_vi() first",
         )
     value = controller.get_control_value(indicator_name)
     if value is not None:
         return ToolResult(
             name="tool_get_numeric_indicator",
             success=True,
-            output={"message": f"Retrieved indicator '{indicator_name}'", "value": str(float(value))},
-            error=None
+            output={
+                "message": f"Retrieved indicator '{indicator_name}'",
+                "value": str(float(value)),
+            },
+            error=None,
         )
     else:
         return ToolResult(
             name="tool_get_numeric_indicator",
             success=False,
             output=None,
-            error=f"Failed to get '{indicator_name}'"
+            error=f"Failed to get '{indicator_name}'",
         )
 
 
@@ -152,8 +165,12 @@ def tool_get_vi_status() -> ToolResult:
     return ToolResult(
         name="tool_get_vi_status",
         success=result.get("connected", False),
-        output={k: str(v) for k, v in result.items() if k not in ["connected", "error"]},
-        error=result.get("error")
+        output={
+            k: str(v)
+            for k, v in result.items()
+            if k not in ["connected", "error"]
+        },
+        error=result.get("error"),
     )
 
 
@@ -166,21 +183,24 @@ def tool_select_combo_box(
             name="tool_select_combo_box",
             success=False,
             output=None,
-            error="No VI connection. Use connect_to_vi() first"
+            error="No VI connection. Use connect_to_vi() first",
         )
     if controller.select_combo_box(combo_box_name, item):
         return ToolResult(
             name="tool_select_combo_box",
             success=True,
-            output={"message": f"Combo box '{combo_box_name}' selected to {item}", "selection": str(item)},
-            error=None
+            output={
+                "message": f"Combo box '{combo_box_name}' selected to {item}",
+                "selection": str(item),
+            },
+            error=None,
         )
     else:
         return ToolResult(
             name="tool_select_combo_box",
             success=False,
             output=None,
-            error=f"Failed to select '{combo_box_name}'"
+            error=f"Failed to select '{combo_box_name}'",
         )
 
 
@@ -196,7 +216,7 @@ def tool_select_tab(
             name="tool_select_tab",
             success=False,
             output=None,
-            error="No VI connection. Use connect_to_vi() first"
+            error="No VI connection. Use connect_to_vi() first",
         )
     resolved_index: Optional[int] = None
     if isinstance(tab, int):
@@ -209,28 +229,30 @@ def tool_select_tab(
                 name="tool_select_tab",
                 success=False,
                 output=None,
-                error="Page name not found in mapping"
+                error="Page name not found in mapping",
             )
     else:
         return ToolResult(
             name="tool_select_tab",
             success=False,
             output=None,
-            error="'tab' must be int or str"
+            error="'tab' must be int or str",
         )
     if controller.set_tab_index(tab_control_name, int(resolved_index)):
         return ToolResult(
             name="tool_select_tab",
             success=True,
-            output={"message": f"Tab '{tab_control_name}' set to index {int(resolved_index)}"},
-            error=None
+            output={
+                "message": f"Tab '{tab_control_name}' set to index {int(resolved_index)}"
+            },
+            error=None,
         )
     else:
         return ToolResult(
             name="tool_select_tab",
             success=False,
             output=None,
-            error="Failed to set tab index"
+            error="Failed to set tab index",
         )
 
 
@@ -241,7 +263,7 @@ def tool_stop_vi(close_labview: bool = True) -> ToolResult:
             name="tool_stop_vi",
             success=False,
             output=None,
-            error="No VI connection. Use connect_to_vi() first"
+            error="No VI connection. Use connect_to_vi() first",
         )
     if controller.stop_vi(close_labview=close_labview):
         msg = (
@@ -253,14 +275,14 @@ def tool_stop_vi(close_labview: bool = True) -> ToolResult:
             name="tool_stop_vi",
             success=True,
             output={"message": msg},
-            error=None
+            error=None,
         )
     else:
         return ToolResult(
             name="tool_stop_vi",
             success=False,
             output=None,
-            error="Failed to stop VI"
+            error="Failed to stop VI",
         )
 
 
@@ -274,6 +296,10 @@ def tool_handle_save_dialog(
     return ToolResult(
         name="tool_handle_save_dialog",
         success=result["success"],
-        output={k: str(v) for k, v in result.items() if k not in ["success", "error"]},
-        error=result.get("error")
+        output={
+            k: str(v)
+            for k, v in result.items()
+            if k not in ["success", "error"]
+        },
+        error=result.get("error"),
     )
