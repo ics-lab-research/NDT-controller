@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from loguru import logger
+from ..core.models import ExperimentTool
 
 
 def save_experiment_plans(
