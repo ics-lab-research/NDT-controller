@@ -7,12 +7,10 @@ from .tab_experiments import create_experiments_tab
 def create_sidebar(
     project_manager: ProjectManager,
 ) -> gr.Column:
-    """Create the sidebar with tabs for different content areas."""
+    """Create the sidebar with experiments content."""
     with gr.Column(scale=1) as sidebar_column:
-        with gr.Tabs():
-            with gr.TabItem("Experiments"):
-                gr.Markdown("## Experiment Planning and Approval")
-                create_experiments_tab(project_manager)
+        gr.Markdown("## Experiment Planning and Approval")
+        create_experiments_tab(project_manager)
 
     return sidebar_column
 
