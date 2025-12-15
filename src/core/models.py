@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Union
+from pydantic import BaseModel
 
 
 from ..baml_client.types import (
@@ -27,6 +28,11 @@ ExperimentTool = Union[
     SelectComboBoxTool,
     Literal["unknown"],
 ]
+
+
+class ExperimentPlan(BaseModel):
+    filename: str
+    experiment: List[ExperimentTool]
 
 
 # TODO: metadata should have description of file
@@ -99,7 +105,7 @@ class AgentResponse:
     response: str | None = None
     thinking: str | None = None
     metadata: Dict[str, Any] | None = None
-    actions: List[str] | None = None
+    action: str | None = None
 
 
 # Type alias for chat history using OpenAI-style message format
