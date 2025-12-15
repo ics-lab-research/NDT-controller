@@ -68,8 +68,7 @@ def handle_experiment_mode(
                     filename=single_experiment.filename,
                 )
                 single_plan = ExperimentPlan(
-                    filename=single_experiment.filename,
-                    experiment=single_tools
+                    filename=single_experiment.filename, experiment=single_tools
                 )
                 metadata = project_manager.get_mode_metadata(
                     project_manager.current_mode
