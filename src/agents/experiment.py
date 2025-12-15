@@ -92,13 +92,7 @@ def handle_experiment_mode(
                     raise ValueError("Metadata is not ExperimentsMetadata")
                 plans_path = metadata.plans_path
                 save_status = save_experiment_plans(
-                    [
-                        {
-                            "filename": single_experiment.filename,
-                            "tools": [tool.__dict__ for tool in single_plan],
-                            "approved": False,
-                        }
-                    ],
+                    single_plan,
                     plans_path,
                 )
 
@@ -130,7 +124,7 @@ def handle_experiment_mode(
                 plans_to_save.append(
                     {
                         "filename": experiment.filename,
-                        "tools": [tool.__dict__ for tool in plan],
+                        "tools": plan,
                         "approved": False,
                     }
                 )

@@ -8,13 +8,14 @@ from ..core.models import ExperimentTool
 
 
 def save_experiment_plans(
-    plans: List[dict], filepath: Path
+    plans: List[ExperimentTool], filepath: Path
 ) -> Dict[str, Union[bool, str]]:
     """Save experiment plans to a JSON file."""
     logger.info(f"Saving experiment plans to {filepath}")
     try:
+        plans_dict = [tool.__dict__ for tool in plans]
         with filepath.open("w") as f:
-            json.dump(plans, f, indent=4)
+            json.dump(plans_dict, f, indent=4)
         logger.info(
             f"Successfully saved {len(plans)} experiment plans to {filepath}"
         )
