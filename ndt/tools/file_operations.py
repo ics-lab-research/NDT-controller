@@ -6,6 +6,7 @@ from typing import List
 from aider.coders import Coder
 from aider.models import Model
 from loguru import logger
+from ..baml_client.types import ToolResult
 
 
 def tool_edit_file_with_prompt(
