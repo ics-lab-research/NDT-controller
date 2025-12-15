@@ -103,14 +103,10 @@ def get_available_filenames(project_manager: ProjectManager) -> list[str]:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     if not isinstance(metadata, ExperimentsMetadata):
         return []
-    json_filepath = str(metadata.plans_path)
-    if not os.path.exists(json_filepath):
-        return []
     try:
-        with open(json_filepath, "r") as f:
-            data = json.load(f)
+        data = load_experiment_plans(metadata.plans_path)
         return [plan["filename"] for plan in data]
-    except (json.JSONDecodeError, KeyError):
+    except Exception:
         return []
 
 
@@ -128,15 +124,8 @@ def create_experiments_tab(project_manager: ProjectManager):
             return "Not in experiments mode", gr.update(
                 choices=available_filenames, value=None
             )
-        json_filepath = str(metadata.plans_path)
-        if not os.path.exists(json_filepath):
-            return (
-                "No plans available. Please generate experiment plans first.",
-                gr.update(choices=available_filenames, value=None),
-            )
         try:
-            with open(json_filepath, "r") as f:
-                data = json.load(f)
+            data = load_experiment_plans(metadata.plans_path)
             for plan in data:
                 if plan["filename"] == filename:
                     tools: List[ExperimentTool] = []
@@ -194,12 +183,8 @@ def create_experiments_tab(project_manager: ProjectManager):
         metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
         if not isinstance(metadata, ExperimentsMetadata):
             return "Not in experiments mode"
-        json_filepath = str(metadata.plans_path)
-        if not os.path.exists(json_filepath):
-            return "No plans available."
         try:
-            with open(json_filepath, "r") as f:
-                data = json.load(f)
+            data = load_experiment_plans(metadata.plans_path)
 
             found = False
             for plan in data:
