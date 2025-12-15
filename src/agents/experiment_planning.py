@@ -6,7 +6,9 @@ from pathlib import Path
 from loguru import logger
 
 
-def save_experiment_plans(plans: List[dict], filepath: Path) -> Dict[str, Union[bool, str]]:
+def save_experiment_plans(
+    plans: List[dict], filepath: Path
+) -> Dict[str, Union[bool, str]]:
     """Save experiment plans to a JSON file."""
     logger.info(f"Saving experiment plans to {filepath}")
     try:
