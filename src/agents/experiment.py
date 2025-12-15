@@ -80,7 +80,7 @@ def handle_experiment_mode(
                 single_experiment = orchestrator_response.experiments[0]
 
                 single_plan = call_exp_planner(
-                    user_message, filename=single_experiment.filename
+                    str(single_experiment.experiment), filename=single_experiment.filename
                 )
                 yield AgentResponse(response="Plan generated.")
 
@@ -111,21 +111,47 @@ def handle_experiment_mode(
                     )
 
         elif router_final.action == ExpAction.MULTIPLE_SCAN:
-            all_plans = []
+            yield AgentResponse(thinking="Performing multiple scan.")
 
             orchestrator_response = call_exp_orchestrator(user_message)
+            yield AgentResponse(thinking="Called exp_orchestrator.")
 
             experiments = orchestrator_response.experiments
+            plans_to_save = []
             for experiment in experiments:
+                yield AgentResponse(
+                    thinking=f"Generating plan for {experiment.filename}..."
+                )
                 plan = call_exp_planner(
                     user_message=str(experiment.experiment),
                     filename=experiment.filename,
                 )
-                all_plans.append(plan)
+                plans_to_save.append(
+                    {
+                        "filename": experiment.filename,
+                        "tools": [tool.__dict__ for tool in plan],
+                        "approved": False,
+                    }
+                )
 
-            execute_multiple_plans(all_plans, project_manager)
+            yield AgentResponse(response="Plans generated.")
 
-            yield AgentResponse(response="Done")
+            metadata = project_manager.get_mode_metadata(
+                project_manager.current_mode
+            )
+            if not isinstance(metadata, ExperimentsMetadata):
+                raise ValueError("Metadata is not ExperimentsMetadata")
+            plans_path = metadata.plans_path
+            save_status = save_experiment_plans(plans_to_save, plans_path)
+
+            if save_status["success"]:
+                yield AgentResponse(
+                    action="Experiment plans saved successfully."
+                )
+            else:
+                yield AgentResponse(
+                    action=f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
+                )
 
         else:
             pass
