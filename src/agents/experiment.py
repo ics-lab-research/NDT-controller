@@ -114,17 +114,15 @@ def handle_experiment_mode(
                 yield AgentResponse(
                     thinking=f"Generating plan for {experiment.filename}..."
                 )
-                plan = call_exp_planner(
+                experiment_tools = call_exp_planner(
                     user_message=str(experiment.experiment),
                     filename=experiment.filename,
                 )
-                plans_to_save.append(
-                    {
-                        "experiment": experiment.filename,
-                        "tools": plan,
-                        "approved": False,
-                    }
+                experiment_plan = ExperimentPlan(
+                    filename=experiment.filename,
+                    experiment=experiment_tools,
                 )
+                plans_to_save.append(experiment_plan)
 
             yield AgentResponse(response="Plans generated.")
 
