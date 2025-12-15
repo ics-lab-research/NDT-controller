@@ -90,7 +90,7 @@ def handle_experiment_mode(
                 if not isinstance(metadata, ExperimentsMetadata):
                     raise ValueError("Metadata is not ExperimentsMetadata")
                 plans_path = metadata.plans_path
-                save_experiment_plans(
+                save_status = save_experiment_plans(
                     [
                         {
                             "filename": single_experiment.filename,
@@ -100,6 +100,11 @@ def handle_experiment_mode(
                     ],
                     plans_path,
                 )
+
+                if save_status["success"]:
+                    yield AgentResponse(response="Experiment plans saved successfully.")
+                else:
+                    yield AgentResponse(response=f"Failed to save plans: {save_status.get('error', 'Unknown error')}")
 
             yield AgentResponse(action="Done")
 

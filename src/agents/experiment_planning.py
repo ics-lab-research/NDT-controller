@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import json
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 from loguru import logger
 
 
-def save_experiment_plans(plans: List[dict], filepath: Path) -> None:
+def save_experiment_plans(plans: List[dict], filepath: Path) -> Dict[str, bool]:
     """Save experiment plans to a JSON file."""
     logger.info(f"Saving experiment plans to {filepath}")
     try:
@@ -15,9 +15,10 @@ def save_experiment_plans(plans: List[dict], filepath: Path) -> None:
         logger.info(
             f"Successfully saved {len(plans)} experiment plans to {filepath}"
         )
+        return {"success": True}
     except Exception as e:
         logger.error(f"Failed to save experiment plans to {filepath}: {e}")
-        raise
+        return {"success": False, "error": str(e)}
 
 
 def load_experiment_plans(filepath: Path) -> List[dict]:
