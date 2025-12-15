@@ -1,12 +1,12 @@
 from typing import Dict, List, Union
-
+  
 import json
 from pathlib import Path
-
+  
 from loguru import logger
 from ..core.models import ExperimentPlan
-
-
+  
+  
 def save_experiment_plans(
     plans: List[ExperimentPlan],
     filepath: Path,
@@ -20,6 +20,7 @@ def save_experiment_plans(
                 "tools": plan,
                 "approved": False,
             }
+            for plan in plans
         ]
         with filepath.open("w") as f:
             json.dump(formatted_plans, f, indent=4)
@@ -30,8 +31,8 @@ def save_experiment_plans(
     except Exception as e:
         logger.error(f"Failed to save experiment plans to {filepath}: {e}")
         return {"success": False, "error": str(e)}
-
-
+  
+  
 def load_experiment_plans(filepath: Path) -> List[dict]:
     """Load experiment plans from a JSON file."""
     logger.info(f"Loading experiment plans from {filepath}")
