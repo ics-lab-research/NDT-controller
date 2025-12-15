@@ -6,7 +6,6 @@ from loguru import logger
 from ..core.models import ChatHistory, Mode
 from ..core.project_manager import ProjectManager
 from ..core.llm import get_agent_response
-from baml_py import BamlSyncStream
 from .utils import build_conversation_history
 
 
