@@ -49,7 +49,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             if tool == "unknown":
                 continue
             tool_name = tool.tool_name
-            params = vars(tool)
+            params = dict(vars(tool))
             params.pop("tool_name", None)
             param_list = [f"{k}={v}" for k, v in params.items()]
             param1 = param_list[0] if len(param_list) > 0 else ""
@@ -71,7 +71,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             if tool == "unknown":
                 continue
             tool_name = tool.tool_name
-            params = vars(tool)
+            params = dict(vars(tool))
             params.pop("tool_name", None)
             param_list = [f"{k}={v}" for k, v in params.items()]
             param1 = param_list[0] if len(param_list) > 0 else ""
