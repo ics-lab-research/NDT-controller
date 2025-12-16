@@ -49,8 +49,10 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             tool_name = tool.tool_name
             params = vars(tool)
             params.pop("tool_name", None)
-            params_str = ", ".join(f"{k}={v}" for k, v in params.items())
-            initial_data.append([tool_name, params_str])
+            param_list = [f"{k}={v}" for k, v in params.items()]
+            param1 = param_list[0] if len(param_list) > 0 else ""
+            param2 = param_list[1] if len(param_list) > 1 else ""
+            initial_data.append([tool_name, param1, param2])
 
     def update_details(selected_filename):
         logger.info(
@@ -61,7 +63,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         plan = next((p for p in plans if p.filename == selected_filename), None)
         if not plan:
             logger.warning(f"Plan not found for filename: {selected_filename}")
-            return [["Error", ""]]
+            return [["Error", "", ""]]
         data = []
         for tool in plan.experiment:
             if tool == "unknown":
@@ -69,8 +71,10 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             tool_name = tool.tool_name
             params = vars(tool)
             params.pop("tool_name", None)
-            params_str = ", ".join(f"{k}={v}" for k, v in params.items())
-            data.append([tool_name, params_str])
+            param_list = [f"{k}={v}" for k, v in params.items()]
+            param1 = param_list[0] if len(param_list) > 0 else ""
+            param2 = param_list[1] if len(param_list) > 1 else ""
+            data.append([tool_name, param1, param2])
         logger.info(f"Details updated with {len(data)} tools")
         return data
 
@@ -81,7 +85,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=filenames[0] if filenames else None,
         )
         details_df = gr.Dataframe(
-            headers=["Tool Name", "Parameters"],
+            headers=["Tool Name", "Parameter 1", "Parameter 2"],
             value=initial_data,
         )
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
