@@ -31,7 +31,7 @@ def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
     for tool in plan.experiment:
         if tool == "unknown":
             continue
-        tool_name = tool.tool_name
+        tool_name = str(tool.tool_name)
         params = dict(vars(tool))
         params.pop("tool_name", None)
         param_list = [f"{k}={v}" for k, v in params.items()]
@@ -60,7 +60,7 @@ def convert_table_data_to_tools(
     tools: List[ExperimentTool] = []
 
     tool_map = {
-        SetNumericControlTool.tool_name: SetNumericControlTool,
+        str(SetNumericControlTool.tool_name): SetNumericControlTool,
         "SelectTabTool": SelectTabTool,
         "RunOpenViTool": RunOpenViTool,
         "ConnectToViTool": ConnectToViTool,
