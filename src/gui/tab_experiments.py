@@ -60,7 +60,7 @@ def convert_table_data_to_tools(
 ) -> List[ExperimentTool]:
     """Convert table data back to experiment tools."""
     tools: List[ExperimentTool] = []
-    
+
     tool_map = {
         "SetNumericControlTool": SetNumericControlTool,
         "SelectTabTool": SelectTabTool,
@@ -71,15 +71,15 @@ def convert_table_data_to_tools(
         "SetButtonStateTool": SetButtonStateTool,
         "SelectComboBoxTool": SelectComboBoxTool,
     }
-    
+
     for row in table_data:
         if len(row) < 1 or not row[0]:
             continue
-            
+
         tool_name = row[0].strip()
         param1_str = row[1] if len(row) > 1 else ""
         param2_str = row[2] if len(row) > 2 else ""
-        
+
         params = {}
         if param1_str:
             key, value = parse_param(param1_str)
@@ -89,7 +89,7 @@ def convert_table_data_to_tools(
             key, value = parse_param(param2_str)
             if key:
                 params[key] = value
-        
+
         tool_class = tool_map.get(tool_name)
         if tool_class:
             try:
@@ -101,7 +101,7 @@ def convert_table_data_to_tools(
         else:
             logger.warning(f"Unknown tool type: {tool_name}")
             tools.append("unknown")
-    
+
     return tools
 
 
