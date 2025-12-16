@@ -143,24 +143,24 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
                     params[key.strip()] = value.strip()
 
             logger.debug(tool_name)
-            # logger.debug(params)
+            logger.debug(params)
 
-            # tool = parse_tool_from_params(tool_name, params)
-            # if tool:
-            #     tools.append(tool)
+            tool = parse_tool_from_params(tool_name, params)
+            if tool != "unknown":
+                tools.append(tool)
 
         plans[plan_index] = ExperimentPlan(
             filename=selected_filename, experiment=tools
         )
 
-        # result = save_experiment_plans(plans, plans_path)
-        # if result.get("success"):
-        #     logger.info(f"Successfully saved changes for {selected_filename}")
-        #     return f"Successfully saved changes to {selected_filename}"
-        # else:
-        #     error_msg = result.get("error", "Unknown error")
-        #     logger.error(f"Failed to save changes: {error_msg}")
-        #     return f"Error saving: {error_msg}"
+        result = save_experiment_plans(plans, plans_path)
+        if result.get("success"):
+            logger.info(f"Successfully saved changes for {selected_filename}")
+            return f"Successfully saved changes to {selected_filename}"
+        else:
+            error_msg = result.get("error", "Unknown error")
+            logger.error(f"Failed to save changes: {error_msg}")
+            return f"Error saving: {error_msg}"
 
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
