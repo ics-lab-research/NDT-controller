@@ -224,13 +224,13 @@ def _click_ok_win32(target_hwnd: int, ok_button_regex: str) -> None:
   
   
 def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
-    """Check for and handle replace prompt dialogs, returning success if found."""
+    """Check for replace prompt dialogs and log detection without interacting."""
     try:
         time.sleep(0.5)
         replace_regex = re.compile(
             r"(?i)(replace|already exists|confirm save|confirm file replace|existing file|do you want to replace)"
         )
-  
+
         # UIA check
         try:
             desktop = Desktop(backend="uia")
@@ -238,28 +238,26 @@ def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
                 try:
                     title = (w.element_info.name or "")
                     if replace_regex.search(title):
-                        w.set_focus()
-                        time.sleep(0.05)
-                        send_keys("{ENTER}")
-                        logger.info(f"Save 1 would replace existing file: {full_path}")
+                        logger.info(
+                            f"Replace prompt detected (UIA title): File already exists at {full_path}"
+                        )
                         return _success_response(
-                            "Replace prompt detected and handled (UIA)",
+                            "Replace prompt detected (UIA)",
                             path=full_path,
                             replace_prompt=True,
                         )
-  
+
                     texts = [
                         (t.window_text() or "")
                         for t in w.descendants(control_type="Text")
                     ]
                     for txt in texts:
                         if replace_regex.search(txt):
-                            w.set_focus()
-                            time.sleep(0.05)
-                            send_keys("{ENTER}")
-                            logger.info(f"Save 2 would replace existing file: {full_path}")
+                            logger.info(
+                                f"Replace prompt detected (UIA text): File already exists at {full_path}"
+                            )
                             return _success_response(
-                                "Replace prompt detected and handled (UIA)",
+                                "Replace prompt detected (UIA)",
                                 path=full_path,
                                 replace_prompt=True,
                             )
@@ -267,39 +265,35 @@ def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
                     continue
         except ImportError:
             pass
-  
+
         # Win32 check
         def _enum_check(hwnd, _):
             try:
                 title = (win32gui.GetWindowText(hwnd) or "")
                 if replace_regex.search(title):
-                    win32gui.SetForegroundWindow(hwnd)
-                    time.sleep(0.05)
-                    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-                    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-                    logger.info(f"Save 3 would replace existing file: {full_path}")
+                    logger.info(
+                        f"Replace prompt detected (win32 title): File already exists at {full_path}"
+                    )
                     raise StopIteration
-  
+
                 def _child_cb(ch_hwnd, _):
                     txt = (win32gui.GetWindowText(ch_hwnd) or "")
                     if replace_regex.search(txt):
-                        win32gui.SetForegroundWindow(hwnd)
-                        time.sleep(0.05)
-                        win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-                        win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-                        logger.info(f"Save 4 would replace existing file: {full_path}")
+                        logger.info(
+                            f"Replace prompt detected (win32 child): File already exists at {full_path}"
+                        )
                         raise StopIteration
-  
+
                 win32gui.EnumChildWindows(hwnd, _child_cb, None)
             except StopIteration:
                 raise
             except Exception:
                 pass
-  
+
         win32gui.EnumWindows(_enum_check, None)
     except StopIteration:
         return _success_response(
-            "Replace prompt detected and handled (win32)",
+            "Replace prompt detected (win32)",
             path=full_path,
             replace_prompt=True,
         )
