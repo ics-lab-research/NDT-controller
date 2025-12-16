@@ -37,9 +37,9 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path)
-    
+
     filenames = [plan.filename for plan in plans] if plans else []
-    
+
     initial_data = []
     if filenames:
         first_plan = plans[0]
@@ -72,13 +72,12 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
 
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
-            choices=filenames, 
+            choices=filenames,
             label="Select Experiment",
-            value=filenames[0] if filenames else None
+            value=filenames[0] if filenames else None,
         )
         details_df = gr.Dataframe(
-            headers=["Tool Name", "Parameters"], 
-            value=initial_data
+            headers=["Tool Name", "Parameters"], value=initial_data
         )
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
     return tab
