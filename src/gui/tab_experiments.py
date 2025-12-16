@@ -73,34 +73,35 @@ def convert_table_data_to_tools(
     }
 
     for row in table_data:
-        if len(row) < 1 or not row[0]:
-            continue
+        print(row)
+        # if len(row) < 1 or not row[0]:
+        #     continue
 
-        tool_name = row[0].strip()
-        param1_str = row[1] if len(row) > 1 else ""
-        param2_str = row[2] if len(row) > 2 else ""
+        # tool_name = row[0].strip()
+        # param1_str = row[1] if len(row) > 1 else ""
+        # param2_str = row[2] if len(row) > 2 else ""
 
-        params = {}
-        if param1_str:
-            key, value = parse_param(param1_str)
-            if key:
-                params[key] = value
-        if param2_str:
-            key, value = parse_param(param2_str)
-            if key:
-                params[key] = value
+        # params = {}
+        # if param1_str:
+        #     key, value = parse_param(param1_str)
+        #     if key:
+        #         params[key] = value
+        # if param2_str:
+        #     key, value = parse_param(param2_str)
+        #     if key:
+        #         params[key] = value
 
-        tool_class = tool_map.get(tool_name)
-        if tool_class:
-            try:
-                tool = tool_class(tool_name=tool_name, **params)
-                tools.append(tool)
-            except Exception as e:
-                logger.error(f"Failed to create tool {tool_name}: {e}")
-                tools.append("unknown")
-        else:
-            logger.warning(f"Unknown tool type: {tool_name}")
-            tools.append("unknown")
+        # tool_class = tool_map.get(tool_name)
+        # if tool_class:
+        #     try:
+        #         tool = tool_class(tool_name=tool_name, **params)
+        #         tools.append(tool)
+        #     except Exception as e:
+        #         logger.error(f"Failed to create tool {tool_name}: {e}")
+        #         tools.append("unknown")
+        # else:
+        #     logger.warning(f"Unknown tool type: {tool_name}")
+        #     tools.append("unknown")
 
     return tools
 
@@ -125,7 +126,7 @@ def update_experiment_details(
 
 def save_experiment_changes(
     plans: List[ExperimentPlan],
-    plans_path: Path,
+    plans_path: Path | None,
     selected_filename: str,
     table_data: List[List[str]],
 ) -> str:
@@ -142,8 +143,9 @@ def save_experiment_changes(
 
     try:
         new_tools = convert_table_data_to_tools(table_data)
-        plan.experiment = new_tools
-        save_experiment_plans(plans, plans_path)
+        print(new_tools)
+        # plan.experiment = new_tools
+        # save_experiment_plans(plans, plans_path)
         logger.info(f"Successfully saved changes to {selected_filename}")
         return f"Successfully saved changes to {selected_filename}"
     except Exception as e:
