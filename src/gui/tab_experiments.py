@@ -21,8 +21,8 @@ from ..core.models import (
 )
 from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, save_experiment_plans
-  
-  
+
+
 def tool_to_table_row(tool: ExperimentTool) -> List[str]:
     if tool == "unknown":
         return []
@@ -32,19 +32,24 @@ def tool_to_table_row(tool: ExperimentTool) -> List[str]:
     param1 = param_list[0] if param_list else ""
     param2 = param_list[1] if len(param_list) > 1 else ""
     return [tool_name, param1, param2]
-  
-  
+
+
 def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
-    return [row for tool in plan.experiment for row in [tool_to_table_row(tool)] if row]
-  
-  
+    return [
+        row
+        for tool in plan.experiment
+        for row in [tool_to_table_row(tool)]
+        if row
+    ]
+
+
 def parse_param(param_str: str) -> Tuple[str, str]:
     if not param_str or "=" not in param_str:
         return "", ""
     key, value = param_str.split("=", 1)
     return key.strip(), value.strip()
-  
-  
+
+
 def extract_params_from_row(row: pd.Series) -> Dict[str, str]:
     params = {}
     for i in range(1, len(row)):
@@ -54,9 +59,11 @@ def extract_params_from_row(row: pd.Series) -> Dict[str, str]:
             if key:
                 params[key] = value
     return params
-  
-  
-def create_tool_from_row(row: pd.Series, tool_map: Dict[str, Any]) -> ExperimentTool:
+
+
+def create_tool_from_row(
+    row: pd.Series, tool_map: Dict[str, Any]
+) -> ExperimentTool:
     tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
     if not tool_name or tool_name == "nan":
         return "unknown"
@@ -70,9 +77,11 @@ def create_tool_from_row(row: pd.Series, tool_map: Dict[str, Any]) -> Experiment
             return "unknown"
     logger.warning(f"Unknown tool type: {tool_name}")
     return "unknown"
-  
-  
-def convert_table_data_to_tools(table_data: pd.DataFrame) -> List[ExperimentTool]:
+
+
+def convert_table_data_to_tools(
+    table_data: pd.DataFrame,
+) -> List[ExperimentTool]:
     tool_map = {
         "set_numeric_control": SetNumericControlTool,
         "select_tab": SelectTabTool,
@@ -83,14 +92,20 @@ def convert_table_data_to_tools(table_data: pd.DataFrame) -> List[ExperimentTool
         "set_button_state": SetButtonStateTool,
         "select_combo_box": SelectComboBoxTool,
     }
-    return [create_tool_from_row(row, tool_map) for _, row in table_data.iterrows()]
-  
-  
-def find_plan_by_filename(plans: List[ExperimentPlan], filename: str) -> ExperimentPlan | None:
+    return [
+        create_tool_from_row(row, tool_map) for _, row in table_data.iterrows()
+    ]
+
+
+def find_plan_by_filename(
+    plans: List[ExperimentPlan], filename: str
+) -> ExperimentPlan | None:
     return next((p for p in plans if p.filename == filename), None)
-  
-  
-def update_experiment_details(plans: List[ExperimentPlan], selected_filename: str) -> List[List[str]]:
+
+
+def update_experiment_details(
+    plans: List[ExperimentPlan], selected_filename: str
+) -> List[List[str]]:
     if not selected_filename:
         return []
     plan = find_plan_by_filename(plans, selected_filename)
@@ -98,8 +113,8 @@ def update_experiment_details(plans: List[ExperimentPlan], selected_filename: st
         logger.warning(f"Plan not found for filename: {selected_filename}")
         return [["Error", "", ""]]
     return convert_plan_to_table_data(plan)
-  
-  
+
+
 def save_experiment_changes(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
@@ -121,8 +136,8 @@ def save_experiment_changes(
         error_msg = f"Error saving changes: {str(e)}"
         logger.error(error_msg)
         return error_msg
-  
-  
+
+
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
