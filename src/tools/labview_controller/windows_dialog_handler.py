@@ -223,96 +223,6 @@ def _click_ok_win32(target_hwnd: int, ok_button_regex: str) -> None:
         win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
   
   
-def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
-    """Check for replace prompt dialogs and log detection without interacting."""
-    replace_regex = re.compile(
-        r"(?i)(replace|already exists|confirm save|confirm file replace|existing file|do you want to replace|overwrite|file exists)"
-    )
-    deadline = time.time() + 3.0  # Wait up to 3 seconds for prompt to appear
-    while time.time() < deadline:
-        try:
-            # UIA check
-            try:
-                desktop = Desktop(backend="uia")
-                for w in desktop.windows():
-                    try:
-                        title = (w.element_info.name or "")
-                        if replace_regex.search(title):
-                            logger.info(
-                                f"Replace prompt detected (UIA title): File already exists at {full_path}"
-                            )
-                            return _success_response(
-                                "Replace prompt detected (UIA)",
-                                path=full_path,
-                                replace_prompt=True,
-                            )
-    
-                        texts = [
-                            (t.window_text() or "")
-                            for t in w.descendants(control_type="Text")
-                        ]
-                        for txt in texts:
-                            if replace_regex.search(txt):
-                                logger.info(
-                                    f"Replace prompt detected (UIA text): File already exists at {full_path}"
-                                )
-                                return _success_response(
-                                    "Replace prompt detected (UIA)",
-                                    path=full_path,
-                                    replace_prompt=True,
-                                )
-                    except Exception:
-                        continue
-            except ImportError:
-                pass
-    
-            # Win32 check
-            detected = False
-            def _enum_check(hwnd, _):
-                nonlocal detected
-                try:
-                    title = (win32gui.GetWindowText(hwnd) or "")
-                    if replace_regex.search(title):
-                        logger.info(
-                            f"Replace prompt detected (win32 title): File already exists at {full_path}"
-                        )
-                        detected = True
-                        raise StopIteration
-    
-                    def _child_cb(ch_hwnd, _):
-                        txt = (win32gui.GetWindowText(ch_hwnd) or "")
-                        if replace_regex.search(txt):
-                            logger.info(
-                                f"Replace prompt detected (win32 child): File already exists at {full_path}"
-                            )
-                            detected = True
-                            raise StopIteration
-    
-                    win32gui.EnumChildWindows(hwnd, _child_cb, None)
-                except StopIteration:
-                    raise
-                except Exception:
-                    pass
-    
-            try:
-                win32gui.EnumWindows(_enum_check, None)
-            except StopIteration:
-                return _success_response(
-                    "Replace prompt detected (win32)",
-                    path=full_path,
-                    replace_prompt=True,
-                )
-    
-            if detected:
-                return _success_response(
-                    "Replace prompt detected (win32)",
-                    path=full_path,
-                    replace_prompt=True,
-                )
-        except Exception:
-            pass
-        time.sleep(0.2)
-    return None
   
   
 def _handle_via_uia(
@@ -334,9 +244,6 @@ def _handle_via_uia(
     _click_ok_uia(dlg, ok_button_regex)
   
     full_path = str(Path(save_directory) / filename)
-    replace_result = _handle_replace_prompt(full_path)
-    if replace_result:
-        return replace_result
     return _success_response("Save dialog handled (UIA)", path=full_path)
   
   
@@ -359,9 +266,6 @@ def _handle_via_win32(
     _click_ok_win32(target_hwnd, ok_button_regex)
   
     full_path = str(Path(save_directory) / filename)
-    replace_result = _handle_replace_prompt(full_path)
-    if replace_result:
-        return replace_result
     return _success_response("Save dialog handled (win32)", path=full_path)
   
   
