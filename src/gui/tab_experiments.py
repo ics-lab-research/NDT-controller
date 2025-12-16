@@ -128,7 +128,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             logger.warning(f"Plan not found for filename: {selected_filename}")
             return "Error: Experiment not found"
 
-        tools = []
+        tools: List[ExperimentTool] = []
         for row in dataframe_data:
             tool_name = row[0]
             param1_str = row[1] if len(row) > 1 else ""
