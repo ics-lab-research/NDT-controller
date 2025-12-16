@@ -58,9 +58,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
 
     filenames = [plan.filename for plan in plans] if plans else []
 
-    initial_data = (
-        convert_plan_to_table_data(plans[0]) if plans else []
-    )
+    initial_data = convert_plan_to_table_data(plans[0]) if plans else []
 
     def update_details(selected_filename: str) -> List[List[str]]:
         logger.info(
@@ -68,9 +66,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         )
         if not selected_filename:
             return []
-        plan = next(
-            (p for p in plans if p.filename == selected_filename), None
-        )
+        plan = next((p for p in plans if p.filename == selected_filename), None)
         if not plan:
             logger.warning(f"Plan not found for filename: {selected_filename}")
             return [["Error", "", ""]]
