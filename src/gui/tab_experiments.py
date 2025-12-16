@@ -82,8 +82,12 @@ def convert_table_data_to_tools(
         print(f"Row {idx}: {row.to_dict()}")
 
         tool_name = str(row["Tool Name"]).strip()
-        param1_str = str(row["Parameter 1"]) if pd.notna(row["Parameter 1"]) else ""
-        param2_str = str(row["Parameter 2"]) if pd.notna(row["Parameter 2"]) else ""
+        param1_str = (
+            str(row["Parameter 1"]) if pd.notna(row["Parameter 1"]) else ""
+        )
+        param2_str = (
+            str(row["Parameter 2"]) if pd.notna(row["Parameter 2"]) else ""
+        )
 
         if not tool_name or tool_name == "nan":
             continue
