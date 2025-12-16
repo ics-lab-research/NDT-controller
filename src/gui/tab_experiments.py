@@ -62,7 +62,8 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             return [["Error", "Plan not found"]]
         data = []
         for tool in plan.experiment:
-            # tool can be Literal["unknown"], so you should prevent it AI!
+            if tool == "unknown":
+                continue
             tool_name = tool.tool_name
             params = vars(tool)
             params.pop("tool_name", None)
