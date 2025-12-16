@@ -30,6 +30,30 @@ from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, read_file
 
 
+def get_max_params(plans: List[ExperimentPlan]) -> int:
+    max_params = 0
+    for plan in plans:
+        for tool in plan.experiment:
+            if tool == "unknown":
+                continue
+            params = vars(tool)
+            params.pop("tool_name", None)
+            max_params = max(max_params, len(params))
+    return max_params
+
+
+def format_tool_row(tool: ExperimentTool, max_params: int) -> List[str]:
+    if tool == "unknown":
+        return []
+    tool_name = tool.tool_name
+    params = vars(tool)
+    params.pop("tool_name", None)
+    param_values = [repr(v) for v in params.values()]
+    while len(param_values) < max_params:
+        param_values.append("")
+    return [tool_name] + param_values
+
+
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
@@ -39,18 +63,18 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             plans = load_experiment_plans(plans_path)
 
     filenames = [plan.filename for plan in plans] if plans else []
+    max_params = get_max_params(plans) if plans else 0
+    headers = ["Tool Name"] + [
+        f"Parameter {i+1}" for i in range(max_params)
+    ]
 
     initial_data = []
     if filenames:
         first_plan = plans[0]
         for tool in first_plan.experiment:
-            if tool == "unknown":
-                continue
-            tool_name = tool.tool_name
-            params = vars(tool)
-            params.pop("tool_name", None)
-            param_str = ", ".join(f"{k}={repr(v)}" for k, v in params.items())
-            initial_data.append([tool_name, param_str])
+            row = format_tool_row(tool, max_params)
+            if row:
+                initial_data.append(row)
 
     def update_details(selected_filename):
         logger.info(
@@ -58,19 +82,19 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         )
         if not selected_filename:
             return []
-        plan = next((p for p in plans if p.filename == selected_filename), None)
+        plan = next(
+            (p for p in plans if p.filename == selected_filename), None
+        )
         if not plan:
             logger.warning(f"Plan not found for filename: {selected_filename}")
-            return [["Error", "Plan not found"]]
+            error_row = ["Error"] + [""] * max_params
+            error_row[1] = "Plan not found"
+            return [error_row]
         data = []
         for tool in plan.experiment:
-            if tool == "unknown":
-                continue
-            tool_name = tool.tool_name
-            params = vars(tool)
-            params.pop("tool_name", None)
-            param_str = ", ".join(f"{k}={repr(v)}" for k, v in params.items())
-            data.append([tool_name, param_str])
+            row = format_tool_row(tool, max_params)
+            if row:
+                data.append(row)
         logger.info(f"Details updated with {len(data)} tools")
         return data
 
@@ -80,8 +104,6 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             label="Select Experiment",
             value=filenames[0] if filenames else None,
         )
-        details_df = gr.Dataframe(
-            headers=["Tool Name", "Parameters"], value=initial_data
-        )
+        details_df = gr.Dataframe(headers=headers, value=initial_data)
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
     return tab
