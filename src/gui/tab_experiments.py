@@ -31,6 +31,22 @@ from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, read_file, save_experiment_plans
 
 
+def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
+    """Convert an experiment plan's tools to table data format."""
+    data = []
+    for tool in plan.experiment:
+        if tool == "unknown":
+            continue
+        tool_name = tool.tool_name
+        params = dict(vars(tool))
+        params.pop("tool_name", None)
+        param_list = [f"{k}={v}" for k, v in params.items()]
+        param1 = param_list[0] if len(param_list) > 0 else ""
+        param2 = param_list[1] if len(param_list) > 1 else ""
+        data.append([tool_name, param1, param2])
+    return data
+
+
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans: List[ExperimentPlan] = []
@@ -42,19 +58,9 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
 
     filenames = [plan.filename for plan in plans] if plans else []
 
-    initial_data = []
-    if filenames:
-        first_plan = plans[0]
-        for tool in first_plan.experiment:
-            if tool == "unknown":
-                continue
-            tool_name = tool.tool_name
-            params = dict(vars(tool))
-            params.pop("tool_name", None)
-            param_list = [f"{k}={v}" for k, v in params.items()]
-            param1 = param_list[0] if len(param_list) > 0 else ""
-            param2 = param_list[1] if len(param_list) > 1 else ""
-            initial_data.append([tool_name, param1, param2])
+    initial_data = (
+        convert_plan_to_table_data(plans[0]) if plans else []
+    )
 
     def update_details(selected_filename: str) -> List[List[str]]:
         logger.info(
@@ -62,21 +68,13 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         )
         if not selected_filename:
             return []
-        plan = next((p for p in plans if p.filename == selected_filename), None)
+        plan = next(
+            (p for p in plans if p.filename == selected_filename), None
+        )
         if not plan:
             logger.warning(f"Plan not found for filename: {selected_filename}")
             return [["Error", "", ""]]
-        data = []
-        for tool in plan.experiment:
-            if tool == "unknown":
-                continue
-            tool_name = tool.tool_name
-            params = dict(vars(tool))
-            params.pop("tool_name", None)
-            param_list = [f"{k}={v}" for k, v in params.items()]
-            param1 = param_list[0] if len(param_list) > 0 else ""
-            param2 = param_list[1] if len(param_list) > 1 else ""
-            data.append([tool_name, param1, param2])
+        data = convert_plan_to_table_data(plan)
         logger.info(f"Details updated with {len(data)} tools")
         return data
 
