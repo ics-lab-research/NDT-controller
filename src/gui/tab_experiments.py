@@ -132,6 +132,30 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         logger.info(f"Details updated with {len(data)} tools")
         return data
 
+    def save_changes(
+        selected_filename: str, table_data: List[List[str]]
+    ) -> str:
+        logger.info(f"Saving changes for experiment: {selected_filename}")
+        if not selected_filename:
+            return "Error: No experiment selected"
+        if not plans_path:
+            return "Error: Plans path not configured"
+
+        plan = next((p for p in plans if p.filename == selected_filename), None)
+        if not plan:
+            return f"Error: Plan not found for {selected_filename}"
+
+        try:
+            new_tools = convert_table_data_to_tools(table_data)
+            plan.experiment = new_tools
+            save_experiment_plans(plans, plans_path)
+            logger.info(f"Successfully saved changes to {selected_filename}")
+            return f"Successfully saved changes to {selected_filename}"
+        except Exception as e:
+            error_msg = f"Error saving changes: {str(e)}"
+            logger.error(error_msg)
+            return error_msg
+
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
             choices=filenames,
@@ -143,6 +167,13 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=initial_data,
             interactive=True,
         )
+        save_button = gr.Button("Save Changes")
+        save_status = gr.Textbox(label="Status", interactive=False)
 
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
+        save_button.click(
+            save_changes,
+            inputs=[dropdown, details_df],
+            outputs=save_status,
+        )
     return tab
