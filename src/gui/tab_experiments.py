@@ -37,7 +37,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path)
     filenames = [plan.filename for plan in plans] if plans else []
-    
+
     def update_details(selected_filename):
         if not selected_filename:
             return []
@@ -50,7 +50,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             param_str = str(tool)
             data.append([tool_name, param_str])
         return data
-    
+
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(choices=filenames, label="Select Experiment")
         details_df = gr.Dataframe(headers=["Tool Name", "Parameters"], value=[])
