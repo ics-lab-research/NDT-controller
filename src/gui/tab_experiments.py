@@ -67,7 +67,7 @@ def parse_tool_from_params(tool_name: str, params: dict) -> ExperimentTool:
 
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
-    plans = []
+    plans: List[ExperimentPlan] = []
     plans_path = None
     if isinstance(metadata, ExperimentsMetadata):
         plans_path = metadata.plans_path
@@ -142,22 +142,25 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
                     key, value = param_str.split("=", 1)
                     params[key.strip()] = value.strip()
 
-            tool = parse_tool_from_params(tool_name, params)
-            if tool:
-                tools.append(tool)
+            logger.debug(tool_name)
+            # logger.debug(params)
+
+            # tool = parse_tool_from_params(tool_name, params)
+            # if tool:
+            #     tools.append(tool)
 
         plans[plan_index] = ExperimentPlan(
             filename=selected_filename, experiment=tools
         )
 
-        result = save_experiment_plans(plans, plans_path)
-        if result.get("success"):
-            logger.info(f"Successfully saved changes for {selected_filename}")
-            return f"Successfully saved changes to {selected_filename}"
-        else:
-            error_msg = result.get("error", "Unknown error")
-            logger.error(f"Failed to save changes: {error_msg}")
-            return f"Error saving: {error_msg}"
+        # result = save_experiment_plans(plans, plans_path)
+        # if result.get("success"):
+        #     logger.info(f"Successfully saved changes for {selected_filename}")
+        #     return f"Successfully saved changes to {selected_filename}"
+        # else:
+        #     error_msg = result.get("error", "Unknown error")
+        #     logger.error(f"Failed to save changes: {error_msg}")
+        #     return f"Error saving: {error_msg}"
 
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
