@@ -6,6 +6,9 @@ from typing import Any, Dict, Optional
 from loguru import logger
 from pywinauto.keyboard import send_keys  # type: ignore
 from pywinauto import Desktop  # type: ignore
+import win32api
+import win32clipboard
+import win32con
 import win32gui
   
   
@@ -67,8 +70,6 @@ def _navigate_directory_uia(dlg: Any, save_directory: str) -> None:
   
 def _set_filename_uia(dlg: Any, filename: str) -> None:
     """Set the filename in UIA dialog."""
-    from pywinauto.keyboard import send_keys  # type: ignore
-  
     filename_edit = None
     edits = dlg.descendants(control_type="Edit")
     if len(edits) >= 2:
@@ -104,8 +105,6 @@ def _set_filename_uia(dlg: Any, filename: str) -> None:
   
 def _click_ok_uia(dlg: Any, ok_button_regex: str) -> None:
     """Click the OK/Save button in UIA dialog."""
-    from pywinauto.keyboard import send_keys  # type: ignore
-  
     btn = None
     for b in dlg.descendants(control_type="Button"):
         name = (b.window_text() or "").strip()
@@ -145,10 +144,6 @@ def _find_win32_dialog(
   
 def _navigate_directory_win32(target_hwnd: int, save_directory: str) -> None:
     """Navigate to the save directory in win32 dialog."""
-    import win32api
-    import win32clipboard
-    import win32con
-  
     try:
         win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
         win32api.keybd_event(ord("L"), 0, 0, 0)
@@ -181,10 +176,6 @@ def _navigate_directory_win32(target_hwnd: int, save_directory: str) -> None:
   
 def _set_filename_win32(target_hwnd: int, filename: str) -> None:
     """Set the filename in win32 dialog."""
-    import win32api
-    import win32clipboard
-    import win32con
-  
     try:
         win32clipboard.OpenClipboard()
         win32clipboard.EmptyClipboard()
@@ -214,10 +205,6 @@ def _set_filename_win32(target_hwnd: int, filename: str) -> None:
   
 def _click_ok_win32(target_hwnd: int, ok_button_regex: str) -> None:
     """Click the OK/Save button in win32 dialog."""
-    import win32api
-    import win32con
-    import win32gui
-  
     ok_btn = None
     child = 0
     while True:
@@ -246,9 +233,6 @@ def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
   
         # UIA check
         try:
-            from pywinauto import Desktop  # type: ignore
-            from pywinauto.keyboard import send_keys  # type: ignore
-  
             desktop = Desktop(backend="uia")
             for w in desktop.windows():
                 try:
@@ -285,10 +269,6 @@ def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
             pass
   
         # Win32 check
-        import win32api
-        import win32con
-        import win32gui
-  
         def _enum_check(hwnd, _):
             try:
                 title = (win32gui.GetWindowText(hwnd) or "")
@@ -362,9 +342,6 @@ def _handle_via_win32(
     settle_delay_seconds: float,
 ) -> Dict[str, Any]:
     """Handle save dialog using win32 APIs."""
-    import win32con
-    import win32gui
-  
     target_hwnd = _find_win32_dialog(dialog_title_regex, timeout_seconds)
     win32gui.ShowWindow(target_hwnd, win32con.SW_SHOWNORMAL)
     win32gui.SetForegroundWindow(target_hwnd)
