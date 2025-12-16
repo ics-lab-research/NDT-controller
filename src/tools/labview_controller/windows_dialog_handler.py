@@ -1,7 +1,7 @@
 import re
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
   
 from loguru import logger
 from pywinauto.keyboard import send_keys  # type: ignore
@@ -221,10 +221,7 @@ def _click_ok_win32(target_hwnd: int, ok_button_regex: str) -> None:
     else:
         win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
         win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-  
-  
-  
-  
+
 def _handle_via_uia(
     save_directory: str,
     filename: str,
