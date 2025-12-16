@@ -45,9 +45,8 @@ def get_max_params(plans: List[ExperimentPlan]) -> int:
 def format_tool_row(tool: ExperimentTool, max_params: int) -> List[str]:
     if tool == "unknown":
         return []
-    # Assume tool is a dict loaded from JSON
-    tool_name = tool["tool_name"]
-    params = tool.copy()
+    tool_name = tool.tool_name
+    params = vars(tool)
     params.pop("tool_name", None)
     param_values = [repr(v) for v in params.values()]
     while len(param_values) < max_params:
