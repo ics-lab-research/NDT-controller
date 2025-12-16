@@ -37,7 +37,18 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path)
+    
     filenames = [plan.filename for plan in plans] if plans else []
+    
+    initial_data = []
+    if filenames:
+        first_plan = plans[0]
+        for tool in first_plan.experiment:
+            tool_name = tool.tool_name
+            params = vars(tool)
+            params.pop("tool_name", None)
+            param_str = ", ".join(f"{k}={repr(v)}" for k, v in params.items())
+            initial_data.append([tool_name, param_str])
 
     def update_details(selected_filename):
         logger.info(
@@ -60,7 +71,14 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         return data
 
     with gr.Tab("Plans Viewer") as tab:
-        dropdown = gr.Dropdown(choices=filenames, label="Select Experiment")
-        details_df = gr.Dataframe(headers=["Tool Name", "Parameters"], value=[])
+        dropdown = gr.Dropdown(
+            choices=filenames, 
+            label="Select Experiment",
+            value=filenames[0] if filenames else None
+        )
+        details_df = gr.Dataframe(
+            headers=["Tool Name", "Parameters"], 
+            value=initial_data
+        )
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
     return tab
