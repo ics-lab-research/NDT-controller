@@ -59,6 +59,9 @@ def convert_table_data_to_tools(
     table_data: List[List[str]],
 ) -> List[ExperimentTool]:
     """Convert table data back to experiment tools."""
+    logger.debug(f"Converting table_data to tools: {table_data}")
+    logger.debug(f"Table data type: {type(table_data)}, length: {len(table_data) if table_data else 0}")
+    
     tools: List[ExperimentTool] = []
 
     tool_map = {
@@ -72,8 +75,9 @@ def convert_table_data_to_tools(
         "SelectComboBoxTool": SelectComboBoxTool,
     }
 
-    for row in table_data:
-        print(row)
+    for idx, row in enumerate(table_data):
+        logger.debug(f"Processing row {idx}: {row}")
+        print(f"Row {idx}: {row}")
         # if row[0] == "Tool Name":
         #     continue
         # if len(row) < 1 or not row[0]:
@@ -134,6 +138,10 @@ def save_experiment_changes(
 ) -> str:
     """Save changes from the table back to the experiment plan."""
     logger.info(f"Saving changes for experiment: {selected_filename}")
+    logger.debug(f"Received table_data: {table_data}")
+    logger.debug(f"Table data type: {type(table_data)}")
+    logger.debug(f"Table data length: {len(table_data) if table_data else 0}")
+    
     if not selected_filename:
         return "Error: No experiment selected"
     if not plans_path:
@@ -145,6 +153,7 @@ def save_experiment_changes(
 
     try:
         new_tools = convert_table_data_to_tools(table_data)
+        logger.debug(f"Converted tools: {new_tools}")
         print(new_tools)
         # plan.experiment = new_tools
         # save_experiment_plans(plans, plans_path)
