@@ -74,6 +74,8 @@ def convert_table_data_to_tools(
 
     for row in table_data:
         print(row)
+        # if row[0] == "Tool Name":
+        #     continue
         # if len(row) < 1 or not row[0]:
         #     continue
 
