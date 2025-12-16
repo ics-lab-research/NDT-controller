@@ -36,8 +36,8 @@ def parse_tool_from_row(row: List[str]) -> ExperimentTool:
     tool_name = row[0]
     params = {}
     for param_str in row[1:]:
-        if '=' in param_str:
-            k, v = param_str.split('=', 1)
+        if "=" in param_str:
+            k, v = param_str.split("=", 1)
             params[k.strip()] = v.strip()
     return parse_tool_from_params(tool_name, params)
 
