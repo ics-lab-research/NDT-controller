@@ -43,22 +43,22 @@ def parse_tool_from_params(tool_name: str, params: dict) -> ExperimentTool:
         "SetButtonStateTool": SetButtonStateTool,
         "SelectComboBoxTool": SelectComboBoxTool,
     }
-    
+
     tool_class = tool_map.get(tool_name)
     if not tool_class:
         logger.warning(f"Unknown tool type: {tool_name}")
         return "unknown"
-    
+
     try:
         tool_params = {"tool_name": tool_name, **params}
-        
+
         if tool_class == SetNumericControlTool and "value" in params:
             tool_params["value"] = float(params["value"])
         elif tool_class == SelectTabTool and "index" in params:
             tool_params["index"] = int(params["index"])
         elif tool_class == SetButtonStateTool and "state" in params:
             tool_params["state"] = params["state"].lower() == "true"
-        
+
         return tool_class(**tool_params)
     except Exception as e:
         logger.error(f"Failed to create tool {tool_name}: {e}")
@@ -119,36 +119,35 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         if not selected_filename or not plans_path:
             logger.warning("No filename selected or plans path not available")
             return "Error: No experiment selected or path not configured"
-        
+
         plan_index = next(
             (i for i, p in enumerate(plans) if p.filename == selected_filename),
-            None
+            None,
         )
         if plan_index is None:
             logger.warning(f"Plan not found for filename: {selected_filename}")
             return "Error: Experiment not found"
-        
+
         tools = []
         for row in dataframe_data:
             tool_name = row[0]
             param1_str = row[1] if len(row) > 1 else ""
             param2_str = row[2] if len(row) > 2 else ""
-            
+
             params = {}
             for param_str in [param1_str, param2_str]:
                 if param_str and "=" in param_str:
                     key, value = param_str.split("=", 1)
                     params[key.strip()] = value.strip()
-            
+
             tool = parse_tool_from_params(tool_name, params)
             if tool:
                 tools.append(tool)
-        
+
         plans[plan_index] = ExperimentPlan(
-            filename=selected_filename,
-            experiment=tools
+            filename=selected_filename, experiment=tools
         )
-        
+
         result = save_experiment_plans(plans, plans_path)
         if result.get("success"):
             logger.info(f"Successfully saved changes for {selected_filename}")
@@ -171,11 +170,9 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         )
         save_btn = gr.Button("Save Changes")
         save_status = gr.Textbox(label="Status", interactive=False)
-        
+
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
         save_btn.click(
-            save_changes,
-            inputs=[dropdown, details_df],
-            outputs=save_status
+            save_changes, inputs=[dropdown, details_df], outputs=save_status
         )
     return tab
