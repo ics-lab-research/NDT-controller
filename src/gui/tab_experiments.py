@@ -31,51 +31,6 @@ from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, read_file, save_experiment_plans
 
 
-def parse_tool_from_row(row: List[str]) -> ExperimentTool:
-    """Parse a table row into an ExperimentTool."""
-    tool_name = row[0]
-    params = {}
-    for param_str in row[1:]:
-        if "=" in param_str:
-            k, v = param_str.split("=", 1)
-            params[k.strip()] = v.strip()
-    return parse_tool_from_params(tool_name, params)
-
-
-def parse_tool_from_params(tool_name: str, params: dict) -> ExperimentTool:
-    """Parse tool parameters and create appropriate tool instance."""
-    tool_map = {
-        "SetNumericControlTool": SetNumericControlTool,
-        "SelectTabTool": SelectTabTool,
-        "RunOpenViTool": RunOpenViTool,
-        "ConnectToViTool": ConnectToViTool,
-        "HandleSaveDialogTool": HandleSaveDialogTool,
-        "PressButtonTool": PressButtonTool,
-        "SetButtonStateTool": SetButtonStateTool,
-        "SelectComboBoxTool": SelectComboBoxTool,
-    }
-
-    tool_class = tool_map.get(tool_name)
-    if not tool_class:
-        logger.warning(f"Unknown tool type: {tool_name}")
-        return "unknown"
-
-    try:
-        tool_params = {"tool_name": tool_name, **params}
-
-        if tool_class == SetNumericControlTool and "value" in params:
-            tool_params["value"] = float(params["value"])
-        elif tool_class == SelectTabTool and "index" in params:
-            tool_params["index"] = int(params["index"])
-        elif tool_class == SetButtonStateTool and "state" in params:
-            tool_params["state"] = params["state"].lower() == "true"
-
-        return tool_class(**tool_params)
-    except Exception as e:
-        logger.error(f"Failed to create tool {tool_name}: {e}")
-        return "unknown"
-
-
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans: List[ExperimentPlan] = []
@@ -125,27 +80,6 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         logger.info(f"Details updated with {len(data)} tools")
         return data
 
-    def save_changes(selected_filename: str, edited_data: List[List[str]]):
-        if not selected_filename:
-            logger.warning("No experiment selected for saving")
-            return
-        plan = next((p for p in plans if p.filename == selected_filename), None)
-        if not plan:
-            logger.warning(f"Plan not found for filename: {selected_filename}")
-            return
-        new_tools = []
-        for row in edited_data:
-            if row[0]:  # Ensure tool_name is present
-                try:
-                    tool = parse_tool_from_row(row)
-                    new_tools.append(tool)
-                except Exception as e:
-                    logger.error(f"Failed to parse row {row}: {e}")
-        plan.experiment = new_tools
-        if plans_path:
-            save_experiment_plans(plans, plans_path)
-            logger.info(f"Saved changes for experiment: {selected_filename}")
-
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
             choices=filenames,
@@ -157,8 +91,6 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=initial_data,
             interactive=True,
         )
-        save_btn = gr.Button("Save Changes")
 
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
-        save_btn.click(save_changes, inputs=[dropdown, details_df], outputs=[])
     return tab
