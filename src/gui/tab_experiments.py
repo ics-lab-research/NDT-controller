@@ -114,7 +114,9 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         logger.info(f"Details updated with {len(data)} tools")
         return data
 
-    def save_changes(selected_filename: str, dataframe_data: List[List[str]]) -> str:
+    def save_changes(
+        selected_filename: str, dataframe_data: List[List[str]]
+    ) -> str:
         logger.info(f"Saving changes for experiment: {selected_filename}")
         if not selected_filename or not plans_path:
             logger.warning("No filename selected or plans path not available")
