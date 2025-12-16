@@ -47,7 +47,9 @@ def format_tool_row(tool: ExperimentTool, max_params: int) -> List[str]:
         return []
     tool_name = tool.tool_name
     tool_dict = tool.model_dump()
-    logger.debug(f"Tool type: {type(tool).__name__}, tool_name: {tool_name}, tool_dict: {tool_dict}")
+    logger.debug(
+        f"Tool type: {type(tool).__name__}, tool_name: {tool_name}, tool_dict: {tool_dict}"
+    )
     params = {k: v for k, v in tool_dict.items() if k != "tool_name"}
     param_values = [repr(v) for v in params.values()]
     while len(param_values) < max_params:
