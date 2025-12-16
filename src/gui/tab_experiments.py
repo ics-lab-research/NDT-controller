@@ -44,7 +44,8 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     if filenames:
         first_plan = plans[0]
         for tool in first_plan.experiment:
-            # tool can be Literal["unknown"], prevent it AI!
+            if tool == "unknown":
+                continue
             tool_name = tool.tool_name
             params = vars(tool)
             params.pop("tool_name", None)
