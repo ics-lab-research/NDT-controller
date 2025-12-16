@@ -74,12 +74,12 @@ def convert_table_data_to_tools(
         logger.debug(f"Processing row {idx}: {row.to_dict()}")
         print(f"Row {idx}: {row.to_dict()}")
 
-        tool_name = str(row["Tool Name"]).strip()
+        tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
         param1_str = (
-            str(row["Parameter 1"]) if pd.notna(row["Parameter 1"]) else ""
+            str(row.iloc[1]) if len(row) > 1 and pd.notna(row.iloc[1]) else ""
         )
         param2_str = (
-            str(row["Parameter 2"]) if pd.notna(row["Parameter 2"]) else ""
+            str(row.iloc[2]) if len(row) > 2 and pd.notna(row.iloc[2]) else ""
         )
 
         if not tool_name or tool_name == "nan":
