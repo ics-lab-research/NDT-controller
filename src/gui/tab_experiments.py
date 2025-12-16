@@ -74,34 +74,34 @@ def convert_table_data_to_tools(
 
     for row in table_data:
         print(row)
-        if len(row) < 1 or not row[0]:
-            continue
+        # if len(row) < 1 or not row[0]:
+        #     continue
 
-        tool_name = row[0].strip()
-        param1_str = row[1] if len(row) > 1 else ""
-        param2_str = row[2] if len(row) > 2 else ""
+        # tool_name = row[0].strip()
+        # param1_str = row[1] if len(row) > 1 else ""
+        # param2_str = row[2] if len(row) > 2 else ""
 
-        params = {}
-        if param1_str:
-            key, value = parse_param(param1_str)
-            if key:
-                params[key] = value
-        if param2_str:
-            key, value = parse_param(param2_str)
-            if key:
-                params[key] = value
+        # params = {}
+        # if param1_str:
+        #     key, value = parse_param(param1_str)
+        #     if key:
+        #         params[key] = value
+        # if param2_str:
+        #     key, value = parse_param(param2_str)
+        #     if key:
+        #         params[key] = value
 
-        tool_class = tool_map.get(tool_name)
-        if tool_class:
-            try:
-                tool = tool_class(tool_name=tool_name, **params)
-                tools.append(tool)
-            except Exception as e:
-                logger.error(f"Failed to create tool {tool_name}: {e}")
-                tools.append("unknown")
-        else:
-            logger.warning(f"Unknown tool type: {tool_name}")
-            tools.append("unknown")
+        # tool_class = tool_map.get(tool_name)
+        # if tool_class:
+        #     try:
+        #         tool = tool_class(tool_name=tool_name, **params)
+        #         tools.append(tool)
+        #     except Exception as e:
+        #         logger.error(f"Failed to create tool {tool_name}: {e}")
+        #         tools.append("unknown")
+        # else:
+        #     logger.warning(f"Unknown tool type: {tool_name}")
+        #     tools.append("unknown")
 
     return tools
 
