@@ -130,10 +130,19 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             logger.warning(f"Plan not found for filename: {selected_filename}")
             return "Error: Experiment not found"
 
+        plan = next((p for p in plans if p.filename == selected_filename), None)
+        if not plan:
+            logger.warning(f"Plan not found for filename: {selected_filename}")
+            return "Error: Experiment not found"
+
         tools: List[ExperimentTool] = []
-        for row in dataframe_data:
-            # tool_name will only a character T (firs character of ToolName), this code is wrong AI!
-            tool_name = row[0]
+        for i, row in enumerate(dataframe_data):
+            if i >= len(plan.experiment):
+                continue
+            original_tool = plan.experiment[i]
+            if original_tool == "unknown":
+                continue
+            tool_name = original_tool.tool_name
             param1_str = row[1] if len(row) > 1 else ""
             param2_str = row[2] if len(row) > 2 else ""
 
