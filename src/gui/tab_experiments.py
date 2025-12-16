@@ -45,8 +45,8 @@ def get_max_params(plans: List[ExperimentPlan]) -> int:
 def format_tool_row(tool: ExperimentTool, max_params: int) -> List[str]:
     if tool == "unknown":
         return []
-    tool_name = tool.tool_name
     tool_dict = tool.model_dump()
+    tool_name = tool_dict["tool_name"]
     logger.debug(
         f"Tool type: {type(tool).__name__}, tool_name: {tool_name}, tool_dict: {tool_dict}"
     )
