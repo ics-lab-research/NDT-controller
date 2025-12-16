@@ -4,6 +4,9 @@ from pathlib import Path
 from typing import Any, Dict, Optional
   
 from loguru import logger
+from pywinauto.keyboard import send_keys  # type: ignore
+from pywinauto import Desktop  # type: ignore
+import win32gui
   
   
 def _handle_error(operation: str, error: Exception) -> Dict[str, Any]:
@@ -31,8 +34,6 @@ def _find_uia_dialog(
     dialog_title_regex: str, timeout_seconds: float
 ) -> Any:
     """Find the UIA dialog window within timeout."""
-    from pywinauto import Desktop  # type: ignore
-  
     deadline = time.time() + timeout_seconds
     while time.time() < deadline:
         desktop = Desktop(backend="uia")
@@ -50,8 +51,6 @@ def _find_uia_dialog(
   
 def _navigate_directory_uia(dlg: Any, save_directory: str) -> None:
     """Navigate to the save directory in UIA dialog."""
-    from pywinauto.keyboard import send_keys  # type: ignore
-  
     try:
         send_keys("^l")  # Ctrl+L to focus address bar
         time.sleep(0.3)
@@ -123,7 +122,6 @@ def _find_win32_dialog(
     dialog_title_regex: str, timeout_seconds: float
 ) -> int:
     """Find the win32 dialog window handle within timeout."""
-    import win32gui
   
     deadline = time.time() + timeout_seconds
     target_hwnd = None
