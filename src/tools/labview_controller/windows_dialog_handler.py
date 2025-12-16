@@ -120,7 +120,59 @@ def _handle_via_uia(
     else:
         btn.click()
 
+    # After clicking Save, some applications show a second modal asking
+    # to confirm replacing an existing file. Detect that and only log
+    # an informational message (do not interact) as requested.
     full_path = str(Path(save_directory) / filename)
+    try:
+        time.sleep(0.5)
+        replace_regex = re.compile(r"(?i)(replace|already exists|confirm save|confirm file replace|existing file|do you want to replace)")
+        desktop2 = Desktop(backend="uia")
+        for w in desktop2.windows():
+            try:
+                title = (w.element_info.name or "")
+                if replace_regex.search(title):
+                    try:
+                        w.set_focus()
+                        time.sleep(0.05)
+                        send_keys("{ENTER}")
+                    except Exception as e:
+                        logger.warning(f"Failed to send Enter to replace dialog (UIA): {e}")
+                    logger.info(f"Save would replace existing file: {full_path}")
+                    return _success_response(
+                        "Save dialog handled (UIA) - replace prompt detected and Enter sent",
+                        path=full_path,
+                        replace_prompt=True,
+                    )
+
+                # Inspect textual descendants for the prompt message
+                try:
+                    texts = [
+                        (t.window_text() or "")
+                        for t in w.descendants(control_type="Text")
+                    ]
+                except Exception:
+                    texts = []
+
+                for txt in texts:
+                    if replace_regex.search(txt):
+                        try:
+                            w.set_focus()
+                            time.sleep(0.05)
+                            send_keys("{ENTER}")
+                        except Exception as e:
+                            logger.warning(f"Failed to send Enter to replace dialog (UIA): {e}")
+                        logger.info(f"Save would replace existing file: {full_path}")
+                        return _success_response(
+                            "Save dialog handled (UIA) - replace prompt detected and Enter sent",
+                            path=full_path,
+                            replace_prompt=True,
+                        )
+            except Exception:
+                continue
+    except Exception:
+        pass
+
     return _success_response("Save dialog handled (UIA)", path=full_path)
 
 
@@ -236,7 +288,67 @@ def _handle_via_win32(
         win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
         win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
 
+    # After confirming the save, detect any top-level confirmation dialogs
+    # (e.g., "Replace existing file?") and only log info rather than
+    # interacting with them.
     full_path = str(Path(save_directory) / filename)
+    try:
+        time.sleep(0.5)
+        replace_regex = re.compile(r"(?i)(replace|already exists|confirm save|confirm file replace|existing file|do you want to replace)")
+
+        def _enum_check(hwnd, _):
+            try:
+                title = (win32gui.GetWindowText(hwnd) or "")
+                if replace_regex.search(title):
+                    try:
+                        win32gui.SetForegroundWindow(hwnd)
+                        time.sleep(0.05)
+                        win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+                        win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+                    except Exception as e:
+                        logger.warning(f"Failed to send Enter to replace dialog (win32): {e}")
+                    logger.info(f"Save would replace existing file: {full_path}")
+                    raise StopIteration
+
+                # Check child windows (static text controls) for the prompt
+                def _child_cb(ch_hwnd, _):
+                    try:
+                        txt = (win32gui.GetWindowText(ch_hwnd) or "")
+                        if replace_regex.search(txt):
+                            try:
+                                win32gui.SetForegroundWindow(hwnd)
+                                time.sleep(0.05)
+                                win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+                                win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+                            except Exception as e:
+                                logger.warning(f"Failed to send Enter to replace dialog (win32 child): {e}")
+                            logger.info(f"Save would replace existing file: {full_path}")
+                            raise StopIteration
+                    except StopIteration:
+                        raise
+                    except Exception:
+                        pass
+
+                try:
+                    win32gui.EnumChildWindows(hwnd, _child_cb, None)
+                except StopIteration:
+                    raise StopIteration
+            except StopIteration:
+                raise
+            except Exception:
+                pass
+
+        try:
+            win32gui.EnumWindows(_enum_check, None)
+        except StopIteration:
+            return _success_response(
+                "Save dialog handled (win32) - replace prompt detected",
+                path=full_path,
+                replace_prompt=True,
+            )
+    except Exception:
+        pass
+
     return _success_response("Save dialog handled (win32)", path=full_path)
 
 
