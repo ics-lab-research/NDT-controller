@@ -64,9 +64,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
 
     filenames = [plan.filename for plan in plans] if plans else []
     max_params = get_max_params(plans) if plans else 0
-    headers = ["Tool Name"] + [
-        f"Parameter {i+1}" for i in range(max_params)
-    ]
+    headers = ["Tool Name"] + [f"Parameter {i + 1}" for i in range(max_params)]
 
     initial_data = []
     if filenames:
@@ -82,9 +80,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         )
         if not selected_filename:
             return []
-        plan = next(
-            (p for p in plans if p.filename == selected_filename), None
-        )
+        plan = next((p for p in plans if p.filename == selected_filename), None)
         if not plan:
             logger.warning(f"Plan not found for filename: {selected_filename}")
             error_row = ["Error"] + [""] * max_params
