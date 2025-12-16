@@ -60,8 +60,10 @@ def convert_table_data_to_tools(
 ) -> List[ExperimentTool]:
     """Convert table data back to experiment tools."""
     logger.debug(f"Converting table_data to tools: {table_data}")
-    logger.debug(f"Table data type: {type(table_data)}, length: {len(table_data) if table_data else 0}")
-    
+    logger.debug(
+        f"Table data type: {type(table_data)}, length: {len(table_data) if table_data else 0}"
+    )
+
     tools: List[ExperimentTool] = []
 
     tool_map = {
@@ -141,7 +143,7 @@ def save_experiment_changes(
     logger.debug(f"Received table_data: {table_data}")
     logger.debug(f"Table data type: {type(table_data)}")
     logger.debug(f"Table data length: {len(table_data) if table_data else 0}")
-    
+
     if not selected_filename:
         return "Error: No experiment selected"
     if not plans_path:
