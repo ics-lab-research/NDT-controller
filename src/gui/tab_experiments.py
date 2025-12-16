@@ -1,8 +1,14 @@
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
+from typing import Any, Dict, List, Tuple
+
 import gradio as gr
 import pandas as pd
 from loguru import logger
+
+from ..agents.experiment_planning import (
+    load_experiment_plans,
+    save_experiment_plans,
+)
 from ..baml_client.types import (
     ConnectToViTool,
     HandleSaveDialogTool,
@@ -20,7 +26,6 @@ from ..core.models import (
     Mode,
 )
 from ..core.project_manager import ProjectManager
-from ..core.utils import load_experiment_plans, save_experiment_plans
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:

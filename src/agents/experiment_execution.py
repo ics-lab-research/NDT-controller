@@ -1,5 +1,5 @@
 import time
-from typing import List, Optional
+from typing import List
 
 from loguru import logger
 
@@ -96,13 +96,6 @@ def describe_tool(tool: ExperimentTool) -> str:
         return f"Handle save dialog for file '{tool.file_name}' in directory '{tool.save_directory}'"
     else:
         return f"Unknown tool: {type(tool).__name__}"
-
-
-def is_approved(tools: List[ExperimentTool]) -> bool:
-    """Check if the experiment plan is approved for execution. Placeholder for GUI integration."""
-    # In a real implementation, this would check a GUI state or flag set by user approval.
-    # For now, return False to require manual approval.
-    return False
 
 
 def execute_tool(

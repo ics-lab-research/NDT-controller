@@ -30,32 +30,32 @@ def handle_experiment_mode(
         # try to process if they want to control system
         router_final = router_response.get_final_response()
 
-        # elif router_final.action == ExpAction.BASIC_CONTROL:
-        #     single_plan = call_exp_planner(user_message)
+        if router_final.action == ExpAction.BASIC_CONTROL:
+            single_plan = call_exp_planner(user_message)
 
-        #     tool_connect_to_vi(
-        #         vi_path=r"D:\PECT LLM\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
-        #     )
-        #     time.sleep(5)  # wait for VI to load
-        #     running = tool_get_vi_status()["running"]
-        #     print(running)
+            tool_connect_to_vi(
+                vi_path=r"D:\PECT LLM\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
+            )
+            time.sleep(5)  # wait for VI to load
+            running = tool_get_vi_status()["running"]
+            print(running)
 
-        #     # BUG: running return False when VI is running
-        #     if not running:
-        #         execute_single_plan(single_plan, project_manager)
-        #     else:
-        #         tool_connect_to_vi(
-        #             vi_path=r"D:\PECT LLM\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
-        #         )
-        #         tool_run_open_vi(run_vi=True)
-        #         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        #         tool_handle_save_dialog(
-        #             r"D:\other-repos\river\EXPERIMENTS\data", timestamp
-        #         )
+            # BUG: running return False when VI is running
+            if not running:
+                execute_single_plan(single_plan, project_manager)
+            else:
+                tool_connect_to_vi(
+                    vi_path=r"D:\PECT LLM\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
+                )
+                tool_run_open_vi(run_vi=True)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                tool_handle_save_dialog(
+                    r"D:\other-repos\river\EXPERIMENTS\data", timestamp
+                )
 
-        #         execute_single_plan(single_plan, project_manager)
+                execute_single_plan(single_plan, project_manager)
 
-        #     yield AgentResponse(response="Done")
+            yield AgentResponse(response="Done")
 
         if router_final.action == ExpAction.SINGLE_SCAN:
             yield AgentResponse(thinking="Performing single scan.")
