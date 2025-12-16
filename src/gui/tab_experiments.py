@@ -97,18 +97,12 @@ def convert_table_data_to_tools(
     ]
 
 
-def find_plan_by_filename(
-    plans: List[ExperimentPlan], filename: str
-) -> ExperimentPlan | None:
-    return next((p for p in plans if p.filename == filename), None)
-
-
 def update_experiment_details(
     plans: List[ExperimentPlan], selected_filename: str
 ) -> List[List[str]]:
     if not selected_filename:
         return []
-    plan = find_plan_by_filename(plans, selected_filename)
+    plan = next((p for p in plans if p.filename == selected_filename), None)
     if not plan:
         logger.warning(f"Plan not found for filename: {selected_filename}")
         return [["Error", "", ""]]
@@ -125,7 +119,7 @@ def save_experiment_changes(
         return "Error: No experiment selected"
     if not plans_path:
         return "Error: Plans path not configured"
-    plan = find_plan_by_filename(plans, selected_filename)
+    plan = next((p for p in plans if p.filename == selected_filename), None)
     if not plan:
         return f"Error: Plan not found for {selected_filename}"
     try:
