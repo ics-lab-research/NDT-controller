@@ -2,13 +2,13 @@ import json
 import queue
 from pathlib import Path
 from typing import Callable, List, Tuple
-  
+
 import gradio as gr
 from loguru import logger
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 from watchdog.observers.api import BaseObserver
-  
+
 from ..agents.experiment_execution import describe_tool, execute_multiple_plans
 from ..baml_client.types import (
     ConnectToViTool,
@@ -28,8 +28,8 @@ from ..core.models import (
 )
 from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, read_file
-  
-  
+
+
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
@@ -37,9 +37,9 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path)
-  
+
     filenames = [plan.filename for plan in plans] if plans else []
-  
+
     initial_data = []
     if filenames:
         first_plan = plans[0]
@@ -51,7 +51,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             params.pop("tool_name", None)
             params_str = ", ".join(f"{k}={v}" for k, v in params.items())
             initial_data.append([tool_name, params_str])
-  
+
     def update_details(selected_filename):
         logger.info(
             f"Updating details for selected experiment: {selected_filename}"
@@ -73,7 +73,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             data.append([tool_name, params_str])
         logger.info(f"Details updated with {len(data)} tools")
         return data
-  
+
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
             choices=filenames,
