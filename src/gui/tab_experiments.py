@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Callable, List, Tuple
 
 import gradio as gr
+import pandas as pd
 from loguru import logger
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
@@ -56,13 +57,12 @@ def parse_param(param_str: str) -> Tuple[str, str]:
 
 
 def convert_table_data_to_tools(
-    table_data: List[List[str]],
+    table_data: pd.DataFrame,
 ) -> List[ExperimentTool]:
     """Convert table data back to experiment tools."""
     logger.debug(f"Converting table_data to tools: {table_data}")
-    logger.debug(
-        f"Table data type: {type(table_data)}, length: {len(table_data) if table_data else 0}"
-    )
+    logger.debug(f"Table data type: {type(table_data)}")
+    logger.debug(f"Table data shape: {table_data.shape}")
 
     tools: List[ExperimentTool] = []
 
@@ -77,39 +77,38 @@ def convert_table_data_to_tools(
         "SelectComboBoxTool": SelectComboBoxTool,
     }
 
-    for idx, row in enumerate(table_data):
-        logger.debug(f"Processing row {idx}: {row}")
-        print(f"Row {idx}: {row}")
-        # if row[0] == "Tool Name":
-        #     continue
-        # if len(row) < 1 or not row[0]:
-        #     continue
+    for idx, row in table_data.iterrows():
+        logger.debug(f"Processing row {idx}: {row.to_dict()}")
+        print(f"Row {idx}: {row.to_dict()}")
 
-        # tool_name = row[0].strip()
-        # param1_str = row[1] if len(row) > 1 else ""
-        # param2_str = row[2] if len(row) > 2 else ""
+        tool_name = str(row["Tool Name"]).strip()
+        param1_str = str(row["Parameter 1"]) if pd.notna(row["Parameter 1"]) else ""
+        param2_str = str(row["Parameter 2"]) if pd.notna(row["Parameter 2"]) else ""
 
-        # params = {}
-        # if param1_str:
-        #     key, value = parse_param(param1_str)
-        #     if key:
-        #         params[key] = value
-        # if param2_str:
-        #     key, value = parse_param(param2_str)
-        #     if key:
-        #         params[key] = value
+        if not tool_name or tool_name == "nan":
+            continue
 
-        # tool_class = tool_map.get(tool_name)
-        # if tool_class:
-        #     try:
-        #         tool = tool_class(tool_name=tool_name, **params)
-        #         tools.append(tool)
-        #     except Exception as e:
-        #         logger.error(f"Failed to create tool {tool_name}: {e}")
-        #         tools.append("unknown")
-        # else:
-        #     logger.warning(f"Unknown tool type: {tool_name}")
-        #     tools.append("unknown")
+        params = {}
+        if param1_str and param1_str != "nan":
+            key, value = parse_param(param1_str)
+            if key:
+                params[key] = value
+        if param2_str and param2_str != "nan":
+            key, value = parse_param(param2_str)
+            if key:
+                params[key] = value
+
+        tool_class = tool_map.get(tool_name)
+        if tool_class:
+            try:
+                tool = tool_class(tool_name=tool_name, **params)
+                tools.append(tool)
+            except Exception as e:
+                logger.error(f"Failed to create tool {tool_name}: {e}")
+                tools.append("unknown")
+        else:
+            logger.warning(f"Unknown tool type: {tool_name}")
+            tools.append("unknown")
 
     return tools
 
@@ -136,13 +135,13 @@ def save_experiment_changes(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
     selected_filename: str,
-    table_data: List[List[str]],
+    table_data: pd.DataFrame,
 ) -> str:
     """Save changes from the table back to the experiment plan."""
     logger.info(f"Saving changes for experiment: {selected_filename}")
-    logger.debug(f"Received table_data: {table_data}")
+    logger.debug(f"Received table_data:\n{table_data}")
     logger.debug(f"Table data type: {type(table_data)}")
-    logger.debug(f"Table data length: {len(table_data) if table_data else 0}")
+    logger.debug(f"Table data shape: {table_data.shape}")
 
     if not selected_filename:
         return "Error: No experiment selected"
@@ -157,8 +156,8 @@ def save_experiment_changes(
         new_tools = convert_table_data_to_tools(table_data)
         logger.debug(f"Converted tools: {new_tools}")
         print(new_tools)
-        # plan.experiment = new_tools
-        # save_experiment_plans(plans, plans_path)
+        plan.experiment = new_tools
+        save_experiment_plans(plans, plans_path)
         logger.info(f"Successfully saved changes to {selected_filename}")
         return f"Successfully saved changes to {selected_filename}"
     except Exception as e:
