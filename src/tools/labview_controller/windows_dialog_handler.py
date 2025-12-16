@@ -241,7 +241,7 @@ def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
                         w.set_focus()
                         time.sleep(0.05)
                         send_keys("{ENTER}")
-                        logger.info(f"Save would replace existing file: {full_path}")
+                        logger.info(f"Save 1 would replace existing file: {full_path}")
                         return _success_response(
                             "Replace prompt detected and handled (UIA)",
                             path=full_path,
@@ -257,7 +257,7 @@ def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
                             w.set_focus()
                             time.sleep(0.05)
                             send_keys("{ENTER}")
-                            logger.info(f"Save would replace existing file: {full_path}")
+                            logger.info(f"Save 2 would replace existing file: {full_path}")
                             return _success_response(
                                 "Replace prompt detected and handled (UIA)",
                                 path=full_path,
@@ -277,7 +277,7 @@ def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
                     time.sleep(0.05)
                     win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
                     win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-                    logger.info(f"Save would replace existing file: {full_path}")
+                    logger.info(f"Save 3 would replace existing file: {full_path}")
                     raise StopIteration
   
                 def _child_cb(ch_hwnd, _):
@@ -287,7 +287,7 @@ def _handle_replace_prompt(full_path: str) -> Optional[Dict[str, Any]]:
                         time.sleep(0.05)
                         win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
                         win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-                        logger.info(f"Save would replace existing file: {full_path}")
+                        logger.info(f"Save 4 would replace existing file: {full_path}")
                         raise StopIteration
   
                 win32gui.EnumChildWindows(hwnd, _child_cb, None)
