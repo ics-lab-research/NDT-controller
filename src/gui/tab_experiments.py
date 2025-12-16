@@ -90,7 +90,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             param2 = param_list[1] if len(param_list) > 1 else ""
             initial_data.append([tool_name, param1, param2])
 
-    def update_details(selected_filename):
+    def update_details(selected_filename: str) -> List[List[str]]:
         logger.info(
             f"Updating details for selected experiment: {selected_filename}"
         )
@@ -114,7 +114,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         logger.info(f"Details updated with {len(data)} tools")
         return data
 
-    def save_changes(selected_filename, dataframe_data):
+    def save_changes(selected_filename: str, dataframe_data: List[List[str]]) -> str:
         logger.info(f"Saving changes for experiment: {selected_filename}")
         if not selected_filename or not plans_path:
             logger.warning("No filename selected or plans path not available")
