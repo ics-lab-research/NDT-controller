@@ -60,7 +60,7 @@ def convert_table_data_to_tools(
     tools: List[ExperimentTool] = []
 
     tool_map = {
-        "SetNumericControlTool": SetNumericControlTool,
+        SetNumericControlTool.tool_name: SetNumericControlTool,
         "SelectTabTool": SelectTabTool,
         "RunOpenViTool": RunOpenViTool,
         "ConnectToViTool": ConnectToViTool,
@@ -153,8 +153,8 @@ def save_experiment_changes(
         new_tools = convert_table_data_to_tools(table_data)
         logger.debug(f"Converted tools: {new_tools}")
         print(new_tools)
-        plan.experiment = new_tools
-        save_experiment_plans(plans, plans_path)
+        # plan.experiment = new_tools
+        # save_experiment_plans(plans, plans_path)
         logger.info(f"Successfully saved changes to {selected_filename}")
         return f"Successfully saved changes to {selected_filename}"
     except Exception as e:
