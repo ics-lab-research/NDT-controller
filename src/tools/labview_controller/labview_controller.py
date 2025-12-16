@@ -35,6 +35,21 @@ class LabVIEWController:
         response.update(kwargs)
         return response
 
+    def _get_python_command(self) -> str:
+        """
+        Intelligently select the Python command based on the environment.
+        - Anaconda: use sys.executable (more reliable)
+        - Microsoft Store Python: use "python" command (registered in PATH)
+        """
+        # Check if running in Anaconda environment
+        if "conda" in sys.prefix.lower() or "conda" in environ.get("CONDA_DEFAULT_ENV", "").lower():
+            logger.debug(f"Detected Anaconda environment, using sys.executable: {sys.executable}")
+            return sys.executable
+        
+        # Default to "python" command (works for Microsoft Store Python)
+        logger.debug("Using 'python' command from PATH (Microsoft Store Python)")
+        return "python"
+
     def run_open_vi_subprocess(self, run_vi: bool = True) -> Dict[str, Any]:
         """Run open_vi.py in a subprocess to open and run the VI"""
         try:
@@ -68,7 +83,12 @@ class LabVIEWController:
             env = environ.copy()
             env["PYTHONIOENCODING"] = "ascii:replace"
             env["PYTHONLEGACYWINDOWSSTDIO"] = "1"
-            cmd = [sys.executable, str(open_vi_path), self.vi_path]
+            
+            # Intelligently select Python command based on environment
+            # Anaconda: use sys.executable (more reliable)
+            # Microsoft Store Python: use "python" command (registered in PATH)
+            python_cmd = self._get_python_command()
+            cmd = [python_cmd, str(open_vi_path), self.vi_path]
             if not run_vi:
                 cmd.append("--no-run")
             logger.debug(f"Running command: {' '.join(cmd)}")
