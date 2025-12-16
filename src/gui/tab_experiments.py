@@ -2,13 +2,13 @@ import json
 import queue
 from pathlib import Path
 from typing import Callable, List, Tuple
-
+  
 import gradio as gr
 from loguru import logger
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 from watchdog.observers.api import BaseObserver
-
+  
 from ..agents.experiment_execution import describe_tool, execute_multiple_plans
 from ..baml_client.types import (
     ConnectToViTool,
@@ -28,8 +28,8 @@ from ..core.models import (
 )
 from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, read_file
-
-
+  
+  
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
@@ -37,9 +37,9 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path)
-
+  
     filenames = [plan.filename for plan in plans] if plans else []
-
+  
     initial_data = []
     if filenames:
         first_plan = plans[0]
@@ -49,9 +49,11 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             tool_name = tool.tool_name
             params = vars(tool)
             params.pop("tool_name", None)
-            param_str = ", ".join(f"{k}={repr(v)}" for k, v in params.items())
-            initial_data.append([tool_name, param_str])
-
+            param_values = list(params.values())
+            while len(param_values) < 3:
+                param_values.append("")
+            initial_data.append([tool_name] + param_values)
+  
     def update_details(selected_filename):
         logger.info(
             f"Updating details for selected experiment: {selected_filename}"
@@ -61,7 +63,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         plan = next((p for p in plans if p.filename == selected_filename), None)
         if not plan:
             logger.warning(f"Plan not found for filename: {selected_filename}")
-            return [["Error", "Plan not found"]]
+            return [["Error", "", "", ""]]
         data = []
         for tool in plan.experiment:
             if tool == "unknown":
@@ -69,11 +71,13 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             tool_name = tool.tool_name
             params = vars(tool)
             params.pop("tool_name", None)
-            param_str = ", ".join(f"{k}={repr(v)}" for k, v in params.items())
-            data.append([tool_name, param_str])
+            param_values = list(params.values())
+            while len(param_values) < 3:
+                param_values.append("")
+            data.append([tool_name] + param_values)
         logger.info(f"Details updated with {len(data)} tools")
         return data
-
+  
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
             choices=filenames,
@@ -81,7 +85,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=filenames[0] if filenames else None,
         )
         details_df = gr.Dataframe(
-            headers=["Tool Name", "Parameters"], value=initial_data
+            headers=["Tool Name", "Parameter 1", "Parameter 2", "Parameter 3"], value=initial_data
         )
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
     return tab
