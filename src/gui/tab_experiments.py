@@ -23,7 +23,7 @@ from ..core.project_manager import ProjectManager
 from ..core.utils import load_experiment_plans, save_experiment_plans
 
 
-def tool_to_table_row(tool: ExperimentTool) -> List[str]:
+def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
     if tool == "unknown":
         return []
     tool_name = str(tool.tool_name)
@@ -38,36 +38,36 @@ def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
     return [
         row
         for tool in plan.experiment
-        for row in [tool_to_table_row(tool)]
+        for row in [_tool_to_table_row(tool)]
         if row
     ]
 
 
-def parse_param(param_str: str) -> Tuple[str, str]:
+def _parse_param(param_str: str) -> Tuple[str, str]:
     if not param_str or "=" not in param_str:
         return "", ""
     key, value = param_str.split("=", 1)
     return key.strip(), value.strip()
 
 
-def extract_params_from_row(row: pd.Series) -> Dict[str, str]:
+def _extract_params_from_row(row: pd.Series) -> Dict[str, str]:
     params = {}
     for i in range(1, len(row)):
         param_str = str(row.iloc[i]) if pd.notna(row.iloc[i]) else ""
         if param_str and param_str != "nan":
-            key, value = parse_param(param_str)
+            key, value = _parse_param(param_str)
             if key:
                 params[key] = value
     return params
 
 
-def create_tool_from_row(
+def _create_tool_from_row(
     row: pd.Series, tool_map: Dict[str, Any]
 ) -> ExperimentTool:
     tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
     if not tool_name or tool_name == "nan":
         return "unknown"
-    params = extract_params_from_row(row)
+    params = _extract_params_from_row(row)
     tool_class = tool_map.get(tool_name)
     if tool_class:
         try:
@@ -79,7 +79,7 @@ def create_tool_from_row(
     return "unknown"
 
 
-def convert_table_data_to_tools(
+def _convert_table_data_to_tools(
     table_data: pd.DataFrame,
 ) -> List[ExperimentTool]:
     tool_map = {
@@ -93,11 +93,11 @@ def convert_table_data_to_tools(
         "select_combo_box": SelectComboBoxTool,
     }
     return [
-        create_tool_from_row(row, tool_map) for _, row in table_data.iterrows()
+        _create_tool_from_row(row, tool_map) for _, row in table_data.iterrows()
     ]
 
 
-def update_experiment_details(
+def _update_experiment_details(
     plans: List[ExperimentPlan], selected_filename: str
 ) -> List[List[str]]:
     if not selected_filename:
@@ -123,7 +123,7 @@ def save_experiment_changes(
     if not plan:
         return f"Error: Plan not found for {selected_filename}"
     try:
-        plan.experiment = convert_table_data_to_tools(table_data)
+        plan.experiment = _convert_table_data_to_tools(table_data)
         save_experiment_plans(plans, plans_path)
         return f"Successfully saved changes to {selected_filename}"
     except Exception as e:
@@ -156,7 +156,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         save_button = gr.Button("Save Changes")
         save_status = gr.Textbox(label="Status", interactive=False)
         dropdown.change(
-            lambda filename: update_experiment_details(plans, filename),
+            lambda filename: _update_experiment_details(plans, filename),
             inputs=dropdown,
             outputs=details_df,
         )
