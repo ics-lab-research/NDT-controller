@@ -114,64 +114,6 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         logger.info(f"Details updated with {len(data)} tools")
         return data
 
-    def save_changes(
-        selected_filename: str, dataframe_data: List[List[str]]
-    ) -> str:
-        logger.info(f"Saving changes for experiment: {selected_filename}")
-        if not selected_filename or not plans_path:
-            logger.warning("No filename selected or plans path not available")
-            return "Error: No experiment selected or path not configured"
-
-        plan_index = next(
-            (i for i, p in enumerate(plans) if p.filename == selected_filename),
-            None,
-        )
-        if plan_index is None:
-            logger.warning(f"Plan not found for filename: {selected_filename}")
-            return "Error: Experiment not found"
-
-        plan = next((p for p in plans if p.filename == selected_filename), None)
-        if not plan:
-            logger.warning(f"Plan not found for filename: {selected_filename}")
-            return "Error: Experiment not found"
-
-        tools: List[ExperimentTool] = []
-        for i, row in enumerate(dataframe_data):
-            if i >= len(plan.experiment):
-                continue
-            original_tool = plan.experiment[i]
-            if original_tool == "unknown":
-                continue
-            tool_name = original_tool.tool_name
-            param1_str = row[1] if len(row) > 1 else ""
-            param2_str = row[2] if len(row) > 2 else ""
-
-            params = {}
-            for param_str in [param1_str, param2_str]:
-                if param_str and "=" in param_str:
-                    key, value = param_str.split("=", 1)
-                    params[key.strip()] = value.strip()
-
-            logger.debug(tool_name)
-            logger.debug(params)
-
-            tool = parse_tool_from_params(tool_name, params)
-            if tool != "unknown":
-                tools.append(tool)
-
-        plans[plan_index] = ExperimentPlan(
-            filename=selected_filename, experiment=tools
-        )
-
-        result = save_experiment_plans(plans, plans_path)
-        if result.get("success"):
-            logger.info(f"Successfully saved changes for {selected_filename}")
-            return f"Successfully saved changes to {selected_filename}"
-        else:
-            error_msg = result.get("error", "Unknown error")
-            logger.error(f"Failed to save changes: {error_msg}")
-            return f"Error saving: {error_msg}"
-
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
             choices=filenames,
@@ -183,11 +125,6 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=initial_data,
             interactive=True,
         )
-        save_btn = gr.Button("Save Changes")
-        save_status = gr.Textbox(label="Status", interactive=False)
 
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
-        save_btn.click(
-            save_changes, inputs=[dropdown, details_df], outputs=save_status
-        )
     return tab
