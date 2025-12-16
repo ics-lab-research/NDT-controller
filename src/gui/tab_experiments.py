@@ -50,7 +50,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             params = vars(tool)
             params.pop("tool_name", None)
             param_values = list(params.values())
-            while len(param_values) < 3:
+            while len(param_values) < 2:
                 param_values.append("")
             initial_data.append([tool_name] + param_values)
 
@@ -63,7 +63,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
         plan = next((p for p in plans if p.filename == selected_filename), None)
         if not plan:
             logger.warning(f"Plan not found for filename: {selected_filename}")
-            return [["Error", "", "", ""]]
+            return [["Error", "", ""]]
         data = []
         for tool in plan.experiment:
             if tool == "unknown":
@@ -72,7 +72,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             params = vars(tool)
             params.pop("tool_name", None)
             param_values = list(params.values())
-            while len(param_values) < 3:
+            while len(param_values) < 2:
                 param_values.append("")
             data.append([tool_name] + param_values)
         logger.info(f"Details updated with {len(data)} tools")
@@ -85,7 +85,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=filenames[0] if filenames else None,
         )
         details_df = gr.Dataframe(
-            headers=["Tool Name", "Parameter 1", "Parameter 2", "Parameter 3"],
+            headers=["Tool Name", "Parameter 1", "Parameter 2"],
             value=initial_data,
         )
         dropdown.change(update_details, inputs=dropdown, outputs=details_df)
