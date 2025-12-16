@@ -31,18 +31,28 @@ from ..core.utils import load_experiment_plans, read_file
 
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+    plans = []
     if isinstance(metadata, ExperimentsMetadata):
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path)
-            data = [[plan.filename, str(plan.experiment)] for plan in plans]
-            headers = ["Filename", "Experiment"]
-        else:
-            data = [["Error", "plans_path is not a Path object"]]
-            headers = ["Status", "Message"]
-    else:
-        data = [["Error", "Invalid metadata type for experiments mode"]]
-        headers = ["Status", "Message"]
+    filenames = [plan.filename for plan in plans] if plans else []
+    
+    def update_details(selected_filename):
+        if not selected_filename:
+            return []
+        plan = next((p for p in plans if p.filename == selected_filename), None)
+        if not plan:
+            return [["Error", "Plan not found"]]
+        data = []
+        for tool in plan.experiment:
+            tool_name = tool.tool_name
+            param_str = str(tool)
+            data.append([tool_name, param_str])
+        return data
+    
     with gr.Tab("Plans Viewer") as tab:
-        gr.Dataframe(value=data, headers=headers)
+        dropdown = gr.Dropdown(choices=filenames, label="Select Experiment")
+        details_df = gr.Dataframe(headers=["Tool Name", "Parameters"], value=[])
+        dropdown.change(update_details, inputs=dropdown, outputs=details_df)
     return tab
