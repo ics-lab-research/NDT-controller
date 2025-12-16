@@ -1,4 +1,3 @@
-import ast
 import json
 import queue
 from dataclasses import asdict
@@ -132,8 +131,8 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             return "Error: Experiment not found"
 
         tools: List[ExperimentTool] = []
-        for row_str in dataframe_data:
-            row = ast.literal_eval(row_str)
+        for row in dataframe_data:
+            # tool_name will only a character T (firs character of ToolName), this code is wrong AI!
             tool_name = row[0]
             param1_str = row[1] if len(row) > 1 else ""
             param2_str = row[2] if len(row) > 2 else ""
