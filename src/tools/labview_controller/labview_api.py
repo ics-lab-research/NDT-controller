@@ -207,7 +207,6 @@ def tool_select_tab(
     name_to_index: Optional[Dict[str, int]] = None,
 ) -> ToolResult:
     """Select a page in a LabVIEW Tab control by index or name."""
-    # ... (keep existing implementation)
     if not controller.vi_reference:
         return ToolResult(
             name="tool_select_tab",

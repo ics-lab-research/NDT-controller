@@ -47,7 +47,7 @@ class ExpAction(str, Enum):
     ASK_CLARIFICATION = "ASK_CLARIFICATION"
 
 # #########################################################################
-# Generated classes (13)
+# Generated classes (17)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -60,16 +60,23 @@ class ConversationMessage(BaseModel):
 
 class ExpOrchestratorOutput(BaseModel):
     number_of_scans: int
-    experiments: typing.List["ExperimentWithFilename"]
-    response: str
+    experiments: typing.List["Experiment"]
 
 class ExpRouterOutput(BaseModel):
     action: ExpAction
     response: typing.Optional[str] = None
+    reformatted_message: typing.Optional[str] = None
 
-class ExperimentWithFilename(BaseModel):
-    experiment: typing.Dict[str, str]
+class Experiment(BaseModel):
+    id: str
+    grid: "Grid"
+    signal: typing.List["SignalParameter"]
+    relative_offset_mm: "RelativeOffset"
     filename: str
+
+class Grid(BaseModel):
+    rows: int
+    cols: int
 
 class HandleSaveDialogTool(BaseModel):
     tool_name: typing_extensions.Literal['handle_save_dialog']
@@ -79,6 +86,11 @@ class HandleSaveDialogTool(BaseModel):
 class PressButtonTool(BaseModel):
     tool_name: typing_extensions.Literal['press_button']
     button_name: str
+
+class RelativeOffset(BaseModel):
+    x: int
+    y: int
+    z: int
 
 class RunOpenViTool(BaseModel):
     tool_name: typing_extensions.Literal['run_open_vi']
@@ -103,6 +115,14 @@ class SetNumericControlTool(BaseModel):
     tool_name: typing_extensions.Literal['set_numeric_control']
     control_name: str
     value: float
+
+class SignalParameter(BaseModel):
+    key: str
+    value: str
+
+class State(BaseModel):
+    current_position: "RelativeOffset"
+    home_position: "RelativeOffset"
 
 class ToolResult(BaseModel):
     name: str

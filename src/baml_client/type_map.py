@@ -28,14 +28,20 @@ type_map = {
     "types.ExpRouterOutput": types.ExpRouterOutput,
     "stream_types.ExpRouterOutput": stream_types.ExpRouterOutput,
 
-    "types.ExperimentWithFilename": types.ExperimentWithFilename,
-    "stream_types.ExperimentWithFilename": stream_types.ExperimentWithFilename,
+    "types.Experiment": types.Experiment,
+    "stream_types.Experiment": stream_types.Experiment,
+
+    "types.Grid": types.Grid,
+    "stream_types.Grid": stream_types.Grid,
 
     "types.HandleSaveDialogTool": types.HandleSaveDialogTool,
     "stream_types.HandleSaveDialogTool": stream_types.HandleSaveDialogTool,
 
     "types.PressButtonTool": types.PressButtonTool,
     "stream_types.PressButtonTool": stream_types.PressButtonTool,
+
+    "types.RelativeOffset": types.RelativeOffset,
+    "stream_types.RelativeOffset": stream_types.RelativeOffset,
 
     "types.RunOpenViTool": types.RunOpenViTool,
     "stream_types.RunOpenViTool": stream_types.RunOpenViTool,
@@ -51,6 +57,12 @@ type_map = {
 
     "types.SetNumericControlTool": types.SetNumericControlTool,
     "stream_types.SetNumericControlTool": stream_types.SetNumericControlTool,
+
+    "types.SignalParameter": types.SignalParameter,
+    "stream_types.SignalParameter": stream_types.SignalParameter,
+
+    "types.State": types.State,
+    "stream_types.State": stream_types.State,
 
     "types.ToolResult": types.ToolResult,
     "stream_types.ToolResult": stream_types.ToolResult,

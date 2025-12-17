@@ -1,180 +1,350 @@
-function ExpPlanner(
-    user_message: string,
-    filename: string?
-) -> (SetNumericControlTool | SelectComboBoxTool | SelectTabTool | RunOpenViTool | ConnectToViTool | HandleSaveDialogTool | PressButtonTool | SetButtonStateTool)[] {
+function ExpPlanner(experiment: Experiment, state: State) -> string {
   client GroqRouter
   prompt #"
-You are a LabVIEW experiment control agent. Interpret user requests and generate sequences of parameter-setting functions for LabVIEW operations.
+You are an experiment planning system for experiment "{{ experiment.id }}".
 
-CORE INSTRUCTIONS
+COORDINATE SYSTEM:
+- X-axis: negative = left, positive = right
+- Y-axis: negative = forward, positive = backward  
+- Z-axis: negative = down, positive = up
 
-1. Analyze the user request to determine operation type:
-   - Scan operation: Full workflow with pulse mode, motion parameters, and data acquisition
-   - Movement operation: Directional movement (right/left/forward/backward)
-   - Parameter setting: Setting individual controls without running experiments
-   - System control: Starting/stopping/resetting operations
+CURRENT SITUATION:
+- Current position: ({{ state.current_position.x }}, {{ state.current_position.y }}, {{ state.current_position.z }}) mm
+- Home position: ({{ state.home_position.x }}, {{ state.home_position.y }}, {{ state.home_position.z }}) mm
+- Target offset from home: ({{ experiment.relative_offset_mm.x }}, {{ experiment.relative_offset_mm.y }}, {{ experiment.relative_offset_mm.z }}) mm
 
-2. Generate minimal sequences - only include necessary steps for the requested operation
-3. Use exact control names as specified in the constraints
-4. Configure only mentioned parameters - unspecified parameters use defaults
+TASK:
+Generate a movement plan to:
+1. Move from current position to the target position (home + relative offset);
+2. Configure signal with parameters: {% for param in experiment.signal %}{{ param.key }}={{ param.value }}{% if not loop.last %}, {% endif %}{% endfor %};
+3. Execute {{ experiment.grid.rows }}x{{ experiment.grid.cols }} grid scan;
+4. Return to home position
 
-AVAILABLE FUNCTIONS
+OUTPUT FORMAT (use exact axis names and calculate deltas):
+PLAN {{ experiment.id }}:
+  1. move Y [forward/backward] (distance [calculated_value] mm)
+  2. move X [left/right] (distance [calculated_value] mm)
+  3. move Z [up/down] (distance [calculated_value] mm)
+  4. configure signal({% for param in experiment.signal %}{{ param.key }}={{ param.value }}{% if not loop.last %}, {% endif %}{% endfor %})
+  5. execute grid scan({{ experiment.grid.rows }}x{{ experiment.grid.cols }})
+  6. return home position
 
-run_open_vi(run_vi) - Open LabVIEW application
-connect_to_vi(vi_path) - Connect to VI file
-handle_save_dialog(save_directory, filename) - Handle save operations
-press_button(button_name) - Press UI button
-set_button_state(button_name, state) - Set button state (True/False)
-select_tab(control_name, index) - Switch tabs/modes
-select_combo_box(control_name, value) - Set dropdown selections
-set_numeric_control(control_name, value) - Set numeric values
+CALCULATION RULES:
+- Target absolute position = home_position + relative_offset_mm
+- Movement delta = target_position - current_position
+- Only include movement steps where |delta| > 0
+- Negative Y delta = forward, positive = backward
+- Negative X delta = left, positive = right
+- Negative Z delta = down, positive = upward
+- Order movements: Y, X, Z
 
-SYSTEM CONFIGURATION
-
-PULSE MODES (Tab Control 4):
-Basic (0): "Basic Type"(Sine/Triangle/Square/Sawtooth Wave), "Duty cycle %"(50), "Basic freq (Hz)"(200), "Basic amp"(1.13)
-Gaussian (1): "Gauss amp"(2.1), "Gauss atten (dB)"(6), "Gauss freq (Hz)"(1000), "Gauss Nor.Band"(0.5)
-Chirp (2): "Chirp amp"(160), "Chirp f1"(500), "Chirp f2"(1500)
-
-MOTION PARAMETERS: "Speed (mm/s)"(2), "xl"(100), "yl"(100), "StepX"(1), "StepY"(1)
-
-DEFAULTS: Values in parentheses are defaults. Only set parameters explicitly mentioned by user.
-
-OPERATION TYPES AND WORKFLOWS
-
-1. SCAN OPERATION
-Triggers: User mentions "scan", provides scan dimensions, or specifies pulse parameters with motion
-
-Full Workflow:
-1. run_open_vi(False)
-2. connect_to_vi("file_vi.vi")
-3. select_tab("Tab Control 2", 1) - Switch to scan mode
-4. select_tab("Tab Control 4", [mode_index]) - Select pulse mode (0/1/2)
-5. [If Basic mode] select_combo_box("Basic Type", waveform_type)
-6. Configure pulse parameters with set_numeric_control()
-7. Configure motion parameters with set_numeric_control()
-8. run_open_vi(True)
-9. handle_save_dialog("DIRECTORY", "{{ filename }}")
-10. connect_to_vi("file_vi.vi")
-11. set_button_state("sethome", True) - REQUIRED before scan
-12. set_button_state("Scan", True)
-
-Mode Selection:
-User mentions "gaussian" -> [mode_index] = 1
-User mentions "chirp" -> [mode_index] = 2
-User mentions "sine/triangle/square/sawtooth" OR default -> [mode_index] = 0
-
-2. MOVEMENT OPERATION
-Triggers: User mentions "move", "go right/left/forward/backward"
-
-Workflow:
-1. connect_to_vi("file_vi.vi")
-2. set_numeric_control("Move Dis(mm)", distance_value) - Set distance to move
-3. set_button_state(direction_button, True) - direction_button is "right", "left", "forward", or "backward"
-
-Direction Mapping:
-"right" or "east" -> button "right"
-"left" or "west" -> button "left"
-"forward" or "north" or "up" -> button "forward"
-"backward" or "south" or "down" -> button "backward"
-
-3. PARAMETER SETTING
-Triggers: User says "set [parameter]", "change [value]", "configure [setting]" WITHOUT scanning
-
-Workflow:
-1. connect_to_vi("file_vi.vi")
-2. set_numeric_control() or select_combo_box() - Configure requested parameters only
-
-4. SYSTEM CONTROL
-Triggers: "stop", "reset", "home", "initialize"
-
-Workflow:
-1. connect_to_vi("file_vi.vi")
-2. set_button_state() or press_button() - Execute control action
-
-Common Actions:
-Go Home: set_button_state("gohome", True)
-Set Current Position as Home: set_button_state("sethome", True)
-Stop: set_button_state("Stop", True)
-
-DECISION LOGIC
-
-Determine operation type by keywords:
-Contains "scan" OR (pulse_mode + dimensions) -> SCAN OPERATION
-Contains "move" OR "right" OR "left" OR "forward" OR "backward" -> MOVEMENT OPERATION
-Contains "set" OR "change" (parameter only, no scan) -> PARAMETER SETTING
-Contains "stop" OR "home" -> SYSTEM CONTROL
-
-USER REQUEST
-
-{{ user_message }}
-
-IMPORTANT NOTES
-
-Filename for save operations: {{ filename }}
-Only configure parameters explicitly mentioned by user
-Use exact control names as specified above
-Follow the complete workflow sequence for scan operations
-Use minimal sequences for other operations
-Movement is directional only - use right/left/forward/backward buttons with specified distance
-
-{{ ctx.output_format }}
+Generate the plan:
 "#
 }
 
 // Test Cases
-test TestScanOperation {
+// Test Case 1: Basic movement from origin
+test TestBasicMovementFromOrigin {
   functions [ExpPlanner]
   args {
-    user_message "scan for me 20x20 using gaussian"
-    filename "gaussian_20x20_freq1000"
+    experiment {
+      id "EXP-001"
+      grid {
+        rows 5
+        cols 5
+      }
+      signal [
+        {
+          key "frequency"
+          value "1000"
+        },
+        {
+          key "amplitude"
+          value "5.0"
+        },
+        {
+          key "waveform"
+          value "sine"
+        }
+      ]
+      relative_offset_mm {
+        x 10
+        y -20
+        z 15
+      }
+      filename "exp001.dat"
+    }
+    state {
+      current_position {
+        x 0
+        y 0
+        z 0
+      }
+      home_position {
+        x 0
+        y 0
+        z 0
+      }
+    }
   }
 }
 
-test TestMovementOperation {
+// Test Case 2: Already at target position (no movement needed)
+test TestNoMovementNeeded {
   functions [ExpPlanner]
   args {
-    user_message "move to right by 10mm"
-    filename "movement_log"
+    experiment {
+      id "EXP-002"
+      grid {
+        rows 3
+        cols 3
+      }
+      signal [
+        {
+          key "frequency"
+          value "500"
+        },
+        {
+          key "amplitude"
+          value "3.0"
+        }
+      ]
+      relative_offset_mm {
+        x 50
+        y 30
+        z 10
+      }
+      filename "exp002.dat"
+    }
+    state {
+      current_position {
+        x 50
+        y 30
+        z 10
+      }
+      home_position {
+        x 0
+        y 0
+        z 0
+      }
+    }
   }
 }
 
-test TestMovementOperation2 {
+// Test Case 3: Movement with negative deltas (left, forward, down)
+test TestNegativeMovement {
   functions [ExpPlanner]
   args {
-    user_message "I am at coordinate (0, 0), moving to (5, 5)"
-    filename "movement_log"
+    experiment {
+      id "EXP-003"
+      grid {
+        rows 10
+        cols 8
+      }
+      signal [
+        {
+          key "frequency"
+          value "2000"
+        },
+        {
+          key "amplitude"
+          value "7.5"
+        },
+        {
+          key "phase"
+          value "90"
+        },
+        {
+          key "duration"
+          value "100"
+        }
+      ]
+      relative_offset_mm {
+        x -25
+        y -40
+        z -15
+      }
+      filename "exp003.dat"
+    }
+    state {
+      current_position {
+        x 10
+        y 20
+        z 30
+      }
+      home_position {
+        x 0
+        y 0
+        z 0
+      }
+    }
   }
 }
 
-test TestParameterSetting {
+// Test Case 4: Complex movement from non-origin home position
+test TestNonOriginHome {
   functions [ExpPlanner]
   args {
-    user_message "set speed to 5 mm/s"
-    filename "config_update"
+    experiment {
+      id "EXP-004"
+      grid {
+        rows 7
+        cols 12
+      }
+      signal [
+        {
+          key "frequency"
+          value "1500"
+        },
+        {
+          key "amplitude"
+          value "4.2"
+        },
+        {
+          key "waveform"
+          value "square"
+        }
+      ]
+      relative_offset_mm {
+        x 30
+        y 15
+        z -20
+      }
+      filename "exp004.dat"
+    }
+    state {
+      current_position {
+        x 5
+        y -10
+        z 25
+      }
+      home_position {
+        x 100
+        y 50
+        z 75
+      }
+    }
   }
 }
 
-test TestSystemControl {
+// Test Case 5: Large grid scan with single axis movement
+test TestSingleAxisMovement {
   functions [ExpPlanner]
   args {
-    user_message "go to home position"
-    filename "home_operation"
+    experiment {
+      id "EXP-005"
+      grid {
+        rows 20
+        cols 20
+      }
+      signal [
+        {
+          key "frequency"
+          value "800"
+        }
+      ]
+      relative_offset_mm {
+        x 0
+        y 0
+        z 50
+      }
+      filename "exp005.dat"
+    }
+    state {
+      current_position {
+        x 0
+        y 0
+        z 0
+      }
+      home_position {
+        x 0
+        y 0
+        z 0
+      }
+    }
   }
 }
 
-test TestChirpScan {
+// Test Case 6: All positive movements (right, backward, up)
+test TestAllPositiveMovements {
   functions [ExpPlanner]
   args {
-    user_message "perform 15x15 chirp scan with f1=300Hz and f2=2000Hz"
-    filename "chirp_15x15_300_2000"
+    experiment {
+      id "EXP-006"
+      grid {
+        rows 4
+        cols 6
+      }
+      signal [
+        {
+          key "frequency"
+          value "1200"
+        },
+        {
+          key "amplitude"
+          value "6.0"
+        },
+        {
+          key "offset"
+          value "2.5"
+        }
+      ]
+      relative_offset_mm {
+        x 45
+        y 60
+        z 35
+      }
+      filename "exp006.dat"
+    }
+    state {
+      current_position {
+        x -10
+        y -20
+        z -15
+      }
+      home_position {
+        x 0
+        y 0
+        z 0
+      }
+    }
   }
 }
 
-test TestBasicSineScan {
+// Test Case 7: Minimal signal parameters
+test TestMinimalSignal {
   functions [ExpPlanner]
   args {
-    user_message "scan 10x10 using sine wave at 500Hz"
-    filename "sine_10x10_500hz"
+    experiment {
+      id "EXP-007"
+      grid {
+        rows 2
+        cols 2
+      }
+      signal [
+        {
+          key "enabled"
+          value "true"
+        }
+      ]
+      relative_offset_mm {
+        x 5
+        y 5
+        z 5
+      }
+      filename "exp007.dat"
+    }
+    state {
+      current_position {
+        x 0
+        y 0
+        z 0
+      }
+      home_position {
+        x 0
+        y 0
+        z 0
+      }
+    }
   }
 }

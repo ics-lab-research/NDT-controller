@@ -24,6 +24,12 @@ class LlmResponseParser:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    def ExpExecutor(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]]:
+        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="request")
+        return typing.cast(typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]], result)
+
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> types.ExpOrchestratorOutput:
@@ -32,8 +38,14 @@ class LlmResponseParser:
 
     def ExpPlanner(
         self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]]:
+    ) -> str:
         result = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner", llm_response=llm_response, mode="request")
+        return typing.cast(str, result)
+
+    def ExpPlanner2(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]]:
+        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner2", llm_response=llm_response, mode="request")
         return typing.cast(typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]], result)
 
     def ExpRouter(
@@ -50,6 +62,12 @@ class LlmStreamParser:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    def ExpExecutor(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]]:
+        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="stream")
+        return typing.cast(typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]], result)
+
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> stream_types.ExpOrchestratorOutput:
@@ -58,8 +76,14 @@ class LlmStreamParser:
 
     def ExpPlanner(
         self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]]:
+    ) -> str:
         result = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner", llm_response=llm_response, mode="stream")
+        return typing.cast(str, result)
+
+    def ExpPlanner2(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]]:
+        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner2", llm_response=llm_response, mode="stream")
         return typing.cast(typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]], result)
 
     def ExpRouter(
@@ -68,4 +92,4 @@ class LlmStreamParser:
         result = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="stream")
         return typing.cast(stream_types.ExpRouterOutput, result)
 
-    
+    

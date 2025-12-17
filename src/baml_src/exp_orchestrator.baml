@@ -1,148 +1,430 @@
-class ExperimentWithFilename {
-  experiment map<string, string> @description("single experiment with key-value pairs")
-  filename string @description("filename for this specific experiment without extension")
-}
-
-class ExpOrchestratorOutput {
-  number_of_scans int @description("total number of scans to be performed")
-  experiments ExperimentWithFilename[] @description("list of experiments with filenames")
-  response string @description("natural language response summarizing the experiments")
-}
-
 function ExpOrchestrator(
   user_message: string, 
-  conversation_history: ConversationMessage[]?)
--> ExpOrchestratorOutput {
+) -> ExpOrchestratorOutput {
   client GroqRouter
   prompt #"
-You are a lab automation agent that converts natural language into structured JSON experiments with individual filenames.
+Lab automation agent: convert natural language to structured experiments with filenames and spatial offsets.
 
-EXPERIMENT PARSING RULES:
-1. Split on: commas, "and", "then", "next", "after"
-2. Parameters persist unless changed
-3. Infer parameter keys: "20x20"→scan_dimensions, "gaussian"→scan_type, "1kHz"→frequency, etc.
-4. Use snake_case; omit null values
-5. EXPAND RANGES: "10 to 30"→[10,20,30], "1000 to 1200Hz"→[1000,1050,1100,1150,1200]
-6. CREATE CARTESIAN PRODUCT: When multiple parameters have ranges, create separate experiments for ALL combinations
-   - Example: 3 areas × 5 frequencies = 15 experiments
-7. Each experiment object must have SINGLE values, not arrays
+PARSING:
+1. Split: commas, "and", "then", "next", "after"
+2. Persist params unless changed
+3. Infer keys:
+   - "20x20"→grid rows/cols
+   - "gaussian"/"sine"/"square"→waveform
+   - "1kHz"/"2000Hz"→frequency_hz
+   - "2.5V"→amplitude
+   - "10dB"→attenuation
+   - "100us"/"5ms"→duration/pulse_width
+   - Any signal param→add to signal map
+4. EXPAND ranges: "10 to 30"→[10,20,30], "1000-1200Hz"→[1000,1050,1100,1150,1200]
+5. CARTESIAN PRODUCT: multiple ranges = all combinations
+66. Each experiment = single values, NOT arrays
+7. IDs: exp_1, exp_2, exp_3...
 
-FILENAME GENERATION RULES (Applied to EACH experiment):
-- Format: {pulse_mode}_{key_parameters_with_values}
-- Use underscores to separate components
-- Include ONLY the specific parameter values for THIS experiment
-- Prioritize the most distinctive experimental parameters
-- Keep total length under 50 characters
-- Use standard abbreviations (amp=amplitude, freq=frequency, atten=attenuation, etc.)
-- For scan dimensions, use format: {xl}x{yl} (e.g., 20x20)
-- DON'T include "scan" in filename
-- Each filename must be UNIQUE and reflect the specific parameter combination
+RELATIVE OFFSET CALCULATION:
+- ALL experiments default to: RelativeOffset(0, 0, 1) - z=1mm liftoff default
+- NO automatic x-increment or y-increment between experiments
+- User MUST explicitly specify spatial relationships
+
+SPATIAL PARSING:
+- "Xcm apart on X axis" / "Xmm apart on X axis" / "X axis spacing Xcm": increment x by X between experiments
+  - "2 experiments 2cm apart on X axis": exp_1 (0,0,1), exp_2 (20,0,1)
+  - "3 scans 30mm X axis spacing": exp_1 (0,0,1), exp_2 (30,0,1), exp_3 (60,0,1)
+- "Xcm apart on Y axis" / "Xmm apart on Y axis" / "Y axis spacing Xcm": increment y by X between experiments
+  - "2 experiments 15mm apart on Y axis": exp_1 (0,0,1), exp_2 (0,15,1)
+  - "3 scans 10mm Y axis spacing": exp_1 (0,0,1), exp_2 (0,10,1), exp_3 (0,20,1)
+- "liftoff X" / "lift off Xmm" / "Z height X": set z value for that experiment
+  - "experiment 1 and liftoff 2 is 3mm": exp_1 (0,0,1), exp_2 (0,0,3)
+  - "first scan liftoff 2mm, second liftoff 5mm": exp_1 (0,0,2), exp_2 (0,0,5)
+- "at position (x,y,z)" / "offset (x,y,z)": use explicit coordinates
+  - "scan at (10, 20, 2)": exp (10, 20, 2)
+- "move X left/right" / "shift Y up/down": add to previous x/y
+  - After exp at (0,0,1), "move 5mm right": next exp at (5,0,1)
+
+OFFSET PRIORITY (highest to lowest):
+1. Explicit coordinates: "at position (x,y,z)"
+2. Axis-specific spacing: "Xcm apart on X/Y axis" → increment specified axis by X
+3. Liftoff instruction: affects only z value
+4. Default: RelativeOffset(0, 0, 1) for ALL experiments
+
+IMPORTANT:
+- If user says "apart" or "spacing" WITHOUT specifying X axis or Y axis → return error message
+- Error message: "Please specify axis for spacing (e.g., '2cm apart on X axis' or '15mm apart on Y axis')"
+- All experiments at same location (0,0,1) unless user explicitly specifies otherwise
+
+SIGNAL MAP:
+- Flexible key-value pairs
+- Common keys: waveform, frequency_hz, amplitude, attenuation, pulse_width, duty_cycle, phase
+- Add ANY signal params mentioned
+
+FILENAMES:
+- Format: {waveform}_{rows}x{cols}_{key_signal_params}
+- Include most distinctive signal params (freq, amp, atten)
+- Max 50 chars, unique per experiment
+- Example: gaussian_20x20_freq1000_amp2.5V
 
 EXAMPLES:
 
-Input: "scan 10x10 and 20x20 gaussian at 1kHz and 2kHz"
-Output:
-{
-  "number_of_scans": 4,
-  "experiments": [
-    {
-      "experiment": {"scan_dimensions": "10x10", "scan_type": "gaussian", "frequency": "1000Hz"},
-      "filename": "gaussian_10x10_freq1000"
-    },
-    {
-      "experiment": {"scan_dimensions": "10x10", "scan_type": "gaussian", "frequency": "2000Hz"},
-      "filename": "gaussian_10x10_freq2000"
-    },
-    {
-      "experiment": {"scan_dimensions": "20x20", "scan_type": "gaussian", "frequency": "1000Hz"},
-      "filename": "gaussian_20x20_freq1000"
-    },
-    {
-      "experiment": {"scan_dimensions": "20x20", "scan_type": "gaussian", "frequency": "2000Hz"},
-      "filename": "gaussian_20x20_freq2000"
-    }
-  ],
-  "response": "Created 4 gaussian scan experiments with dimensions 10x10 and 20x20 at frequencies 1kHz and 2kHz."
-}
+"scan 10x10 gaussian at 1kHz and 20x20 at 2kHz"
+→ 2 experiments:
+- exp_1: grid 10x10, signal {waveform: gaussian, frequency_hz: 1000}, offset (0,0,1), filename "gaussian_10x10_freq1000"
+- exp_2: grid 20x20, signal {waveform: gaussian, frequency_hz: 2000}, offset (0,0,1), filename "gaussian_20x20_freq2000"
 
-Input: "gaussian 50x50 at 5kHz amplitude 2.1V"
-Output:
-{
-  "number_of_scans": 1,
-  "experiments": [
-    {
-      "experiment": {"scan_type": "gaussian", "scan_dimensions": "50x50", "frequency": "5000Hz", "amplitude": "2.1V"},
-      "filename": "gaussian_50x50_freq5000_amp2.1V"
-    }
-  ],
-  "response": "Created 1 gaussian scan experiment at 50x50, 5kHz, 2.1V amplitude."
-}
+"do 2 experiments 2cm apart on X axis: sine 50x50 at 5kHz and gaussian 30x30 at 3kHz"
+→ 2 experiments:
+- exp_1: grid 50x50, signal {waveform: sine, frequency_hz: 5000}, offset (0,0,1), filename "sine_50x50_freq5000"
+- exp_2: grid 30x30, signal {waveform: gaussian, frequency_hz: 3000}, offset (20,0,1), filename "gaussian_30x30_freq3000"
 
-{% if conversation_history %}
-Recent conversation context:
-<conversation_history>
-{% for message in conversation_history %}
-{{ message.role }}: {{ message.content }}
-{% endfor %}
-</conversation_history>
-{% endif %}
+"experiment 1 and liftoff 2 is 3mm: gaussian 20x20 1kHz and sine 20x20 2kHz"
+→ 2 experiments:
+- exp_1: grid 20x20, signal {waveform: gaussian, frequency_hz: 1000}, offset (0,0,1), filename "gaussian_20x20_freq1000"
+- exp_2: grid 20x20, signal {waveform: sine, frequency_hz: 2000}, offset (0,0,3), filename "sine_20x20_freq2000"
 
-<user_message>
+"3 scans 15mm spacing on Y axis, liftoffs 1mm, 2mm, 3mm: sine 10x10 at 1kHz"
+→ 3 experiments:
+- exp_1: grid 10x10, signal {waveform: sine, frequency_hz: 1000}, offset (0,0,1), filename "sine_10x10_freq1000"
+- exp_2: grid 10x10, signal {waveform: sine, frequency_hz: 1000}, offset (0,15,2), filename "sine_10x10_freq1000_2"
+- exp_3: grid 10x10, signal {waveform: sine, frequency_hz: 1000}, offset (0,30,3), filename "sine_10x10_freq1000_3"
+
+"2 scans 10mm apart: gaussian 15x15 at 2kHz"
+→ ERROR: "Please specify axis for spacing (e.g., '10mm apart on X axis' or '10mm apart on Y axis')"
+
+<input>
 {{ user_message }}
-</user_message>
+</input>
 
 {{ ctx.output_format }}
 "#
 }
 
-test TestOrchestrator {
+// Basic single experiment tests
+test TestBasicSingleExperiment {
   functions [ExpOrchestrator]
   args {
-    user_message #"
-# EXPERIMENTAL PLAN: VAE Data Collection for Early Corrosion Detection
+    user_message "scan 10x10 gaussian at 1kHz"
+  }
+}
 
-## GOAL
-Acquire a comprehensive dataset of Pulsed Eddy Current (PEC) signals from both pristine and early-stage corroded Al2024 samples to train and validate a Variational Autoencoder (VAE) for anomaly detection.
+test TestSingleExperimentWithMultipleParams {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 sine at 5kHz amplitude 3V attenuation 15dB"
+  }
+}
 
-## SAMPLES
-- **Pristine Al2024:** 10 samples (100mm x 100mm x 5mm, typical aerospace alloy thickness). These will serve as the "healthy" baseline.
-- **Early-Stage Corroded Al2024:** 20 samples (100mm x 100mm x 5mm). These samples will have artificially introduced, controlled corrosion defects of varying severities and depths (e.g., 5%, 10%, 15% material loss localized to distinct areas, depth 0.1mm - 0.5mm) to represent early-stage degradation. Corroded areas should be well-characterized prior to PEC scanning using gravimetric analysis or profilometry.
+// Multiple experiments without spatial offset
+test TestMultipleExperimentsBasic {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 10x10 gaussian at 1kHz amplitude 2V and 20x20 at 2kHz"
+  }
+}
 
-## SCAN APPROACH
-- **Constant Parameters:** All scans will use a Gaussian waveform with `Gauss amp = 2.1V`, `Gauss freq = 1000 Hz`, `Gauss Nor.Band = 0.5`, `Gauss atten = 6 dB`. Lift-off will be fixed at 1.0 mm for all scans.
-- **Varying Parameters:** To introduce controlled variability representative of real-world scenarios, a subset of healthy and corroded samples will be scanned with slight variations in:
-    - **StepX/StepY:** 1mm, 2mm (to assess resolution impact)
-    - **Speed:** 1 mm/s, 2 mm/s (to assess scan speed impact on signal quality/noise)
-    - **Probe Orientation:** Introduce 0, 90, 180, 270 degree rotations for 2 healthy and 4 corroded samples to simulate deployment variability. This simulates real-world usage conditions where precise probe alignment might not always be achievable.
+test TestMultipleExperimentsAllAtOrigin {
+  functions [ExpOrchestrator]
+  args {
+    user_message "gaussian 20x20 at 1kHz and sine 20x20 at 2kHz and square 30x30 at 3kHz"
+  }
+}
 
-## PROCEDURE
-1.  **Baseline Healthy Data Collection:**
-    *   Place a pristine Al2024 sample on the scanning platform.
-    *   Set `Lift-off` to 1.0 mm.
-    *   Execute a full 100mm x 100mm scan at `StepX = 1mm`, `StepY = 1mm`, `Speed = 2 mm/s`.
-    *   Repeat for all 10 pristine samples, varying `StepX/StepY` and `Speed` as specified in "Varying Parameters" for designated samples.
-    *   For the 2 designated samples, re-scan with probe rotations (0, 90, 180, 270 degrees).
-2.  **Early-Stage Corroded Data Collection:**
-    *   Place a corroded Al2024 sample on the scanning platform, ensuring known corroded areas are within the scan region.
-    *   Set `Lift-off` to 1.0 mm.
-    *   Execute a full 100mm x 100mm scan at `StepX = 1mm`, `StepY = 1mm`, `Speed = 2 mm/s`.
-    *   Repeat for all 20 corroded samples, varying `StepX/StepY` and `Speed` as specified in "Varying Parameters" for designated samples.
-    *   For the 4 designated samples, re-scan with probe rotations (0, 90, 180, 270 degrees).
-3.  **Data Labeling and Annotation:**
-    *   For each corroded sample scan, precisely label the spatial coordinates (X, Y) corresponding to the known corroded areas, along with their estimated severity (e.g., % material loss) and depth. This ground truth is crucial for training and validation.
+test TestMultipleExperimentsAllAtOrigin2 {
+  functions [ExpOrchestrator]
+  args {
+    user_message "gaussian 20x20 from 1000Hz to 1200Hz"
+  }
+}
 
-## WATCH FOR
--   **Lift-off consistency:** Manual lift-off verification before each scan, especially for different samples, to ensure the 1.0mm setting is maintained.
--   **Sensor Drift/Noise:** Periodically scan a reference pristine sample (e.g., every 5 samples) to monitor for sensor drift or increased noise floor. Re-run scans if significant deviation from initial reference is observed.
--   **Sample Placement:** Ensure consistent sample orientation and placement to enable accurate defect mapping.
--   **Robotic Arm Stability:** Monitor for any vibrations or jerky movements that could introduce noise into the signal.
+// X-axis spacing tests
+test TestXAxisSpacingCentimeters {
+  functions [ExpOrchestrator]
+  args {
+    user_message "do 2 experiments 2cm apart on X axis: sine 50x50 at 5kHz and gaussian 30x30 at 3kHz"
+  }
+}
 
-## SUCCESS CHECK
--   A minimum of 500 individual PEC time-domain signals (500 samples each) acquired per 100x100mm scan area (~10,000 data points per scan).
--   Consistent signal characteristics for healthy samples, with observable and distinct deviations in corroded areas.
--   Accurate spatial mapping of known corrosion defects within the acquired data for at least 80% of corroded samples.
--   Variation in scanning parameters (StepX/Y, Speed, Probe Orientation) introduces slight but manageable signal variance, allowing the VAE to learn robust feature representations.
-    "#
+test TestXAxisSpacingMillimeters {
+  functions [ExpOrchestrator]
+  args {
+    user_message "3 scans 30mm apart on X axis: gaussian 15x15 at 2kHz"
+  }
+}
+
+test TestXAxisSpacingAlternativeSyntax {
+  functions [ExpOrchestrator]
+  args {
+    user_message "2 experiments with X axis spacing 25mm: sine 10x10 at 1kHz and square 10x10 at 1.5kHz"
+  }
+}
+
+// Y-axis spacing tests
+test TestYAxisSpacingMillimeters {
+  functions [ExpOrchestrator]
+  args {
+    user_message "3 scans 15mm spacing on Y axis: sine 10x10 at 1kHz"
+  }
+}
+
+test TestYAxisSpacingCentimeters {
+  functions [ExpOrchestrator]
+  args {
+    user_message "2 experiments 3cm apart on Y axis: gaussian 20x20 at 4kHz and sine 20x20 at 5kHz"
+  }
+}
+
+// Liftoff tests
+test TestLiftoffSingleValue {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 gaussian at 2kHz with liftoff 5mm"
+  }
+}
+
+test TestLiftoffMultipleExperiments {
+  functions [ExpOrchestrator]
+  args {
+    user_message "experiment 1 and liftoff 2 is 3mm: gaussian 20x20 1kHz and sine 20x20 2kHz"
+  }
+}
+
+test TestLiftoffWithSpacing {
+  functions [ExpOrchestrator]
+  args {
+    user_message "3 scans 15mm spacing on Y axis, liftoffs 1mm, 2mm, 3mm: sine 10x10 at 1kHz"
+  }
+}
+
+test TestIndividualLiftoffs {
+  functions [ExpOrchestrator]
+  args {
+    user_message "first scan liftoff 2mm, second liftoff 5mm: gaussian 15x15 at 3kHz and square 15x15 at 3kHz"
+  }
+}
+
+// Explicit position tests
+test TestExplicitPosition {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan at position (10, 20, 2): gaussian 20x20 at 2kHz"
+  }
+}
+
+test TestMultipleExplicitPositions {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan at (0,0,1) gaussian 10x10 1kHz, at (15,0,2) sine 10x10 2kHz, at (30,0,3) square 10x10 3kHz"
+  }
+}
+
+test TestExplicitOffsetSyntax {
+  functions [ExpOrchestrator]
+  args {
+    user_message "gaussian 20x20 at 2kHz with offset (5, 10, 1.5)"
+  }
+}
+
+// Range expansion tests
+test TestFrequencyRange {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 10x10 gaussian at 1000-1200Hz"
+  }
+}
+
+test TestSimpleRange {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 15x15 sine at frequencies 1 to 3 kHz"
+  }
+}
+
+test TestAmplitudeRange {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 gaussian at 2kHz amplitude 1V to 3V"
+  }
+}
+
+// Cartesian product tests
+test TestCartesianProductTwoRanges {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 10x10 gaussian at 1-2kHz amplitude 1-2V"
+  }
+}
+
+test TestCartesianProductThreeRanges {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 10x10 sine frequency 1-2kHz amplitude 1-2V attenuation 5-10dB"
+  }
+}
+
+// Signal parameter variety tests
+test TestPulseWidthParameter {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 15x15 square at 10kHz pulse width 100us"
+  }
+}
+
+test TestDutyCycleParameter {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 square at 5kHz duty cycle 25%"
+  }
+}
+
+test TestPhaseParameter {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 10x10 sine at 1kHz phase 90 degrees"
+  }
+}
+
+test TestMultipleSignalParams {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 gaussian at 3kHz amplitude 2.5V attenuation 12dB pulse width 50us duty cycle 50%"
+  }
+}
+
+// Error case tests
+test TestSpacingWithoutAxisError {
+  functions [ExpOrchestrator]
+  args {
+    user_message "2 scans 10mm apart: gaussian 15x15 at 2kHz"
+  }
+}
+
+test TestSpacingWithoutAxisError2 {
+  functions [ExpOrchestrator]
+  args {
+    user_message "3 experiments with 5cm spacing: sine 10x10 at 1kHz"
+  }
+}
+
+// Complex combination tests
+test TestComplexXSpacingWithRanges {
+  functions [ExpOrchestrator]
+  args {
+    user_message "2 scans 20mm apart on X axis: gaussian 10x10 at 1-2kHz"
+  }
+}
+
+test TestComplexYSpacingWithMultipleParams {
+  functions [ExpOrchestrator]
+  args {
+    user_message "3 experiments 10mm spacing on Y axis: sine 20x20 at 2kHz amplitude 3V attenuation 10dB"
+  }
+}
+
+test TestComplexMixedSpacingAndLiftoff {
+  functions [ExpOrchestrator]
+  args {
+    user_message "2 scans 15mm apart on X axis, first liftoff 1mm second liftoff 3mm: gaussian 25x25 at 4kHz amplitude 2V"
+  }
+}
+
+// Persistence tests
+test TestParameterPersistence {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 10x10 gaussian at 1kHz amplitude 2V, then 20x20 at 2kHz, then 30x30"
+  }
+}
+
+test TestGridPersistence {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 15x15 gaussian at 1kHz, then sine at 2kHz, then square at 3kHz"
+  }
+}
+
+// Waveform variety tests
+test TestSquareWaveform {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 square at 10kHz"
+  }
+}
+
+test TestMixedWaveforms {
+  functions [ExpOrchestrator]
+  args {
+    user_message "gaussian 10x10 at 1kHz, sine 10x10 at 2kHz, square 10x10 at 3kHz"
+  }
+}
+
+// Natural language variations
+test TestNaturalLanguageVariation1 {
+  functions [ExpOrchestrator]
+  args {
+    user_message "do a scan with 20x20 grid using gaussian waveform at frequency 2000Hz"
+  }
+}
+
+test TestNaturalLanguageVariation2 {
+  functions [ExpOrchestrator]
+  args {
+    user_message "run experiment: sine wave, 15 by 15 grid, 3.5 kHz, 2.8 volts"
+  }
+}
+
+test TestNaturalLanguageVariation3 {
+  functions [ExpOrchestrator]
+  args {
+    user_message "I need to scan a 10x10 area with sine at 1kHz then move 2cm right on X axis and scan 10x10 with gaussian at 1kHz"
+  }
+}
+
+// Edge cases
+test TestSinglePointGrid {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 1x1 gaussian at 5kHz"
+  }
+}
+
+test TestLargeGrid {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 100x100 sine at 10kHz"
+  }
+}
+
+test TestHighFrequency {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 gaussian at 100kHz"
+  }
+}
+
+test TestLowFrequency {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 sine at 100Hz"
+  }
+}
+
+test TestZeroLiftoff {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 10x10 gaussian at 1kHz liftoff 0mm"
+  }
+}
+
+// Duration/time-based parameters
+test TestDurationParameter {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 15x15 gaussian at 2kHz duration 5ms"
+  }
+}
+
+test TestMultipleTimeParams {
+  functions [ExpOrchestrator]
+  args {
+    user_message "scan 20x20 square at 5kHz pulse width 200us duration 10ms"
   }
 }
 

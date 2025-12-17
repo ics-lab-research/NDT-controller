@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (13)
+# Generated classes (17)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -36,16 +36,23 @@ class ConversationMessage(BaseModel):
 
 class ExpOrchestratorOutput(BaseModel):
     number_of_scans: typing.Optional[int] = None
-    experiments: typing.List["ExperimentWithFilename"]
-    response: typing.Optional[str] = None
+    experiments: typing.List["Experiment"]
 
 class ExpRouterOutput(BaseModel):
     action: typing.Optional[types.ExpAction] = None
     response: typing.Optional[str] = None
+    reformatted_message: typing.Optional[str] = None
 
-class ExperimentWithFilename(BaseModel):
-    experiment: typing.Dict[str, str]
+class Experiment(BaseModel):
+    id: typing.Optional[str] = None
+    grid: typing.Optional["Grid"] = None
+    signal: typing.List["SignalParameter"]
+    relative_offset_mm: typing.Optional["RelativeOffset"] = None
     filename: typing.Optional[str] = None
+
+class Grid(BaseModel):
+    rows: typing.Optional[int] = None
+    cols: typing.Optional[int] = None
 
 class HandleSaveDialogTool(BaseModel):
     tool_name: typing.Optional[str] = None
@@ -55,6 +62,11 @@ class HandleSaveDialogTool(BaseModel):
 class PressButtonTool(BaseModel):
     tool_name: typing.Optional[str] = None
     button_name: typing.Optional[str] = None
+
+class RelativeOffset(BaseModel):
+    x: typing.Optional[int] = None
+    y: typing.Optional[int] = None
+    z: typing.Optional[int] = None
 
 class RunOpenViTool(BaseModel):
     tool_name: typing.Optional[str] = None
@@ -79,6 +91,14 @@ class SetNumericControlTool(BaseModel):
     tool_name: typing.Optional[str] = None
     control_name: typing.Optional[str] = None
     value: typing.Optional[float] = None
+
+class SignalParameter(BaseModel):
+    key: typing.Optional[str] = None
+    value: typing.Optional[str] = None
+
+class State(BaseModel):
+    current_position: typing.Optional["RelativeOffset"] = None
+    home_position: typing.Optional["RelativeOffset"] = None
 
 class ToolResult(BaseModel):
     name: typing.Optional[str] = None

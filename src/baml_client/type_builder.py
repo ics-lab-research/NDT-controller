@@ -20,7 +20,7 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["ConnectToViTool","ConversationMessage","ExpOrchestratorOutput","ExpRouterOutput","ExperimentWithFilename","HandleSaveDialogTool","PressButtonTool","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","ToolResult",]
+          ["ConnectToViTool","ConversationMessage","ExpOrchestratorOutput","ExpRouterOutput","Experiment","Grid","HandleSaveDialogTool","PressButtonTool","RelativeOffset","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","SignalParameter","State","ToolResult",]
         ), enums=set(
           ["ExpAction",]
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
@@ -35,7 +35,7 @@ class TypeBuilder(type_builder.TypeBuilder):
 
 
     # #########################################################################
-    # Generated classes 13
+    # Generated classes 17
     # #########################################################################
 
     @property
@@ -55,8 +55,12 @@ class TypeBuilder(type_builder.TypeBuilder):
         return ExpRouterOutputViewer(self)
 
     @property
-    def ExperimentWithFilename(self) -> "ExperimentWithFilenameViewer":
-        return ExperimentWithFilenameViewer(self)
+    def Experiment(self) -> "ExperimentViewer":
+        return ExperimentViewer(self)
+
+    @property
+    def Grid(self) -> "GridViewer":
+        return GridViewer(self)
 
     @property
     def HandleSaveDialogTool(self) -> "HandleSaveDialogToolViewer":
@@ -65,6 +69,10 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def PressButtonTool(self) -> "PressButtonToolViewer":
         return PressButtonToolViewer(self)
+
+    @property
+    def RelativeOffset(self) -> "RelativeOffsetViewer":
+        return RelativeOffsetViewer(self)
 
     @property
     def RunOpenViTool(self) -> "RunOpenViToolViewer":
@@ -85,6 +93,14 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def SetNumericControlTool(self) -> "SetNumericControlToolViewer":
         return SetNumericControlToolViewer(self)
+
+    @property
+    def SignalParameter(self) -> "SignalParameterViewer":
+        return SignalParameterViewer(self)
+
+    @property
+    def State(self) -> "StateViewer":
+        return StateViewer(self)
 
     @property
     def ToolResult(self) -> "ToolResultViewer":
@@ -148,7 +164,7 @@ class ExpActionValues:
 
 
 # #########################################################################
-# Generated classes 13
+# Generated classes 17
 # #########################################################################
 
 class ConnectToViToolAst:
@@ -241,7 +257,7 @@ class ExpOrchestratorOutputAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
         self._bldr = _tb.class_("ExpOrchestratorOutput")
-        self._properties: typing.Set[str] = set([  "number_of_scans",  "experiments",  "response",  ])
+        self._properties: typing.Set[str] = set([  "number_of_scans",  "experiments",  ])
         self._props = ExpOrchestratorOutputProperties(self._bldr, self._properties)
 
     def type(self) -> baml_py.FieldType:
@@ -277,10 +293,6 @@ class ExpOrchestratorOutputProperties:
     def experiments(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("experiments"))
     
-    @property
-    def response(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("response"))
-    
     
 
 
@@ -288,7 +300,7 @@ class ExpRouterOutputAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
         self._bldr = _tb.class_("ExpRouterOutput")
-        self._properties: typing.Set[str] = set([  "action",  "response",  ])
+        self._properties: typing.Set[str] = set([  "action",  "response",  "reformatted_message",  ])
         self._props = ExpRouterOutputProperties(self._bldr, self._properties)
 
     def type(self) -> baml_py.FieldType:
@@ -324,25 +336,29 @@ class ExpRouterOutputProperties:
     def response(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("response"))
     
+    @property
+    def reformatted_message(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("reformatted_message"))
+    
     
 
 
-class ExperimentWithFilenameAst:
+class ExperimentAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("ExperimentWithFilename")
-        self._properties: typing.Set[str] = set([  "experiment",  "filename",  ])
-        self._props = ExperimentWithFilenameProperties(self._bldr, self._properties)
+        self._bldr = _tb.class_("Experiment")
+        self._properties: typing.Set[str] = set([  "id",  "grid",  "signal",  "relative_offset_mm",  "filename",  ])
+        self._props = ExperimentProperties(self._bldr, self._properties)
 
     def type(self) -> baml_py.FieldType:
         return self._bldr.field()
 
     @property
-    def props(self) -> "ExperimentWithFilenameProperties":
+    def props(self) -> "ExperimentProperties":
         return self._props
 
 
-class ExperimentWithFilenameViewer(ExperimentWithFilenameAst):
+class ExperimentViewer(ExperimentAst):
     def __init__(self, tb: type_builder.TypeBuilder):
         super().__init__(tb)
 
@@ -352,7 +368,7 @@ class ExperimentWithFilenameViewer(ExperimentWithFilenameAst):
     
 
 
-class ExperimentWithFilenameProperties:
+class ExperimentProperties:
     def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
         self.__bldr = bldr
         self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
@@ -360,12 +376,67 @@ class ExperimentWithFilenameProperties:
     
     
     @property
-    def experiment(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("experiment"))
+    def id(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("id"))
+    
+    @property
+    def grid(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("grid"))
+    
+    @property
+    def signal(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("signal"))
+    
+    @property
+    def relative_offset_mm(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("relative_offset_mm"))
     
     @property
     def filename(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("filename"))
+    
+    
+
+
+class GridAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("Grid")
+        self._properties: typing.Set[str] = set([  "rows",  "cols",  ])
+        self._props = GridProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "GridProperties":
+        return self._props
+
+
+class GridViewer(GridAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class GridProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def rows(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("rows"))
+    
+    @property
+    def cols(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("cols"))
     
     
 
@@ -456,6 +527,53 @@ class PressButtonToolProperties:
     @property
     def button_name(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("button_name"))
+    
+    
+
+
+class RelativeOffsetAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("RelativeOffset")
+        self._properties: typing.Set[str] = set([  "x",  "y",  "z",  ])
+        self._props = RelativeOffsetProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "RelativeOffsetProperties":
+        return self._props
+
+
+class RelativeOffsetViewer(RelativeOffsetAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class RelativeOffsetProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def x(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("x"))
+    
+    @property
+    def y(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("y"))
+    
+    @property
+    def z(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("z"))
     
     
 
@@ -691,6 +809,92 @@ class SetNumericControlToolProperties:
     
 
 
+class SignalParameterAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("SignalParameter")
+        self._properties: typing.Set[str] = set([  "key",  "value",  ])
+        self._props = SignalParameterProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "SignalParameterProperties":
+        return self._props
+
+
+class SignalParameterViewer(SignalParameterAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class SignalParameterProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def key(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("key"))
+    
+    @property
+    def value(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("value"))
+    
+    
+
+
+class StateAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("State")
+        self._properties: typing.Set[str] = set([  "current_position",  "home_position",  ])
+        self._props = StateProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "StateProperties":
+        return self._props
+
+
+class StateViewer(StateAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class StateProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def current_position(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("current_position"))
+    
+    @property
+    def home_position(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("home_position"))
+    
+    
+
+
 class ToolResultAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
@@ -741,3 +945,4 @@ class ToolResultProperties:
     
     
 
+
