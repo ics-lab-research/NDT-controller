@@ -34,12 +34,20 @@ class Experiment {
   filename string
 }
 
+enum ScanStatus {
+  IDLE
+  IN_PROGRESS
+  COMPLETED
+  ERROR
+}
+
 class State {
   current_position RelativeOffset
   home_position RelativeOffset
+  
 }
 
-// Output models
+// ==================Output models===================
 class ExpRouterOutput {
   action ExpAction
   response string? @description("For ASK_CLARIFICATION only")

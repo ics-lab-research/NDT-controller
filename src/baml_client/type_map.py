@@ -31,6 +31,12 @@ type_map = {
     "types.Experiment": types.Experiment,
     "stream_types.Experiment": stream_types.Experiment,
 
+    "types.GetNumericIndicatorTool": types.GetNumericIndicatorTool,
+    "stream_types.GetNumericIndicatorTool": stream_types.GetNumericIndicatorTool,
+
+    "types.GetViStatusTool": types.GetViStatusTool,
+    "stream_types.GetViStatusTool": stream_types.GetViStatusTool,
+
     "types.Grid": types.Grid,
     "stream_types.Grid": stream_types.Grid,
 
@@ -64,10 +70,15 @@ type_map = {
     "types.State": types.State,
     "stream_types.State": stream_types.State,
 
+    "types.StopViTool": types.StopViTool,
+    "stream_types.StopViTool": stream_types.StopViTool,
+
     "types.ToolResult": types.ToolResult,
     "stream_types.ToolResult": stream_types.ToolResult,
 
 
     "types.ExpAction": types.ExpAction,
+
+    "types.ScanStatus": types.ScanStatus,
 
 }

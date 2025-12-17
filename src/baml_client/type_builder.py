@@ -20,22 +20,26 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["ConnectToViTool","ConversationMessage","ExpOrchestratorOutput","ExpRouterOutput","Experiment","Grid","HandleSaveDialogTool","PressButtonTool","RelativeOffset","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","SignalParameter","State","ToolResult",]
+          ["ConnectToViTool","ConversationMessage","ExpOrchestratorOutput","ExpRouterOutput","Experiment","GetNumericIndicatorTool","GetViStatusTool","Grid","HandleSaveDialogTool","PressButtonTool","RelativeOffset","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","SignalParameter","State","StopViTool","ToolResult",]
         ), enums=set(
-          ["ExpAction",]
+          ["ExpAction","ScanStatus",]
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
 
     # #########################################################################
-    # Generated enums 1
+    # Generated enums 2
     # #########################################################################
 
     @property
     def ExpAction(self) -> "ExpActionViewer":
         return ExpActionViewer(self)
 
+    @property
+    def ScanStatus(self) -> "ScanStatusViewer":
+        return ScanStatusViewer(self)
+
 
     # #########################################################################
-    # Generated classes 17
+    # Generated classes 20
     # #########################################################################
 
     @property
@@ -57,6 +61,14 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def Experiment(self) -> "ExperimentViewer":
         return ExperimentViewer(self)
+
+    @property
+    def GetNumericIndicatorTool(self) -> "GetNumericIndicatorToolViewer":
+        return GetNumericIndicatorToolViewer(self)
+
+    @property
+    def GetViStatusTool(self) -> "GetViStatusToolViewer":
+        return GetViStatusToolViewer(self)
 
     @property
     def Grid(self) -> "GridViewer":
@@ -103,13 +115,17 @@ class TypeBuilder(type_builder.TypeBuilder):
         return StateViewer(self)
 
     @property
+    def StopViTool(self) -> "StopViToolViewer":
+        return StopViToolViewer(self)
+
+    @property
     def ToolResult(self) -> "ToolResultViewer":
         return ToolResultViewer(self)
 
 
 
 # #########################################################################
-# Generated enums 1
+# Generated enums 2
 # #########################################################################
 
 class ExpActionAst:
@@ -162,9 +178,59 @@ class ExpActionValues:
     
 
 
+class ScanStatusAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.enum("ScanStatus")
+        self._values: typing.Set[str] = set([  "IDLE",  "IN_PROGRESS",  "COMPLETED",  "ERROR",  ])
+        self._vals = ScanStatusValues(self._bldr, self._values)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def values(self) -> "ScanStatusValues":
+        return self._vals
+
+
+class ScanStatusViewer(ScanStatusAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_values(self) -> typing.List[typing.Tuple[str, type_builder.EnumValueViewer]]:
+        return [(name, type_builder.EnumValueViewer(self._bldr.value(name))) for name in self._values]
+    
+
+class ScanStatusValues:
+    def __init__(self, enum_bldr: baml_py.EnumBuilder, values: typing.Set[str]):
+        self.__bldr = enum_bldr
+        self.__values = values # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def IDLE(self) -> type_builder.EnumValueViewer:
+        return type_builder.EnumValueViewer(self.__bldr.value("IDLE"))
+    
+    @property
+    def IN_PROGRESS(self) -> type_builder.EnumValueViewer:
+        return type_builder.EnumValueViewer(self.__bldr.value("IN_PROGRESS"))
+    
+    @property
+    def COMPLETED(self) -> type_builder.EnumValueViewer:
+        return type_builder.EnumValueViewer(self.__bldr.value("COMPLETED"))
+    
+    @property
+    def ERROR(self) -> type_builder.EnumValueViewer:
+        return type_builder.EnumValueViewer(self.__bldr.value("ERROR"))
+    
+    
+
+
 
 # #########################################################################
-# Generated classes 17
+# Generated classes 20
 # #########################################################################
 
 class ConnectToViToolAst:
@@ -394,6 +460,88 @@ class ExperimentProperties:
     @property
     def filename(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("filename"))
+    
+    
+
+
+class GetNumericIndicatorToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("GetNumericIndicatorTool")
+        self._properties: typing.Set[str] = set([  "tool_name",  "indicator_name",  ])
+        self._props = GetNumericIndicatorToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "GetNumericIndicatorToolProperties":
+        return self._props
+
+
+class GetNumericIndicatorToolViewer(GetNumericIndicatorToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class GetNumericIndicatorToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def tool_name(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("tool_name"))
+    
+    @property
+    def indicator_name(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("indicator_name"))
+    
+    
+
+
+class GetViStatusToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("GetViStatusTool")
+        self._properties: typing.Set[str] = set([  "tool_name",  ])
+        self._props = GetViStatusToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "GetViStatusToolProperties":
+        return self._props
+
+
+class GetViStatusToolViewer(GetViStatusToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class GetViStatusToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def tool_name(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("tool_name"))
     
     
 
@@ -891,6 +1039,49 @@ class StateProperties:
     @property
     def home_position(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("home_position"))
+    
+    
+
+
+class StopViToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("StopViTool")
+        self._properties: typing.Set[str] = set([  "tool_name",  "close_labview",  ])
+        self._props = StopViToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "StopViToolProperties":
+        return self._props
+
+
+class StopViToolViewer(StopViToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class StopViToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def tool_name(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("tool_name"))
+    
+    @property
+    def close_labview(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("close_labview"))
     
     
 

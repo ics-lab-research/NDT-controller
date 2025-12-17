@@ -27,7 +27,7 @@ def tool_run_open_vi(run_vi: bool = True) -> ToolResult:
 
 def tool_connect_to_vi(vi_path: str | None = None) -> ToolResult:
     """
-    Connect to an existing LabVIEW VI that is already open.
+    Connect to an existing LabVIEW VI and also opens the front panel if not already open.
     """
     if controller.connect_to_existing_vi(vi_path):
         return ToolResult(

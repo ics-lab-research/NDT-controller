@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (17)
+# Generated classes (20)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -49,6 +49,13 @@ class Experiment(BaseModel):
     signal: typing.List["SignalParameter"]
     relative_offset_mm: typing.Optional["RelativeOffset"] = None
     filename: typing.Optional[str] = None
+
+class GetNumericIndicatorTool(BaseModel):
+    tool_name: typing.Optional[str] = None
+    indicator_name: typing.Optional[str] = None
+
+class GetViStatusTool(BaseModel):
+    tool_name: typing.Optional[str] = None
 
 class Grid(BaseModel):
     rows: typing.Optional[int] = None
@@ -99,6 +106,10 @@ class SignalParameter(BaseModel):
 class State(BaseModel):
     current_position: typing.Optional["RelativeOffset"] = None
     home_position: typing.Optional["RelativeOffset"] = None
+
+class StopViTool(BaseModel):
+    tool_name: typing.Optional[str] = None
+    close_labview: typing.Optional[bool] = None
 
 class ToolResult(BaseModel):
     name: typing.Optional[str] = None

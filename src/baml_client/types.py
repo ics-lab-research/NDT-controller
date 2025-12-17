@@ -37,7 +37,7 @@ def get_checks(checks: typing.Dict[CheckName, Check]) -> typing.List[Check]:
 def all_succeeded(checks: typing.Dict[CheckName, Check]) -> bool:
     return all(check.status == "succeeded" for check in get_checks(checks))
 # #########################################################################
-# Generated enums (1)
+# Generated enums (2)
 # #########################################################################
 
 class ExpAction(str, Enum):
@@ -46,8 +46,14 @@ class ExpAction(str, Enum):
     MULTIPLE_SCAN = "MULTIPLE_SCAN"
     ASK_CLARIFICATION = "ASK_CLARIFICATION"
 
+class ScanStatus(str, Enum):
+    IDLE = "IDLE"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    ERROR = "ERROR"
+
 # #########################################################################
-# Generated classes (17)
+# Generated classes (20)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -73,6 +79,13 @@ class Experiment(BaseModel):
     signal: typing.List["SignalParameter"]
     relative_offset_mm: "RelativeOffset"
     filename: str
+
+class GetNumericIndicatorTool(BaseModel):
+    tool_name: typing_extensions.Literal['get_numeric_indicator']
+    indicator_name: str
+
+class GetViStatusTool(BaseModel):
+    tool_name: typing_extensions.Literal['get_vi_status']
 
 class Grid(BaseModel):
     rows: int
@@ -123,6 +136,10 @@ class SignalParameter(BaseModel):
 class State(BaseModel):
     current_position: "RelativeOffset"
     home_position: "RelativeOffset"
+
+class StopViTool(BaseModel):
+    tool_name: typing_extensions.Literal['stop_vi']
+    close_labview: bool
 
 class ToolResult(BaseModel):
     name: str
