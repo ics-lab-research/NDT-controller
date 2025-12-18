@@ -20,13 +20,13 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["ConnectToViTool","ConversationMessage","ExpOrchestratorOutput","ExpRouterOutput","Experiment","GetNumericIndicatorTool","GetViStatusTool","Grid","HandleSaveDialogTool","PressButtonTool","RelativeOffset","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","SignalParameter","State","StopViTool","ToolResult",]
+          ["ConnectToViTool","ConversationMessage","Error","ExpOrchestratorOutput","ExpRouterOutput","Experiment","GetNumericIndicatorTool","GetViStatusTool","Grid","HandleSaveDialogTool","PressButtonTool","RelativeOffset","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","SignalParameter","State","StopViTool","ToolResult","WaitForOperationCompleteTool",]
         ), enums=set(
-          ["ExpAction","ScanStatus",]
+          ["ExpAction","ExpType","ScanStatus",]
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
 
     # #########################################################################
-    # Generated enums 2
+    # Generated enums 3
     # #########################################################################
 
     @property
@@ -34,12 +34,16 @@ class TypeBuilder(type_builder.TypeBuilder):
         return ExpActionViewer(self)
 
     @property
+    def ExpType(self) -> "ExpTypeViewer":
+        return ExpTypeViewer(self)
+
+    @property
     def ScanStatus(self) -> "ScanStatusViewer":
         return ScanStatusViewer(self)
 
 
     # #########################################################################
-    # Generated classes 20
+    # Generated classes 22
     # #########################################################################
 
     @property
@@ -49,6 +53,10 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def ConversationMessage(self) -> "ConversationMessageViewer":
         return ConversationMessageViewer(self)
+
+    @property
+    def Error(self) -> "ErrorViewer":
+        return ErrorViewer(self)
 
     @property
     def ExpOrchestratorOutput(self) -> "ExpOrchestratorOutputViewer":
@@ -122,10 +130,14 @@ class TypeBuilder(type_builder.TypeBuilder):
     def ToolResult(self) -> "ToolResultViewer":
         return ToolResultViewer(self)
 
+    @property
+    def WaitForOperationCompleteTool(self) -> "WaitForOperationCompleteToolViewer":
+        return WaitForOperationCompleteToolViewer(self)
+
 
 
 # #########################################################################
-# Generated enums 2
+# Generated enums 3
 # #########################################################################
 
 class ExpActionAst:
@@ -174,6 +186,48 @@ class ExpActionValues:
     @property
     def ASK_CLARIFICATION(self) -> type_builder.EnumValueViewer:
         return type_builder.EnumValueViewer(self.__bldr.value("ASK_CLARIFICATION"))
+    
+    
+
+
+class ExpTypeAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.enum("ExpType")
+        self._values: typing.Set[str] = set([  "MOVEMENT",  "SCAN",  ])
+        self._vals = ExpTypeValues(self._bldr, self._values)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def values(self) -> "ExpTypeValues":
+        return self._vals
+
+
+class ExpTypeViewer(ExpTypeAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_values(self) -> typing.List[typing.Tuple[str, type_builder.EnumValueViewer]]:
+        return [(name, type_builder.EnumValueViewer(self._bldr.value(name))) for name in self._values]
+    
+
+class ExpTypeValues:
+    def __init__(self, enum_bldr: baml_py.EnumBuilder, values: typing.Set[str]):
+        self.__bldr = enum_bldr
+        self.__values = values # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def MOVEMENT(self) -> type_builder.EnumValueViewer:
+        return type_builder.EnumValueViewer(self.__bldr.value("MOVEMENT"))
+    
+    @property
+    def SCAN(self) -> type_builder.EnumValueViewer:
+        return type_builder.EnumValueViewer(self.__bldr.value("SCAN"))
     
     
 
@@ -230,7 +284,7 @@ class ScanStatusValues:
 
 
 # #########################################################################
-# Generated classes 20
+# Generated classes 22
 # #########################################################################
 
 class ConnectToViToolAst:
@@ -315,6 +369,45 @@ class ConversationMessageProperties:
     @property
     def content(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("content"))
+    
+    
+
+
+class ErrorAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("Error")
+        self._properties: typing.Set[str] = set([  "error",  ])
+        self._props = ErrorProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "ErrorProperties":
+        return self._props
+
+
+class ErrorViewer(ErrorAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class ErrorProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def error(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("error"))
     
     
 
@@ -1133,6 +1226,49 @@ class ToolResultProperties:
     @property
     def error(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("error"))
+    
+    
+
+
+class WaitForOperationCompleteToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("WaitForOperationCompleteTool")
+        self._properties: typing.Set[str] = set([  "tool_name",  "exp_type",  ])
+        self._props = WaitForOperationCompleteToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "WaitForOperationCompleteToolProperties":
+        return self._props
+
+
+class WaitForOperationCompleteToolViewer(WaitForOperationCompleteToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class WaitForOperationCompleteToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def tool_name(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("tool_name"))
+    
+    @property
+    def exp_type(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("exp_type"))
     
     
 

@@ -1,100 +1,172 @@
 function ExpOrchestrator(
   user_message: string, 
-) -> ExpOrchestratorOutput {
+) -> ExpOrchestratorOutput | Error {
   client GroqRouter
   prompt #"
-Lab automation agent: convert natural language to structured experiments with filenames and spatial offsets.
+You are a lab automation parser that converts natural language experiment descriptions into structured JSON configurations. Your task is to extract spatial coordinates, grid dimensions, and signal parameters from experiment descriptions.
 
-PARSING:
-1. Split: commas, "and", "then", "next", "after"
-2. Persist params unless changed
-3. Infer keys:
-   - "20x20"→grid rows/cols
-   - "gaussian"/"sine"/"square"→waveform
-   - "1kHz"/"2000Hz"→frequency_hz
-   - "2.5V"→amplitude
-   - "10dB"→attenuation
-   - "100us"/"5ms"→duration/pulse_width
-   - Any signal param→add to signal map
-4. EXPAND ranges: "10 to 30"→[10,20,30], "1000-1200Hz"→[1000,1050,1100,1150,1200]
-5. CARTESIAN PRODUCT: multiple ranges = all combinations
-66. Each experiment = single values, NOT arrays
-7. IDs: exp_1, exp_2, exp_3...
-
-RELATIVE OFFSET CALCULATION:
-- ALL experiments default to: RelativeOffset(0, 0, 1) - z=1mm liftoff default
-- NO automatic x-increment or y-increment between experiments
-- User MUST explicitly specify spatial relationships
-
-SPATIAL PARSING:
-- "Xcm apart on X axis" / "Xmm apart on X axis" / "X axis spacing Xcm": increment x by X between experiments
-  - "2 experiments 2cm apart on X axis": exp_1 (0,0,1), exp_2 (20,0,1)
-  - "3 scans 30mm X axis spacing": exp_1 (0,0,1), exp_2 (30,0,1), exp_3 (60,0,1)
-- "Xcm apart on Y axis" / "Xmm apart on Y axis" / "Y axis spacing Xcm": increment y by X between experiments
-  - "2 experiments 15mm apart on Y axis": exp_1 (0,0,1), exp_2 (0,15,1)
-  - "3 scans 10mm Y axis spacing": exp_1 (0,0,1), exp_2 (0,10,1), exp_3 (0,20,1)
-- "liftoff X" / "lift off Xmm" / "Z height X": set z value for that experiment
-  - "experiment 1 and liftoff 2 is 3mm": exp_1 (0,0,1), exp_2 (0,0,3)
-  - "first scan liftoff 2mm, second liftoff 5mm": exp_1 (0,0,2), exp_2 (0,0,5)
-- "at position (x,y,z)" / "offset (x,y,z)": use explicit coordinates
-  - "scan at (10, 20, 2)": exp (10, 20, 2)
-- "move X left/right" / "shift Y up/down": add to previous x/y
-  - After exp at (0,0,1), "move 5mm right": next exp at (5,0,1)
-
-OFFSET PRIORITY (highest to lowest):
-1. Explicit coordinates: "at position (x,y,z)"
-2. Axis-specific spacing: "Xcm apart on X/Y axis" → increment specified axis by X
-3. Liftoff instruction: affects only z value
-4. Default: RelativeOffset(0, 0, 1) for ALL experiments
-
-IMPORTANT:
-- If user says "apart" or "spacing" WITHOUT specifying X axis or Y axis → return error message
-- Error message: "Please specify axis for spacing (e.g., '2cm apart on X axis' or '15mm apart on Y axis')"
-- All experiments at same location (0,0,1) unless user explicitly specifies otherwise
-
-SIGNAL MAP:
-- Flexible key-value pairs
-- Common keys: waveform, frequency_hz, amplitude, attenuation, pulse_width, duty_cycle, phase
-- Add ANY signal params mentioned
-
-FILENAMES:
-- Format: {waveform}_{rows}x{cols}_{key_signal_params}
-- Include most distinctive signal params (freq, amp, atten)
-- Max 50 chars, unique per experiment
-- Example: gaussian_20x20_freq1000_amp2.5V
-
-EXAMPLES:
-
-"scan 10x10 gaussian at 1kHz and 20x20 at 2kHz"
-→ 2 experiments:
-- exp_1: grid 10x10, signal {waveform: gaussian, frequency_hz: 1000}, offset (0,0,1), filename "gaussian_10x10_freq1000"
-- exp_2: grid 20x20, signal {waveform: gaussian, frequency_hz: 2000}, offset (0,0,1), filename "gaussian_20x20_freq2000"
-
-"do 2 experiments 2cm apart on X axis: sine 50x50 at 5kHz and gaussian 30x30 at 3kHz"
-→ 2 experiments:
-- exp_1: grid 50x50, signal {waveform: sine, frequency_hz: 5000}, offset (0,0,1), filename "sine_50x50_freq5000"
-- exp_2: grid 30x30, signal {waveform: gaussian, frequency_hz: 3000}, offset (20,0,1), filename "gaussian_30x30_freq3000"
-
-"experiment 1 and liftoff 2 is 3mm: gaussian 20x20 1kHz and sine 20x20 2kHz"
-→ 2 experiments:
-- exp_1: grid 20x20, signal {waveform: gaussian, frequency_hz: 1000}, offset (0,0,1), filename "gaussian_20x20_freq1000"
-- exp_2: grid 20x20, signal {waveform: sine, frequency_hz: 2000}, offset (0,0,3), filename "sine_20x20_freq2000"
-
-"3 scans 15mm spacing on Y axis, liftoffs 1mm, 2mm, 3mm: sine 10x10 at 1kHz"
-→ 3 experiments:
-- exp_1: grid 10x10, signal {waveform: sine, frequency_hz: 1000}, offset (0,0,1), filename "sine_10x10_freq1000"
-- exp_2: grid 10x10, signal {waveform: sine, frequency_hz: 1000}, offset (0,15,2), filename "sine_10x10_freq1000_2"
-- exp_3: grid 10x10, signal {waveform: sine, frequency_hz: 1000}, offset (0,30,3), filename "sine_10x10_freq1000_3"
-
-"2 scans 10mm apart: gaussian 15x15 at 2kHz"
-→ ERROR: "Please specify axis for spacing (e.g., '10mm apart on X axis' or '10mm apart on Y axis')"
-
-<input>
+<user_message>
 {{ user_message }}
-</input>
+</user_message>
+
+<instructions>
+DETAILED INSTRUCTIONS:
+
+1. ANALYZE THE REQUEST
+Think through the input before processing:
+- What experiments are requested?
+- What ranges need expansion?
+- What spatial relationships exist?
+- What signal parameters are specified?
+
+If unclear or uncertain, respond with JSON error schema: {"error": "I don't know how to parse this request. Please provide more details about [specific missing information]."}
+
+2. PARSE THE TEXT
+Split input on delimiters: commas, "and", "then", "next", "after"
+
+3. EXTRACT PARAMETERS
+Identify patterns and extract values:
+- "NxM"→ grid dimensions (rows:N, cols:M)
+- "gaussian", "sine", "square" → waveform type
+- "XkHz" or "XHz" → frequency_hz (normalize to Hz: 1kHz = 1000)
+- "XV" → amplitude (preserve unit: "2.5V")
+- "XdB" → attenuation (preserve unit: "10dB")
+- "Xus", "Xms", "Xs" → pulse_width or duration (preserve unit: "100us")
+
+Parameters persist across experiments unless explicitly changed.
+
+4. EXPAND RANGES
+Only expand if confident about range specification:
+
+NUMERIC RANGES (integer endpoints): "X to Y" → 3 equal steps
+- "10 to 30" → [10, 20, 30]
+- "1000-3000Hz" → [1000, 2000, 3000]
+
+UNIT-BASED RANGES: Standard increments
+- Voltage: "1V to 3V" → [1V, 2V, 3V]
+- Frequency: "1kHz to 3kHz" → [1kHz, 2kHz, 3kHz]
+
+CUSTOM STEPS: "X to Y by Z" → use Z as increment
+- "1V to 3V by 0.5V" → [1V, 1.5V, 2V, 2.5V, 3V]
+
+5. GENERATE EXPERIMENTS VIA CARTESIAN PRODUCT
+Multiple ranges create all combinations. Each experiment contains single values only, not arrays.
+
+Example: "10x10 and 20x20 at 1kHz and 2kHz" produces 4 experiments:
+- exp_1: 10x10 at 1kHz
+- exp_2: 10x10 at 2kHz
+- exp_3: 20x20 at 1kHz
+- exp_4: 20x20 at 2kHz
+
+6. DETERMINE SPATIAL OFFSETS
+DEFAULT: All experiments start at offset (x:0, y:0, z:1) unless explicitly specified.
+
+Apply offset rules in priority order (stop at first match):
+
+PRIORITY 1 - ABSOLUTE POSITION:
+"at position (x,y,z)" or "offset (x,y,z)" → Use exact coordinates
+Example: "at (10,20,2)" → offset: {x:10, y:20, z:2}
+
+PRIORITY 2 - AXIS SPACING:
+"Xmm apart on X axis" → Increment x: exp_1 (0,0,1), exp_2 (X,0,1), exp_3 (2X,0,1)
+"Xmm apart on Y axis" → Increment y: exp_1 (0,0,1), exp_2 (0,X,1), exp_3 (0,2X,1)
+
+CRITICAL: If spacing mentioned WITHOUT axis (e.g., "10mm apart"), return error:
+{"error": "Please specify axis for spacing (e.g., '10mm apart on X axis' or '10mm apart on Y axis')"}
+
+PRIORITY 3 - Z-HEIGHT:
+"liftoff Xmm" or "Z height Xmm" → Set z value only, keep x:0, y:0
+
+PRIORITY 4 - RELATIVE MOVEMENT:
+"move Xmm left/right" or "shift Xmm up/down" → Relative to previous offset
+
+PRIORITY 5 - DEFAULT:
+{x:0, y:0, z:1}
+
+7. GENERATE FILENAMES
+Format: {waveform}_{rows}x{cols}_{distinctive_params}
+
+Rules:
+- Include most distinctive signal parameters (frequency, amplitude, attenuation)
+- Maximum 50 characters
+- Must be unique per experiment
+- Add suffix _2, _3, etc. if duplicates exist
+
+8. ASSIGN EXPERIMENT IDS
+Sequential format: exp_1, exp_2, exp_3, ...
+</instructions>
+
+<example>
+Input: "scan 20x20 gaussian at 2kHz amplitude 1V to 3V"
+
+Processing steps:
+1. Parse: grid=20x20, waveform=gaussian, frequency=2kHz (2000 Hz), amplitude range=1V to 3V
+2. Expand amplitude: [1V, 2V, 3V] (3 steps)
+3. Generate 3 experiments (Cartesian product)
+4. Apply default offset (0,0,1) to all
+5. Create unique filenames
+
+Output:
+{
+  "number_of_scans": 3,
+  "experiments": [
+    {
+      "id": "exp_1",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "gaussian"},
+        {"key": "frequency_hz", "value": "2000"},
+        {"key": "amplitude", "value": "1V"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "gaussian_20x20_2000Hz_1V"
+    },
+    {
+      "id": "exp_2",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "gaussian"},
+        {"key": "frequency_hz", "value": "2000"},
+        {"key": "amplitude", "value": "2V"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "gaussian_20x20_2000Hz_2V"
+    },
+    {
+      "id": "exp_3",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "gaussian"},
+        {"key": "frequency_hz", "value": "2000"},
+        {"key": "amplitude", "value": "3V"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "gaussian_20x20_2000Hz_3V"
+    }
+  ]
+}
+</example>
+
+<critical_reminders>
+- Default offset is (x:0, y:0, z:1) for ALL experiments unless explicitly specified
+- Multiple ranges create separate experiments with ALL combinations (Cartesian product)
+- Filenames must be unique - add _2, _3 suffixes to prevent duplicates
+- Frequency must be normalized to Hz (1kHz → 1000)
+- Return error if spacing mentioned without axis specification
+- Only process if confident - respond with error JSON if uncertain
+- Think through the request before answering
+- Answer only if you are very confident about the parsing
+</critical_reminders>
 
 {{ ctx.output_format }}
 "#
+}
+
+test TestError {
+  functions [ExpOrchestrator]
+  args {
+    user_message "fsdf afsdfda fasdf"
+  }
 }
 
 // Basic single experiment tests

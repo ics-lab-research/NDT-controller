@@ -1,44 +1,90 @@
-function ExpPlanner(experiment: Experiment, state: State) -> string {
+function ExpPlanner(experiment: Experiment, state: State) -> string | Error {
   client GroqRouter
   prompt #"
-You are an experiment planning system for experiment "{{ experiment.id }}".
+You are an experiment planning system that generates sequential movement and configuration plans for scientific experiments. Your task is to create a precise plan for experiment "{{ experiment.id }}".
 
-COORDINATE SYSTEM:
-- X-axis: negative = left, positive = right
-- Y-axis: negative = forward, positive = backward  
-- Z-axis: negative = down, positive = up
-
-CURRENT SITUATION:
+<context>
+CURRENT STATE:
 - Current position: ({{ state.current_position.x }}, {{ state.current_position.y }}, {{ state.current_position.z }}) mm
 - Home position: ({{ state.home_position.x }}, {{ state.home_position.y }}, {{ state.home_position.z }}) mm
-- Target offset from home: ({{ experiment.relative_offset_mm.x }}, {{ experiment.relative_offset_mm.y }}, {{ experiment.relative_offset_mm.z }}) mm
+- Target position: ({{ experiment.relative_offset_mm.x }}, {{ experiment.relative_offset_mm.y }}, {{ experiment.relative_offset_mm.z }}) mm
 
-TASK:
-Generate a movement plan to:
-1. Move from current position to the target position (home + relative offset);
-2. Configure signal with parameters: {% for param in experiment.signal %}{{ param.key }}={{ param.value }}{% if not loop.last %}, {% endif %}{% endfor %};
-3. Execute {{ experiment.grid.rows }}x{{ experiment.grid.cols }} grid scan;
-4. Return to home position
+EXPERIMENT PARAMETERS:
+- Signal: {% for param in experiment.signal %}{{ param.key }}={{ param.value }}{% if not loop.last %}, {% endif %}{% endfor %}.
+- Grid scan: {{ experiment.grid.rows }}x{{ experiment.grid.cols }}.
+</context>
 
-OUTPUT FORMAT (use exact axis names and calculate deltas):
+<instructions>
+COORDINATE SYSTEM:
+- X: negative=left, positive=right
+- Y: negative=forward, positive=backward  
+- Z: negative=down, positive=up
+
+GRID SCAN BEHAVIOR:
+- Grid size NxM means scan area of NxM mm
+- Scan moves in X-Y plane only; Z remains unchanged
+- Movement pattern: from (X, Y, Z) to (X+N, Y+M, Z)
+- Example: 3x3 grid starting at (100, 60, 20) ends at (103, 63, 20)
+
+OUTPUT FORMAT:
 PLAN {{ experiment.id }}:
-  1. move Y [forward/backward] (distance [calculated_value] mm)
-  2. move X [left/right] (distance [calculated_value] mm)
-  3. move Z [up/down] (distance [calculated_value] mm)
-  4. configure signal({% for param in experiment.signal %}{{ param.key }}={{ param.value }}{% if not loop.last %}, {% endif %}{% endfor %})
-  5. execute grid scan({{ experiment.grid.rows }}x{{ experiment.grid.cols }})
-  6. return home position
+  1. move [axis] [direction] (distance [value] mm)
+  ...
+  N. configure signal (frequency=[value], amplitude=[value], offset=[value], etc.)
+  N+1. execute grid scan ([N]x[M])
+  N+2. move X [direction] (distance [value] mm)  # return to target X
+  N+3. move Y [direction] (distance [value] mm)  # return to target Y
 
-CALCULATION RULES:
-- Target absolute position = home_position + relative_offset_mm
-- Movement delta = target_position - current_position
-- Only include movement steps where |delta| > 0
-- Negative Y delta = forward, positive = backward
-- Negative X delta = left, positive = right
-- Negative Z delta = down, positive = upward
-- Order movements: Y, X, Z
+DETAILED INSTRUCTIONS:
+1. Add signal configuration command with the exact parameters provided
+2. Calculate movement deltas: target position minus current position
+3. Generate movement commands in order: X axis first, then Y axis, then Z axis
+4. Omit any movement step where delta equals 0
+5. Add grid scan execution command
+6. Calculate scan end position: After NxM grid scan starting at (X, Y, Z), final position is (X+N, Y+M, Z)
+7. Generate return movement commands to reach target position from scan end position
+8. Use movement order X, Y for return (omit Z if unchanged)
+9. Think step-by-step before generating the plan
+10. Only provide a plan if you are confident in all calculations
+</instructions>
 
-Generate the plan:
+<example>
+EXAMPLE - SUCCESS CASE:
+Input: current=(0, 0, 0), target=(10, -5, 3), signal=(frequency=1200, amplitude=6.0, offset=2.5), grid=2x2
+
+Output:
+"PLAN EXP-XXX:
+  1. move X right (distance 10 mm)
+  2. move Y forward (distance 5 mm)
+  3. move Z up (distance 3 mm)
+  4. configure signal (frequency=1200, amplitude=6.0, offset=2.5)
+  5. execute grid scan (2x2)
+  6. move X left (distance 2 mm)  # return from (12, -3, 3) to (10, -3, 3)
+  7. move Y forward (distance 2 mm)  # return from (10, -3, 3) to (10, -5, 3)"
+
+EXAMPLE - ERROR CASES:
+Input: current=(unknown), target=(10, -5, 3)
+Output: {"error": "Cannot calculate movement deltas - current position is unknown"}
+
+Input: current=(0, 0, 0), target=(10, -5, 3), grid=(dimensions not specified)
+Output: {"error": "Cannot plan grid scan - scan dimensions are not specified"}
+</example>
+
+<critical_reminders>
+- Direction mapping: X negative=left/positive=right, Y negative=forward/positive=backward, Z negative=down/positive=up
+- Grid scan NxM moves from (X, Y, Z) to (X+N, Y+M, Z)
+- For this experiment: 5x5 scan at (10, -20, 15) ends at (15, -15, 15)
+- Return movements must bring position back to exact target (10, -20, 15)
+- Think through each calculation step before generating output
+- If you cannot calculate movements or positions confidently, return an error JSON instead of guessing
+- Say "I don't know" via the error schema rather than making uncertain calculations
+</critical_reminders>
+
+{{ ctx.output_format }}
+Use the error schema if:
+- You cannot confidently calculate positions or movements
+- Parameters are missing, contradictory, or unsafe
+- Any step in the plan cannot be determined with certainty
 "#
 }
 

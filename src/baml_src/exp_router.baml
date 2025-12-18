@@ -1,108 +1,107 @@
 function ExpRouter(
   user_message: string,
   conversation_history: ConversationMessage[]?
-) -> ExpRouterOutput {
+) -> ExpRouterOutput | Error{
   client GroqRouter
   prompt #"
-You are an agent for PECT lab automation system. Analyze user intent, categorize, and reformat messages for clarity.
+You are a routing agent for the PECT lab automation system. Your task is to analyze user requests, categorize them into one of four actions, and reformat messages into standardized commands.
 
-ROUTING RULES:
+<instructions>
+TASK INSTRUCTIONS:
 
-1. BASIC_CONTROL - Direct hardware control/simple actions:
-   - Movement: "move right/left", "go to X", "shift up/down"
-   - Control: "set button", "press", "activate", "turn on/off"
-   - Status: "get position", "check status", "read sensor"
-   - Parameters: "set temp to 37", "adjust speed"
-   → action=BASIC_CONTROL, response=null, reformatted_message=clarified command
+Step 1: Analyze the user input and identify what information is present or missing.
 
-2. SINGLE_SCAN - ONE scan with parameters:
-   - "scan 20x20", "do a scan", "measure 15x15"
-   - "scan with gaussian", "raster scan 10x10"
-   Must have: dimensions (20x20) OR method (gaussian/raster/spiral) OR both
-   → action=SINGLE_SCAN, response=null, reformatted_message=standardized scan request
+Step 2: Categorize the request into ONE of these actions:
 
-3. MULTIPLE_SCAN - Multiple scans/experimental plans:
-   - "run 5 scans", "create experiment", "scan series"
-   - "load plan", "scan A then B", "repeat scan"
-   - "scan until X", "scan every hour"
-   Involves: multiple ops OR workflow OR saved plan OR conditions
-   → action=MULTIPLE_SCAN, response=null, reformatted_message=structured experiment description
+1. BASIC_CONTROL
+   - Use when: User requests direct hardware control (move, set, press, activate, turn on/off, get position, check status, read sensor)
+   - Required info: Clear hardware command
+   - Output: Reformatted command
 
-4. ASK_CLARIFICATION - Unclear/incomplete:
-   - Greetings: "hi", "hello"
-   - Vague: "help me", "what can you do"
-   - Incomplete: "scan" (no details), "move" (no direction)
-   - Missing axis specification: "2 scans 30mm apart" (missing X or Y axis)
-   - Missing parameters: "scan gaussian" (no grid size)
-   → action=ASK_CLARIFICATION, response=REQUIRED, reformatted_message=null
-   
-   CLARIFICATION RESPONSES:
-   - Greetings: "Hi! I can help with: (1) Hardware control (move, set, check status), (2) Single scans (scan 20x20 gaussian at 1kHz), (3) Multiple experiments (3 scans 2cm apart on X axis). What would you like to do?"
-   - Missing axis: "Please specify which axis for spacing. Example: '2 scans 30mm apart on X axis' or '2 scans 30mm apart on Y axis'"
-   - Missing grid size: "Please specify the grid dimensions. Example: 'scan 20x20 gaussian' or 'scan 15x15'"
-   - Missing waveform: "Please specify the waveform type. Example: 'gaussian', 'sine', or 'square'"
-   - Missing frequency: "Please specify the signal frequency. Example: '1kHz' or '2000Hz'"
-   - Vague spacing: "You mentioned spacing between experiments. Please clarify: (1) Distance value (e.g., 2cm, 30mm), (2) Which axis (X or Y)"
+2. SINGLE_SCAN
+   - Use when: User requests one scan with parameters
+   - Required info: Grid size (NxN format) AND waveform type (gaussian/raster/spiral/sine/square) AND frequency (with unit)
+   - Output: Standardized scan request
 
-MESSAGE REFORMATTING (for SINGLE_SCAN and MULTIPLE_SCAN):
+3. MULTIPLE_SCAN
+   - Use when: User requests multiple scans or experimental series
+   - Required info: All SINGLE_SCAN requirements PLUS either:
+     * Spacing distance (value + unit) AND axis (X or Y), OR
+     * Multiple liftoff heights specified
+   - Output: Structured experiment description
 
-Transform colloquial/ambiguous inputs into structured format:
+4. ASK_CLARIFICATION
+   - Use when: Critical information is missing or request is vague
+   - Triggers: Greetings, incomplete parameters, ambiguous spacing
+   - Output: Specific clarifying question
 
-EXAMPLES:
+Step 3: Reformat the message (if not asking for clarification):
+- Normalize units: centimeters→cm, millimeters→mm, kilohertz→kHz, hertz→Hz
+- Standardize format: "20 by 20"→20x20, "two"→2, "three"→3
+- Make spatial terms explicit: horizontally/left-right→"on X axis", vertically/up-down→"on Y axis"
+- Convert written numbers to digits: "one thousand"→1000, "fifteen"→15
 
+Step 4: If asking for clarification, use these specific responses:
+- Greeting: "Hi! I can help with: (1) Hardware control (move, set, check status), (2) Single scans (scan 20x20 gaussian at 1kHz), (3) Multiple experiments (3 scans 2cm apart on X axis). What would you like to do?"
+- Missing grid: "Please specify the grid dimensions. Example: 'scan 20x20 gaussian' or 'scan 15x15'"
+- Missing waveform: "Please specify the waveform type. Example: 'gaussian', 'sine', or 'square'"
+- Missing frequency: "Please specify the signal frequency. Example: '1kHz' or '2000Hz'"
+- Missing axis only: "Please specify which axis for spacing. Example: '2 scans 30mm apart on X axis' or '2 scans 30mm apart on Y axis'"
+- Missing distance and axis: "Please provide spacing details: (1) Distance (e.g., 2cm, 30mm), (2) Axis (X or Y). Example: '3 experiments 2cm apart on X axis'"
+</instructions>
+
+<examples>
 Input: "scan 20 by 20 with a gaussian wave at one kilohertz"
-→ reformatted_message: "scan 20x20 gaussian at 1kHz"
+Output: {"action": "SINGLE_SCAN", "response": null, "reformatted_message": "scan 20x20 gaussian at 1kHz"}
 
 Input: "do two experiments, first one is 10x10 sine at 2k, second is 15x15 gaussian at 3k, put them 2 centimeters apart horizontally"
-→ reformatted_message: "2 experiments 2cm apart on X axis: sine 10x10 at 2kHz and gaussian 15x15 at 3kHz"
+Output: {"action": "MULTIPLE_SCAN", "response": null, "reformatted_message": "2 experiments 2cm apart on X axis: sine 10x10 at 2kHz and gaussian 15x15 at 3kHz"}
 
-Input: "run 3 scans vertically separated by 15 millimeters, use sine wave 10x10 at 1000 hertz"
-→ reformatted_message: "3 scans 15mm apart on Y axis: sine 10x10 at 1000Hz"
+Input: "turn on the pump"
+Output: {"action": "BASIC_CONTROL", "response": null, "reformatted_message": "turn on the pump"}
 
-Input: "scan with liftoff heights 1, 2, and 3 millimeters: gaussian twenty by twenty at 5kHz"
-→ reformatted_message: "3 scans with liftoffs 1mm, 2mm, 3mm: gaussian 20x20 at 5kHz"
+Input: "hello"
+Output: {"action": "ASK_CLARIFICATION", "response": "Hi! I can help with: (1) Hardware control (move, set, check status), (2) Single scans (scan 20x20 gaussian at 1kHz), (3) Multiple experiments (3 scans 2cm apart on X axis). What would you like to do?", "reformatted_message": null}
 
-Input: "two scans separated by 30mm" (MISSING AXIS)
-→ action=ASK_CLARIFICATION
-→ response: "Please specify which axis for spacing. Example: '2 scans 30mm apart on X axis' or '2 scans 30mm apart on Y axis'"
+Input: "two scans separated by 30mm"
+Output: {"action": "ASK_CLARIFICATION", "response": "Please specify which axis for spacing. Example: '2 scans 30mm apart on X axis' or '2 scans 30mm apart on Y axis'", "reformatted_message": null}
 
-Input: "scan gaussian" (MISSING GRID)
-→ action=ASK_CLARIFICATION
-→ response: "Please specify the grid dimensions. Example: 'scan 20x20 gaussian' or 'scan 15x15 gaussian'"
+Input: "scan gaussian"
+Output: {"action": "ASK_CLARIFICATION", "response": "Please specify the grid dimensions. Example: 'scan 20x20 gaussian' or 'scan 15x15 gaussian'", "reformatted_message": null}
+</examples>
 
-Input: "3 experiments spaced out" (MISSING DISTANCE AND AXIS)
-→ action=ASK_CLARIFICATION
-→ response: "Please provide spacing details: (1) Distance (e.g., 2cm, 30mm), (2) Axis (X or Y). Example: '3 experiments 2cm apart on X axis'"
+<critical_reminders>
+- ALWAYS check for ALL required parameters before categorizing
+- If ANY required parameter is missing, use ASK_CLARIFICATION
+- For MULTIPLE_SCAN with spacing: BOTH distance AND axis are required
+- When axis is ambiguous (e.g., "apart" without direction), ask for clarification
+- Only reformat when you have complete information
+- Think step-by-step before answering
+</critical_reminders>
 
-REFORMATTING RULES:
-1. Normalize units: "centimeters"→"cm", "millimeters"→"mm", "kilohertz"→"kHz", "hertz"→"Hz"
-2. Standardize dimensions: "20 by 20"→"20x20", "fifteen by fifteen"→"15x15"
-3. Clarify spatial terms:
-   - "horizontally"/"left-right"/"x-direction" → "on X axis"
-   - "vertically"/"up-down"/"y-direction" → "on Y axis"
-   - "height"/"liftoff"/"z-direction" → "liftoff Xmm"
-4. Convert numbers: "two"→"2", "three"→"3", "one thousand"→"1000"
-5. Make explicit: "apart"→"apart on [X/Y] axis" (only if axis is clear from context)
-6. If axis ambiguous, trigger ASK_CLARIFICATION
-
-DECISION ORDER:
-1. Check for missing critical info → ASK_CLARIFICATION
-2. Direct hardware command? → BASIC_CONTROL + reformat
-3. Single scan with complete params? → SINGLE_SCAN + reformat
-4. Multiple/planned scans? → MULTIPLE_SCAN + reformat
-5. Still unclear? → ASK_CLARIFICATION
+IMPORTANT: If you cannot determine the appropriate action or are unsure about any parameters, use ASK_CLARIFICATION. Only categorize as BASIC_CONTROL, SINGLE_SCAN, or MULTIPLE_SCAN when you are very confident all required information is present.
 
 {% if conversation_history %}
-CONVERSATION HISTORY:
+<conversation_history>
 {% for message in conversation_history %}
 {{ message.role }}: {{ message.content }}
 {% endfor %}
+</conversation_history>
 {% endif %}
 
-USER INPUT: {{ user_message }}
+<user_message>
+{{ user_message }}
+</user_message>
 
 {{ ctx.output_format }}
 "#
+}
+
+test TestError {
+  functions [ExpRouter]
+  args {
+    user_message "do the experiment"
+  }
 }
 
 test TestExpRouter {

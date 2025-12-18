@@ -3,6 +3,10 @@ class ConversationMessage {
   content string
 }
 
+class Error {
+  error string @description("Error message describing what went wrong")
+}
+
 enum ExpAction {
   BASIC_CONTROL
   SINGLE_SCAN
@@ -41,17 +45,21 @@ enum ScanStatus {
   ERROR
 }
 
+enum ExpType {
+  MOVEMENT
+  SCAN
+}
+
 class State {
   current_position RelativeOffset
   home_position RelativeOffset
-  
 }
 
 // ==================Output models===================
 class ExpRouterOutput {
   action ExpAction
-  response string? @description("For ASK_CLARIFICATION only")
-  reformatted_message string? @description("Clarified/reformatted user message")
+  response string? @description("only for ASK_CLARIFICATION")
+  reformatted_message string? @description("for all except ASK_CLARIFICATION")
 }
 
 class ExpOrchestratorOutput {

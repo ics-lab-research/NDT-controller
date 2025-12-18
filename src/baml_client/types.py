@@ -37,7 +37,7 @@ def get_checks(checks: typing.Dict[CheckName, Check]) -> typing.List[Check]:
 def all_succeeded(checks: typing.Dict[CheckName, Check]) -> bool:
     return all(check.status == "succeeded" for check in get_checks(checks))
 # #########################################################################
-# Generated enums (2)
+# Generated enums (3)
 # #########################################################################
 
 class ExpAction(str, Enum):
@@ -46,6 +46,10 @@ class ExpAction(str, Enum):
     MULTIPLE_SCAN = "MULTIPLE_SCAN"
     ASK_CLARIFICATION = "ASK_CLARIFICATION"
 
+class ExpType(str, Enum):
+    MOVEMENT = "MOVEMENT"
+    SCAN = "SCAN"
+
 class ScanStatus(str, Enum):
     IDLE = "IDLE"
     IN_PROGRESS = "IN_PROGRESS"
@@ -53,7 +57,7 @@ class ScanStatus(str, Enum):
     ERROR = "ERROR"
 
 # #########################################################################
-# Generated classes (20)
+# Generated classes (22)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -63,6 +67,9 @@ class ConnectToViTool(BaseModel):
 class ConversationMessage(BaseModel):
     role: typing.Union[typing_extensions.Literal['user'], typing_extensions.Literal['assistant']]
     content: str
+
+class Error(BaseModel):
+    error: str
 
 class ExpOrchestratorOutput(BaseModel):
     number_of_scans: int
@@ -146,6 +153,10 @@ class ToolResult(BaseModel):
     success: bool
     output: typing.Optional[typing.Union[str, typing.Dict[str, str]]] = None
     error: typing.Optional[str] = None
+
+class WaitForOperationCompleteTool(BaseModel):
+    tool_name: typing_extensions.Literal['wait_for_operation_complete']
+    exp_type: ExpType
 
 # #########################################################################
 # Generated type aliases (0)

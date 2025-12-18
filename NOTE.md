@@ -1,12 +1,6 @@
-Got it — let’s **stop abstract talk** and walk through **one concrete, end-to-end example** using *your exact sentence*, showing **what each agent outputs** and **where the “go back / move left / repeat” logic actually lives**.
-
-I’ll keep this **mechanical and explicit**, not conceptual.
-
----
-
 # User Command (Input)
 
-> **“Scan for me 20x20 with gaussian using 1000Hz, move to left 30mm and do the same with 2000Hz. and so on, number of scan is 5”**
+> **“run 3 scans vertically separated by 15 millimeters, use sine wave 10x10 at 1000 hertz”**
 
 ---
 
@@ -17,7 +11,9 @@ I’ll keep this **mechanical and explicit**, not conceptual.
 
 ```json
 {
-  "intent": "multi_experiment_scan"
+  "action": "MULTIPLE_SCAN",
+  "response": null,
+  "reformatted_message": "3 scans 15mm apart on Y axis: sine 10x10 at 1kHz"
 }
 ```
 
@@ -27,10 +23,12 @@ Router is done. Nothing smart here.
 
 # 🔹 Step 2 — Orchestrator (EXPERIMENT COMPILER)
 
-This is the MOST important step.
-
-👉 The orchestrator **does NOT generate movement steps**
-👉 It only **expands user intent into structured experiments**
+### Orchestrator Input
+```json
+{
+  "reformatted_message": "3 scans 15mm apart on Y axis: sine 10x10 at 1kHz"
+}
+```
 
 ### Orchestrator Output
 
@@ -88,17 +86,9 @@ This is the MOST important step.
       "relative_offset_mm": { "x": -120, "y": 0 }
     }
   ],
-  "global_constraints": {
-    "return_home_after_each_experiment": true
-  }
+
 }
 ```
-
-⚠️ Notice:
-
-* **NO `move_x`, `scan()`, `home()`**
-* Just *what* each experiment is
-* Offset is **relative**, not absolute
 
 ---
 
@@ -148,17 +138,21 @@ Planner sees **ONE experiment at a time**.
 {
   "home": { "x": 0, "y": 0, "z": 1 },
   "current_position": { "x": 20, "y": -30, "z": 5 },
+  "scanning_status": "scanning"
 }
 ```
 
 ### Planner Output (ABSTRACT PLAN)
 
 ```text
-PLAN exp_2:
-  1. move_to_offset(-30, 0)
-  2. configure_signal(gaussian, 2000Hz)
-  3. execute_grid_scan(20x20)
-  4. return_home
+PLAN EXP-001:
+1. configure signal (frequency=1000, amplitude=5.0, waveform=sine)
+2. move X right (distance 10 mm)
+3. move Y forward (distance 20 mm)
+4. move Z up (distance 15 mm)
+5. execute grid scan (5x5)
+6. move X right (distance 5 mm)  # return from (5, -15, 15) to (10, -15, 15)\n  
+7. move Y forward (distance 5 mm)  # return from (10, -15, 15) to (10, -20, 15)"
 ```
 
 🔑 Still **no loops**, **no motor commands**
@@ -173,21 +167,10 @@ Now your **existing rule-based logic finally has a correct home**.
 
 ```python
 def move_to_offset(dx, dy):
-    home = state.home
-    target = {
-        "x": home["x"] + dx,
-        "y": home["y"] + dy
-    }
-    safe_move_to(target)
+  pass
 
 def execute_grid_scan(rows, cols):
-    start = state.current_position
-    for i in range(rows):
-        for j in range(cols):
-            scan()
-            move_x(step_x)
-        move_y(step_y)
-        move_x(-cols * step_x)
+  pass
 ```
 
 This is:
@@ -198,56 +181,6 @@ This is:
 
 ---
 
-# 🔹 Step 6 — Full Execution (WHAT ACTUALLY HAPPENS)
 
-### For `exp_2` (2000Hz):
-
-```
-home (0,0)
-→ move to (-30,0)
-→ configure gaussian @2000Hz
-→ scan 20x20
-→ return home
-```
-
-Then:
-
-```
-home (0,0)
-→ move to (-60,0)
-→ configure gaussian @3000Hz
-→ scan 20x20
-→ return home
-...
-```
-
-Exactly what the user asked.
-
----
-
-# 🔥 Why This Finally Click Should Click
-
-### Where is “move left 30mm”?
-
-👉 **Orchestrator → relative_offset**
-
-### Where is “do the same 5 times”?
-
-👉 **Orchestrator → experiment_series**
-
-### Where is “go back home”?
-
-👉 **Global constraint**
-
-### Where is your rule-set?
-
-👉 **Executor ONLY**
-
----
-
-# 🧠 One Sentence Summary (IMPORTANT)
-
-> **LLM decides *what experiments exist*.
-> Code decides *how motion and scanning happen*.**
 
 

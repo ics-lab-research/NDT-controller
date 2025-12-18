@@ -22,6 +22,9 @@ type_map = {
     "types.ConversationMessage": types.ConversationMessage,
     "stream_types.ConversationMessage": stream_types.ConversationMessage,
 
+    "types.Error": types.Error,
+    "stream_types.Error": stream_types.Error,
+
     "types.ExpOrchestratorOutput": types.ExpOrchestratorOutput,
     "stream_types.ExpOrchestratorOutput": stream_types.ExpOrchestratorOutput,
 
@@ -76,8 +79,13 @@ type_map = {
     "types.ToolResult": types.ToolResult,
     "stream_types.ToolResult": stream_types.ToolResult,
 
+    "types.WaitForOperationCompleteTool": types.WaitForOperationCompleteTool,
+    "stream_types.WaitForOperationCompleteTool": stream_types.WaitForOperationCompleteTool,
+
 
     "types.ExpAction": types.ExpAction,
+
+    "types.ExpType": types.ExpType,
 
     "types.ScanStatus": types.ScanStatus,
 

@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (20)
+# Generated classes (22)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -33,6 +33,9 @@ class ConnectToViTool(BaseModel):
 class ConversationMessage(BaseModel):
     role: typing.Optional[typing.Union[str, str]] = None
     content: typing.Optional[str] = None
+
+class Error(BaseModel):
+    error: typing.Optional[str] = None
 
 class ExpOrchestratorOutput(BaseModel):
     number_of_scans: typing.Optional[int] = None
@@ -116,6 +119,10 @@ class ToolResult(BaseModel):
     success: typing.Optional[bool] = None
     output: typing.Optional[typing.Union[str, typing.Dict[str, str]]] = None
     error: typing.Optional[str] = None
+
+class WaitForOperationCompleteTool(BaseModel):
+    tool_name: typing.Optional[str] = None
+    exp_type: typing.Optional[types.ExpType] = None
 
 # #########################################################################
 # Generated type aliases (0)
