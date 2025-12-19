@@ -42,4 +42,4 @@ def handle_experiment_mode(
                     "fasdfds fadsf fsdf"
                 )
 
-                # yield error here AI!
+                yield AgentResponse(response="Error: Orchestration failed")
