@@ -47,7 +47,7 @@ def respond_stream(
                 {
                     "role": "assistant",
                     "content": agent_response.status,
-                    "metadata": {"title": "🧠 Status"},
+                    "metadata": {"title": "📊 Status"},
                 },
             )
             yield history, ""
