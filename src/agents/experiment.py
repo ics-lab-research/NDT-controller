@@ -117,8 +117,12 @@ def handle_experiment_mode(
                                 metadata = project_manager.get_mode_metadata(
                                     project_manager.current_mode
                                 )
-                                if not isinstance(metadata, ExperimentsMetadata):
-                                    raise ValueError("Metadata is not ExperimentsMetadata")
+                                if not isinstance(
+                                    metadata, ExperimentsMetadata
+                                ):
+                                    raise ValueError(
+                                        "Metadata is not ExperimentsMetadata"
+                                    )
                                 plans_path = metadata.plans_path
                                 save_result = save_experiment_plans(
                                     [plan],
@@ -214,7 +218,9 @@ def handle_experiment_mode(
                             project_manager.current_mode
                         )
                         if not isinstance(metadata, ExperimentsMetadata):
-                            raise ValueError("Metadata is not ExperimentsMetadata")
+                            raise ValueError(
+                                "Metadata is not ExperimentsMetadata"
+                            )
                         plans_path = metadata.plans_path
                         save_result = save_experiment_plans(
                             plans_to_save,
