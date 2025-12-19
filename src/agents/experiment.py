@@ -30,14 +30,16 @@ def create_initial_state() -> State:
     return State(current_position=position, home_position=position)
 
 
-def update_state(state: State, tools: List[ExperimentTool]) -> State:
+def update_state(
+    current_state: State, metadata: ExpOrchestratorOutput
+) -> State:
     """Update the state based on executed tools. Placeholder with random values."""
     new_x = random.randint(-10, 10)
     new_y = random.randint(-10, 10)
     new_z = random.randint(0, 5)
     new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
     return State(
-        current_position=new_position, home_position=state.home_position
+        current_position=new_position, home_position=current_state.home_position
     )
 
 
