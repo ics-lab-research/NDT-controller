@@ -144,7 +144,7 @@ def handle_experiment_mode(
                             )
                         else:
                             yield AgentResponse(
-                                status=f"Calling ExpExecutor with file name is `{single_experiment.filename}` and this abstract plan:\n {plan}"
+                                status=f"Calling ExpExecutor with file name is `{single_experiment.filename}` and abstract plan:\n {plan}"
                             )
                             yield AgentResponse(response="Plan generated.")
 
@@ -205,7 +205,7 @@ def handle_experiment_mode(
                                 )
                             else:
                                 yield AgentResponse(
-                                    status=f"Processed experiment {experiment.filename} with plan: {plan}"
+                                    status=f"Processed experiment {experiment.filename} with abstract plan:\n {plan}"
                                 )
                                 if plan:
                                     plans.append(plan)
