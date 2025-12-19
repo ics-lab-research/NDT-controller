@@ -170,13 +170,13 @@ def execute_single_plan(
     return None
 
 
-# def execute_multiple_plans(
-#     plans: List[ExperimentPlan], project_manager: ProjectManager
-# ) -> str | None:
-#     """Execute multiple experiment plans with system reinitialization after each plan."""
-#     for plan in plans:
-#         error = execute_single_plan(plan, project_manager)
-#         if error:
-#             return error
-#         time.sleep(HARDWARE_SETTLE_DELAY)
-#     return None
+def execute_multiple_plans(
+    plans: List[ExperimentPlan], project_manager: ProjectManager
+) -> str | None:
+    """Execute multiple experiment plans with system reinitialization after each plan."""
+    for plan in plans:
+        error = execute_single_plan(plan, project_manager)
+        if error:
+            return error
+        time.sleep(HARDWARE_SETTLE_DELAY)
+    return None
