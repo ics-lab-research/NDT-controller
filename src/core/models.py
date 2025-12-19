@@ -16,6 +16,14 @@ from ..baml_client.types import (
     WaitForOperationCompleteTool,
 )
 
+
+class ExperimentStatus(Enum):
+    PENDING = "⏳ Pending"
+    SCANNING = "🔍 Scanning"
+    COMPLETED = "✅ Completed"
+    ERROR = "❌ Error"
+    IDLE = "🟢 Idle"
+
 # Type alias for experiment tools
 ExperimentTool = Union[
     ConnectToViTool,
