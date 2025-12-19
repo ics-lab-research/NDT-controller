@@ -7,7 +7,6 @@ from ..baml_client.types import (
     ConversationMessage,
     Error,
     ExpAction,
-    Experiment,
     RelativeOffset,
     State,
 )
