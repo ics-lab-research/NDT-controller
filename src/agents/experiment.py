@@ -68,7 +68,7 @@ def save_plans(
 
 def process_single_experiment(
     experiment: Experiment, state: State
-) -> Generator[AgentResponse, None, None] | ExperimentPlan | Error:
+) -> Generator[AgentResponse, None, ExperimentPlan | Error]:
     """Process a single experiment through planning and execution."""
     yield AgentResponse(
         status=f"Generating abstract plan for {experiment.filename}"
