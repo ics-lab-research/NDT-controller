@@ -142,6 +142,7 @@ def handle_experiment_mode(
                         response=f"ERROR: `{orchestrator_response.error}`"
                     )
                 else:
+                    plans = []
                     # TODO: change for loop later
                     # TODO: have to update state between scans
                     for experiment in orchestrator_response.experiments:
@@ -173,3 +174,29 @@ def handle_experiment_mode(
                                     filename=experiment.filename,
                                     experiment=experiment_tools,
                                 )
+                                plans.append(single_plan)
+                    yield AgentResponse(response="Plans generated.")
+
+                    metadata = project_manager.get_mode_metadata(
+                        project_manager.current_mode
+                    )
+                    if not isinstance(
+                        metadata, ExperimentsMetadata
+                    ):
+                        raise ValueError(
+                            "Metadata is not ExperimentsMetadata"
+                        )
+                    plans_path = metadata.plans_path
+                    save_status = save_experiment_plans(
+                        plans,
+                        plans_path,
+                    )
+
+                    if save_status["success"]:
+                        yield AgentResponse(
+                            action="Experiment plans saved successfully."
+                        )
+                    else:
+                        yield AgentResponse(
+                            action=f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
+                        )
