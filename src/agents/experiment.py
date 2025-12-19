@@ -140,6 +140,9 @@ def handle_experiment_mode(
                         response=f"ERROR: `{orchestrator_response.error}`"
                     )
                 else:
+                    yield AgentResponse(
+                        status=f"Number of scans is {orchestrator_response.number_of_scans}, calling ExpPlanner for each experiment."
+                    )
                     plans = []
                     # TODO: change for loop later
                     # TODO: have to update state between scans
