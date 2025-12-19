@@ -45,7 +45,9 @@ class ProjectManager:
         position = RelativeOffset(x=0, y=0, z=1)
         return State(current_position=position, home_position=position)
 
-    def update_experiment_state(self, relative_offset_mm: RelativeOffset) -> None:
+    def update_experiment_state(
+        self, relative_offset_mm: RelativeOffset
+    ) -> None:
         """Update the experiment state based on executed tools."""
         new_x = relative_offset_mm.x
         new_y = relative_offset_mm.y
