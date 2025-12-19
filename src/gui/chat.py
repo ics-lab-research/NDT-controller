@@ -14,25 +14,34 @@ def respond_stream(
     ctx: ProjectManager,
 ) -> Generator[Tuple[ChatHistory, str], None, None]:
     """Handle chat responses with streaming."""
+    # Convert history to conversation messages, excluding the new messages
+    conversation_history = build_conversation_history(history)
+    
     # Add user message to history
     history.append({"role": "user", "content": message})
-    # Add response placeholder
-    history.append({"role": "assistant", "content": ""})
-    yield history, ""
 
     thinking_added = False
     action_added = False
-
-    # Convert history to conversation messages, excluding the new messages
-    conversation_history = build_conversation_history(history[:-2])
+    response_added = False
 
     for agent_response in get_agent_response(
         message, conversation_history, ctx
     ):
         if agent_response.response:
-            # Update response message
-            history[-1]["content"] = agent_response.response
-            yield history, ""
+            if not response_added:
+                # Append response message
+                history.append(
+                    {
+                        "role": "assistant",
+                        "content": agent_response.response,
+                    },
+                )
+                response_added = True
+                yield history, ""
+            else:
+                # Update existing response message
+                history[-1]["content"] = agent_response.response
+                yield history, ""
 
         if agent_response.thinking and agent_response.thinking.strip():
             if not thinking_added:
