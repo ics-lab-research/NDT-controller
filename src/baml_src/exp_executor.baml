@@ -80,10 +80,13 @@ If any instruction is unclear or uses controls not listed in system_capabilities
 <example>
 Input Plan:
 "PLAN EXP-001:
-1. move Z up (distance 9 mm)
-2. configure signal (frequency=1000, amplitude=5.0, waveform=sine, pulse type=basic)
-3. execute grid scan (10x12 grid)
-4. move Z down (distance 9 mm)"
+1. move X left (distance 10 mm)
+2. move Y backward (distance 20 mm)
+3. move Z up (distance 15 mm)
+4. configure signal (frequency=1000, amplitude=6.0, waveform=sine)
+5. execute grid scan (7x8)
+6. move X left (distance 7 mm)
+7. move Y forward (distance 8 mm)"
 
 Input Filename: experiment_001.tdms
 
@@ -95,17 +98,20 @@ Output:
   {"tool_name": "select_tab", "tab_control_name": "Pulse Types", "index": 0},
   {"tool_name": "select_combo_box", "combo_box_name": "Basic Type", "item": "Sine"},
   {"tool_name": "set_numeric_control", "control_name": "Basic freq (Hz)", "value": 1000.0},
-  {"tool_name": "set_numeric_control", "control_name": "Basic amp", "value": 5.0},
-  {"tool_name": "set_numeric_control", "control_name": "Z Distance", "value": 9.0},
+  {"tool_name": "set_numeric_control", "control_name": "Basic amp", "value": 6.0},
+  {"tool_name": "set_numeric_control", "control_name": "X Distance", "value": 10.0},
+  {"tool_name": "set_numeric_control", "control_name": "Y Distance", "value": 20.0}
+  {"tool_name": "set_numeric_control", "control_name": "Z Distance", "value": 15.0},
+  {"tool_name": "press_button", "button_name": "x left"},
+  {"tool_name": "press_button", "button_name": "y backward"},
   {"tool_name": "press_button", "button_name": "z up"},
+  {"tool_name": "set_numeric_control", "control_name": "X Auto Distance", "value": 7.0},
+  {"tool_name": "set_numeric_control", "control_name": "Y Auto Distance", "value": 8.0},
   {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"},
   
   // Stage 2: Execute scan
   {"tool_name": "connect_to_vi", "vi_path": "example.vi"},
   {"tool_name": "select_tab", "tab_control_name": "Measurement Modes", "index": 1},
-  {"tool_name": "set_numeric_control", "control_name": "Basic freq (Hz)", "value": 500.0},
-  {"tool_name": "set_numeric_control", "control_name": "X Auto Distance", "value": 10.0},
-  {"tool_name": "set_numeric_control", "control_name": "Y Auto Distance", "value": 12.0},
   {"tool_name": "run_open_vi", "run_vi": true},
   {"tool_name": "handle_save_dialog", "save_directory": "data_dir", "file_name": "experiment_001.tdms"},
   {"tool_name": "set_button_state", "button_name": "Scan", "state": true},
@@ -113,8 +119,10 @@ Output:
   
   // Stage 3: Return to initial
   {"tool_name": "connect_to_vi", "vi_path": "example.vi"},
-  {"tool_name": "set_numeric_control", "control_name": "Z Distance", "value": 9.0},
-  {"tool_name": "press_button", "button_name": "z down"},
+  {"tool_name": "set_numeric_control", "control_name": "X Distance", "value": 7.0},
+  {"tool_name": "set_numeric_control", "control_name": "Y Distance", "value": 8.0},
+  {"tool_name": "press_button", "button_name": "x right"},
+  {"tool_name": "press_button", "button_name": "y forward"},
   {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"},
   
   // Stage 4: Shutdown
@@ -145,6 +153,24 @@ test TestBasicPlanExecution {
 2. move Y forward (distance 20 mm)
 3. move Z up (distance 15 mm)
 4. configure signal (frequency=1000, amplitude=5.0, waveform=sine)
+5. execute grid scan (5x5)
+6. move X right (distance 5 mm)  # return from (5, -15, 15) to (10, -15, 15)
+7. move Y forward (distance 5 mm)  # return from (10, -15, 15) to (10, -20, 15)"
+    "#
+
+    filename "experiment_exp_001.tdms"
+  }
+}
+
+test TestBasicPlanExecution2 {
+  functions [ExpExecutor]
+  args {
+    plan #"
+"PLAN EXP-001:
+1. move X right (distance 10 mm)
+2. move Y forward (distance 20 mm)
+3. move Z up (distance 15 mm)
+4. configure signal (frequency=1000, amplitude=5.0, waveform=gaussian)
 5. execute grid scan (5x5)
 6. move X right (distance 5 mm)  # return from (5, -15, 15) to (10, -15, 15)
 7. move Y forward (distance 5 mm)  # return from (10, -15, 15) to (10, -20, 15)"

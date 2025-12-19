@@ -27,32 +27,32 @@ class LlmResponseParser:
     def ExpExecutor(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.GetNumericIndicatorTool", "types.GetViStatusTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="request")
-        return typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.GetNumericIndicatorTool", "types.GetViStatusTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="request")
+        return typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.GetNumericIndicatorTool", "types.GetViStatusTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"], __result__)
 
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union["types.ExpOrchestratorOutput", "types.Error"]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpOrchestrator", llm_response=llm_response, mode="request")
-        return typing.cast(typing.Union["types.ExpOrchestratorOutput", "types.Error"], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpOrchestrator", llm_response=llm_response, mode="request")
+        return typing.cast(typing.Union["types.ExpOrchestratorOutput", "types.Error"], __result__)
 
     def ExpPlanner(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union[str, "types.Error"]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner", llm_response=llm_response, mode="request")
-        return typing.cast(typing.Union[str, "types.Error"], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner", llm_response=llm_response, mode="request")
+        return typing.cast(typing.Union[str, "types.Error"], __result__)
 
     def ExpPlanner2(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner2", llm_response=llm_response, mode="request")
-        return typing.cast(typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner2", llm_response=llm_response, mode="request")
+        return typing.cast(typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]], __result__)
 
     def ExpRouter(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union["types.ExpRouterOutput", "types.Error"]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="request")
-        return typing.cast(typing.Union["types.ExpRouterOutput", "types.Error"], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="request")
+        return typing.cast(typing.Union["types.ExpRouterOutput", "types.Error"], __result__)
 
     
 
@@ -65,31 +65,31 @@ class LlmStreamParser:
     def ExpExecutor(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.GetNumericIndicatorTool", "stream_types.GetViStatusTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.Error"]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="stream")
-        return typing.cast(typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.GetNumericIndicatorTool", "stream_types.GetViStatusTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.Error"], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="stream")
+        return typing.cast(typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.GetNumericIndicatorTool", "stream_types.GetViStatusTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.Error"], __result__)
 
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.Error"]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpOrchestrator", llm_response=llm_response, mode="stream")
-        return typing.cast(typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.Error"], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpOrchestrator", llm_response=llm_response, mode="stream")
+        return typing.cast(typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.Error"], __result__)
 
     def ExpPlanner(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union[str, "stream_types.Error"]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner", llm_response=llm_response, mode="stream")
-        return typing.cast(typing.Union[str, "stream_types.Error"], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner", llm_response=llm_response, mode="stream")
+        return typing.cast(typing.Union[str, "stream_types.Error"], __result__)
 
     def ExpPlanner2(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner2", llm_response=llm_response, mode="stream")
-        return typing.cast(typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner2", llm_response=llm_response, mode="stream")
+        return typing.cast(typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]], __result__)
 
     def ExpRouter(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union["stream_types.ExpRouterOutput", "stream_types.Error"]:
-        result = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="stream")
-        return typing.cast(typing.Union["stream_types.ExpRouterOutput", "stream_types.Error"], result)
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="stream")
+        return typing.cast(typing.Union["stream_types.ExpRouterOutput", "stream_types.Error"], __result__)
 
     

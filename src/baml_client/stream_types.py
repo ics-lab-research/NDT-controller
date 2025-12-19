@@ -27,11 +27,11 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['connect_to_vi']] = None
     vi_path: typing.Optional[str] = None
 
 class ConversationMessage(BaseModel):
-    role: typing.Optional[typing.Union[str, str]] = None
+    role: typing.Optional[typing.Union[typing_extensions.Literal['user'], typing_extensions.Literal['assistant']]] = None
     content: typing.Optional[str] = None
 
 class Error(BaseModel):
@@ -54,23 +54,23 @@ class Experiment(BaseModel):
     filename: typing.Optional[str] = None
 
 class GetNumericIndicatorTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['get_numeric_indicator']] = None
     indicator_name: typing.Optional[str] = None
 
 class GetViStatusTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['get_vi_status']] = None
 
 class Grid(BaseModel):
     rows: typing.Optional[int] = None
     cols: typing.Optional[int] = None
 
 class HandleSaveDialogTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['handle_save_dialog']] = None
     save_directory: typing.Optional[str] = None
     file_name: typing.Optional[str] = None
 
 class PressButtonTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['press_button']] = None
     button_name: typing.Optional[str] = None
 
 class RelativeOffset(BaseModel):
@@ -79,26 +79,26 @@ class RelativeOffset(BaseModel):
     z: typing.Optional[int] = None
 
 class RunOpenViTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['run_open_vi']] = None
     run_vi: typing.Optional[bool] = None
 
 class SelectComboBoxTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['select_combo_box']] = None
     combo_box_name: typing.Optional[str] = None
     item: typing.Optional[str] = None
 
 class SelectTabTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['select_tab']] = None
     tab_control_name: typing.Optional[str] = None
     index: typing.Optional[int] = None
 
 class SetButtonStateTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['set_button_state']] = None
     button_name: typing.Optional[str] = None
     state: typing.Optional[bool] = None
 
 class SetNumericControlTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['set_numeric_control']] = None
     control_name: typing.Optional[str] = None
     value: typing.Optional[float] = None
 
@@ -111,7 +111,7 @@ class State(BaseModel):
     home_position: typing.Optional["RelativeOffset"] = None
 
 class StopViTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['stop_vi']] = None
     close_labview: typing.Optional[bool] = None
 
 class ToolResult(BaseModel):
@@ -121,7 +121,7 @@ class ToolResult(BaseModel):
     error: typing.Optional[str] = None
 
 class WaitForOperationCompleteTool(BaseModel):
-    tool_name: typing.Optional[str] = None
+    tool_name: typing.Optional[typing_extensions.Literal['wait_for_operation_complete']] = None
     exp_type: typing.Optional[types.ExpType] = None
 
 # #########################################################################
