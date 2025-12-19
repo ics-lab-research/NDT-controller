@@ -78,12 +78,62 @@ def reinit_system(project_manager: ProjectManager) -> str | None:
     return None
 
 
-def tool_wait_for_operation_complete(exp_type: ExpType) -> ToolResult:
+def tool_wait_for_operation_complete(exp_type: ExpType, project_manager: ProjectManager) -> ToolResult:
     if exp_type == ExpType.SCAN:
-        pass
-
+        metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+        if not isinstance(metadata, ExperimentsMetadata):
+            return ToolResult(
+                name="wait_for_operation_complete",
+                success=False,
+                output=None,
+                error="Not in experiments mode",
+            )
+    
+        vi_path = str(metadata.vi_path)
+    
+        logger.info("Waiting for scan to complete...")
+        while True:
+            connect_result = tool_connect_to_vi(vi_path=vi_path)
+            if not connect_result.success:
+                return ToolResult(
+                    name="wait_for_operation_complete",
+                    success=False,
+                    output=None,
+                    error=connect_result.error,
+                )
+            status_result = tool_get_numeric_indicator("Completed")
+            if not status_result.success:
+                return ToolResult(
+                    name="wait_for_operation_complete",
+                    success=False,
+                    output=None,
+                    error=status_result.error,
+                )
+            if (
+                status_result.output
+                and isinstance(status_result.output, dict)
+                and status_result.output.get("value") == "1.0"
+            ):
+                logger.info("Scan completed!")
+                break
+    
+            time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
+    
+        return ToolResult(
+            name="wait_for_operation_complete",
+            success=True,
+            output=None,
+            error=None,
+        )
+    
     elif exp_type == ExpType.MOVEMENT:
-        pass
+        time.sleep(HARDWARE_SETTLE_DELAY)
+        return ToolResult(
+            name="wait_for_operation_complete",
+            success=True,
+            output=None,
+            error=None,
+        )
 
 
 def execute_tool(
@@ -125,7 +175,7 @@ def execute_tool(
     elif isinstance(tool, SelectComboBoxTool):
         return tool_select_combo_box(tool.combo_box_name, tool.item)
     elif isinstance(tool, WaitForOperationCompleteTool):
-        pass
+        return tool_wait_for_operation_complete(tool.exp_type, project_manager)
     else:
         logger.error(f"Unknown tool type: {type(tool).__name__}")
         return ToolResult(
