@@ -116,9 +116,11 @@ def handle_experiment_mode(
                                 status=f"Calling ExpExecutor with file name is `{single_experiment.filename}` and this abstract plan:\n {plan}"
                             )
                             yield AgentResponse(response="Plan generated.")
-                            yield from save_experiment_plans_to_project(
-                                [plan], project_manager
-                            )
+
+                            if plan:
+                                yield from save_experiment_plans_to_project(
+                                    [plan], project_manager
+                                )
                     else:
                         yield AgentResponse(
                             response="ERROR: Number of scan is not 1"
@@ -143,7 +145,7 @@ def handle_experiment_mode(
                     yield AgentResponse(
                         status=f"Number of scans is {orchestrator_response.number_of_scans}, calling ExpPlanner for each experiment."
                     )
-                    plans = []
+                    plans: List[ExperimentPlan] = []
                     # TODO: change for loop later
                     # TODO: have to update state between scans
                     for experiment in orchestrator_response.experiments:
@@ -161,7 +163,8 @@ def handle_experiment_mode(
                             yield AgentResponse(
                                 status=f"Calling ExpExecutor with file name is `{experiment.filename}` and this abstract plan:\n {plan}"
                             )
-                            plans.append(plan)
+                            if plan:
+                                plans.append(plan)
                     yield AgentResponse(response="Plans generated.")
                     yield from save_experiment_plans_to_project(
                         plans, project_manager
