@@ -113,20 +113,6 @@ def _update_experiment_details(
     return convert_plan_to_table_data(plan)
 
 
-def _reload_plans(
-    project_manager: ProjectManager,
-) -> Tuple[List[str], List[List[str]]]:
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
-    plans = []
-    if isinstance(metadata, ExperimentsMetadata):
-        plans_path = metadata.plans_path
-        if isinstance(plans_path, Path):
-            plans = load_experiment_plans(plans_path)
-    filenames = [plan.filename for plan in plans]
-    initial_data = convert_plan_to_table_data(plans[0]) if plans else []
-    return filenames, initial_data
-
-
 def save_experiment_changes(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
@@ -174,17 +160,11 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=initial_data,
             interactive=True,
         )
-        reload_button = gr.Button("Reload Plans")
         save_button = gr.Button("Save Changes")
         dropdown.change(
             lambda filename: _update_experiment_details(plans, filename),
             inputs=dropdown,
             outputs=details_df,
-        )
-        reload_button.click(
-            lambda: _reload_plans(project_manager),
-            inputs=[],
-            outputs=[dropdown, details_df],
         )
         save_button.click(
             lambda filename, data: save_experiment_changes(
