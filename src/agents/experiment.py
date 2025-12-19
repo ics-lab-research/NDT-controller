@@ -1,3 +1,4 @@
+import concurrent.futures
 from typing import Generator, List, Tuple
 
 from loguru import logger
@@ -179,31 +180,33 @@ def handle_experiment_mode(
                         f"Generating plans for experiments: {[e.filename for e in orchestrator_response.experiments]}"
                     )
                     plans: List[ExperimentPlan] = []
-                    # TODO: change for loop later
-                    # TODO: have to update state between scans
-                    for experiment in orchestrator_response.experiments:
-                        yield AgentResponse(
-                            status=f"Calling ExpPlanner with this experiment {experiment}"
-                        )
-                        logger.debug(
-                            f"Processing experiment: {experiment.filename}"
-                        )
-                        plan, error = generate_plan_for_experiment(
-                            experiment, init_state
-                        )
-                        if error:
-                            logger.error(
-                                f"Error generating plan for experiment {experiment.filename}: {error.error}"
+                    # Use concurrent execution for I/O-bound tasks
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        futures = {
+                            executor.submit(
+                                generate_plan_for_experiment, experiment, init_state
+                            ): experiment
+                            for experiment in orchestrator_response.experiments
+                        }
+                        for future in concurrent.futures.as_completed(futures):
+                            experiment = futures[future]
+                            logger.debug(
+                                f"Processing experiment: {experiment.filename}"
                             )
-                            yield AgentResponse(
-                                response=f"ERROR: {error.error}"
-                            )
-                        else:
-                            yield AgentResponse(
-                                status=f"Calling ExpExecutor with file name is `{experiment.filename}` and this abstract plan:\n {plan}"
-                            )
-                            if plan:
-                                plans.append(plan)
+                            plan, error = future.result()
+                            if error:
+                                logger.error(
+                                    f"Error generating plan for experiment {experiment.filename}: {error.error}"
+                                )
+                                yield AgentResponse(
+                                    response=f"ERROR: {error.error}"
+                                )
+                            else:
+                                yield AgentResponse(
+                                    status=f"Processed experiment {experiment.filename} with plan: {plan}"
+                                )
+                                if plan:
+                                    plans.append(plan)
                     yield AgentResponse(response="Plans generated.")
                     yield from save_experiment_plans_to_project(
                         plans, project_manager
