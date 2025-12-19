@@ -113,7 +113,9 @@ def _update_experiment_details(
     return convert_plan_to_table_data(plan)
 
 
-def _reload_plans(project_manager: ProjectManager) -> Tuple[List[str], List[List[str]]]:
+def _reload_plans(
+    project_manager: ProjectManager,
+) -> Tuple[List[str], List[List[str]]]:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
     if isinstance(metadata, ExperimentsMetadata):
