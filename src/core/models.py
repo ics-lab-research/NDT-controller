@@ -17,6 +17,12 @@ from ..baml_client.types import (
 )
 
 
+@dataclass
+class ExperimentExecutionError:
+    filename: str
+    error_message: str
+
+
 class ExperimentStatus(Enum):
     PENDING = "⏳ Pending"
     SCANNING = "🔍 Scanning"
