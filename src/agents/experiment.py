@@ -6,7 +6,9 @@ from loguru import logger
 from ..baml_client.types import (
     ConversationMessage,
     Error,
+    Experiment,
     ExpAction,
+    ExpOrchestratorOutput,
     RelativeOffset,
     State,
 )
@@ -20,11 +22,174 @@ from .experiment_api import (
 )
 from .experiment_planning import save_experiment_plans
 
-current_position = RelativeOffset(x=0, y=0, z=1)
-home_position = RelativeOffset(x=0, y=0, z=1)
-init_state = State(
-    current_position=current_position, home_position=home_position
-)
+
+def create_initial_state() -> State:
+    """Create the initial state for experiments."""
+    position = RelativeOffset(x=0, y=0, z=1)
+    return State(current_position=position, home_position=position)
+
+
+def yield_error(error: Error) -> Generator[AgentResponse, None, None]:
+    """Yield an error response."""
+    logger.error(f"Error: {error.error}")
+    yield AgentResponse(response=f"ERROR: {error.error}")
+
+
+def get_experiments_metadata(
+    project_manager: ProjectManager,
+) -> ExperimentsMetadata:
+    """Get and validate experiments metadata from project manager."""
+    metadata = project_manager.get_mode_metadata(
+        project_manager.current_mode
+    )
+    if not isinstance(metadata, ExperimentsMetadata):
+        raise ValueError("Metadata is not ExperimentsMetadata")
+    return metadata
+
+
+def save_plans(
+    plans: List[ExperimentPlan], project_manager: ProjectManager
+) -> Generator[AgentResponse, None, None]:
+    """Save experiment plans and yield appropriate response."""
+    metadata = get_experiments_metadata(project_manager)
+    save_result = save_experiment_plans(plans, metadata.plans_path)
+
+    if save_result["success"]:
+        message = (
+            "Plan generated and saved."
+            if len(plans) == 1
+            else "Plans generated and saved."
+        )
+        yield AgentResponse(response=message)
+    else:
+        error_msg = save_result.get("error", "Unknown error")
+        yield AgentResponse(
+            response=f"Plans generated but save failed: {error_msg}"
+        )
+
+
+def process_single_experiment(
+    experiment: Experiment, state: State
+) -> Generator[AgentResponse, None, None] | ExperimentPlan | Error:
+    """Process a single experiment through planning and execution."""
+    yield AgentResponse(
+        status=f"Generating abstract plan for {experiment.filename}"
+    )
+    logger.debug(
+        f"Calling ExpPlanner with experiment: {experiment}, state: {state}"
+    )
+
+    plan = call_exp_planner(experiment, state)
+    if isinstance(plan, Error):
+        yield from yield_error(plan)
+        return plan
+
+    yield AgentResponse(
+        status=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {plan}"
+    )
+    logger.debug(
+        f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
+    )
+
+    tools = call_exp_executor(plan, experiment.filename)
+    if isinstance(tools, Error):
+        yield from yield_error(tools)
+        return tools
+
+    return ExperimentPlan(filename=experiment.filename, experiment=tools)
+
+
+def handle_single_scan(
+    orchestrator_output: ExpOrchestratorOutput,
+    project_manager: ProjectManager,
+) -> Generator[AgentResponse, None, None]:
+    """Handle single scan experiment workflow."""
+    if orchestrator_output.number_of_scans != 1:
+        yield AgentResponse(response="ERROR: Number of scan is not 1")
+        return
+
+    state = create_initial_state()
+    experiment = orchestrator_output.experiments[0]
+    result = yield from process_single_experiment(experiment, state)
+
+    if isinstance(result, ExperimentPlan):
+        yield from save_plans([result], project_manager)
+
+
+def handle_multiple_scan(
+    orchestrator_output: ExpOrchestratorOutput,
+    project_manager: ProjectManager,
+) -> Generator[AgentResponse, None, None]:
+    """Handle multiple scan experiments workflow with concurrent execution."""
+    yield AgentResponse(
+        status=f"Number of scans is {orchestrator_output.number_of_scans}, generating abstract plans for each experiment."
+    )
+    logger.debug(
+        f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_output.experiments]}"
+    )
+
+    state = create_initial_state()
+    plans_to_save = []
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = {
+            executor.submit(call_exp_planner, experiment, state): experiment
+            for experiment in orchestrator_output.experiments
+        }
+
+        for future in concurrent.futures.as_completed(futures):
+            experiment = futures[future]
+            logger.debug(f"Processing experiment: {experiment.filename}")
+
+            plan = future.result()
+            if isinstance(plan, Error):
+                yield from yield_error(plan)
+                continue
+
+            yield AgentResponse(
+                status=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {plan}"
+            )
+            logger.debug(
+                f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
+            )
+
+            tools = call_exp_executor(plan, experiment.filename)
+            if isinstance(tools, Error):
+                yield from yield_error(tools)
+                continue
+
+            plans_to_save.append(
+                ExperimentPlan(
+                    filename=experiment.filename, experiment=tools
+                )
+            )
+
+    if plans_to_save:
+        yield from save_plans(plans_to_save, project_manager)
+    else:
+        yield AgentResponse(response="No plans generated.")
+
+
+def orchestrate_experiments(
+    reformatted_message: str, project_manager: ProjectManager, action: ExpAction
+) -> Generator[AgentResponse, None, None]:
+    """Orchestrate experiment workflow based on action type."""
+    yield AgentResponse(
+        status=f"Calling ExpOrchestrator with message: `{reformatted_message}`"
+    )
+    logger.debug(
+        f"Calling ExpOrchestrator with reformatted_message: '{reformatted_message}'"
+    )
+
+    orchestrator_output = call_exp_orchestrator(reformatted_message)
+    if isinstance(orchestrator_output, Error):
+        yield from yield_error(orchestrator_output)
+        return
+
+    if action == ExpAction.SINGLE_SCAN:
+        yield from handle_single_scan(orchestrator_output, project_manager)
+    elif action == ExpAction.MULTIPLE_SCAN:
+        yield from handle_multiple_scan(orchestrator_output, project_manager)
 
 
 def handle_experiment_mode(
@@ -39,199 +204,25 @@ def handle_experiment_mode(
     )
 
     router_response = call_exp_router(user_message, conversation_history)
+    if not router_response:
+        return
 
-    if router_response:
-        yield AgentResponse(response=router_response.response)
+    yield AgentResponse(response=router_response.response)
 
-        if router_response.action == ExpAction.ASK_CLARIFICATION:
-            pass
+    if router_response.action in (
+        ExpAction.ASK_CLARIFICATION,
+        ExpAction.BASIC_CONTROL,
+    ):
+        return
 
-        elif router_response.action == ExpAction.BASIC_CONTROL:
-            pass
+    if router_response.action == ExpAction.SINGLE_SCAN:
+        yield AgentResponse(status="Performing single scan.")
+    elif router_response.action == ExpAction.MULTIPLE_SCAN:
+        yield AgentResponse(status="Performing multiple scan.")
 
-        elif router_response.action == ExpAction.SINGLE_SCAN:
-            yield AgentResponse(status="Performing single scan.")
-
-            if router_response.reformatted_message:
-                yield AgentResponse(
-                    status=f"Calling ExpOrchestrator with message: `{router_response.reformatted_message}`"
-                )
-                logger.debug(
-                    f"Calling ExpOrchestrator with reformatted_message: '{router_response.reformatted_message}'"
-                )
-                orchestrator_response = call_exp_orchestrator(
-                    reformatted_message=router_response.reformatted_message
-                )
-
-                if isinstance(orchestrator_response, Error):
-                    logger.error(
-                        f"ExpOrchestrator error: {orchestrator_response.error}"
-                    )
-                    yield AgentResponse(
-                        response=f"ERROR: `{orchestrator_response.error}`"
-                    )
-                else:
-                    if orchestrator_response.number_of_scans == 1:
-                        single_experiment = orchestrator_response.experiments[0]
-                        yield AgentResponse(
-                            status=f"Generating abstract plan for {single_experiment.filename}"
-                        )
-                        logger.debug(
-                            f"Calling ExpPlanner with experiment: {single_experiment}, state: {init_state}"
-                        )
-                        planner_response = call_exp_planner(
-                            single_experiment, init_state
-                        )
-                        if isinstance(planner_response, Error):
-                            logger.error(
-                                f"ExpPlanner error: {planner_response.error}"
-                            )
-                            yield AgentResponse(
-                                response=f"ERROR: {planner_response.error}"
-                            )
-                        else:
-                            yield AgentResponse(
-                                status=f"Calling ExpExecutor with filename: {single_experiment.filename} and abstract plan:\n {planner_response}"
-                            )
-                            logger.debug(
-                                f"Calling ExpExecutor with plan: '{planner_response}', filename: '{single_experiment.filename}'"
-                            )
-                            experiment_tools = call_exp_executor(
-                                plan=planner_response,
-                                filename=single_experiment.filename,
-                            )
-                            if isinstance(experiment_tools, Error):
-                                logger.error(
-                                    f"ExpExecutor error: {experiment_tools.error}"
-                                )
-                                yield AgentResponse(
-                                    response=f"ERROR: {experiment_tools.error}"
-                                )
-                            else:
-                                plan = ExperimentPlan(
-                                    filename=single_experiment.filename,
-                                    experiment=experiment_tools,
-                                )
-
-                                metadata = project_manager.get_mode_metadata(
-                                    project_manager.current_mode
-                                )
-                                if not isinstance(
-                                    metadata, ExperimentsMetadata
-                                ):
-                                    raise ValueError(
-                                        "Metadata is not ExperimentsMetadata"
-                                    )
-                                plans_path = metadata.plans_path
-                                save_result = save_experiment_plans(
-                                    [plan],
-                                    plans_path,
-                                )
-                                if save_result["success"]:
-                                    yield AgentResponse(
-                                        response="Plan generated and saved."
-                                    )
-                                else:
-                                    yield AgentResponse(
-                                        response=f"Plan generated but save failed: {save_result.get('error', 'Unknown error')}"
-                                    )
-                    else:
-                        yield AgentResponse(
-                            response="ERROR: Number of scan is not 1"
-                        )
-
-        elif router_response.action == ExpAction.MULTIPLE_SCAN:
-            yield AgentResponse(status="Performing multiple scan.")
-
-            if router_response.reformatted_message:
-                yield AgentResponse(
-                    status=f"Calling ExpOrchestrator with message: `{router_response.reformatted_message}`"
-                )
-                orchestrator_response = call_exp_orchestrator(
-                    reformatted_message=router_response.reformatted_message
-                )
-
-                if isinstance(orchestrator_response, Error):
-                    yield AgentResponse(
-                        response=f"ERROR: `{orchestrator_response.error}`"
-                    )
-                else:
-                    yield AgentResponse(
-                        status=f"Number of scans is {orchestrator_response.number_of_scans}, generating abstract plans for each experiment."
-                    )
-                    logger.debug(
-                        f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_response.experiments]}"
-                    )
-                    plans_to_save = []
-                    # Use concurrent execution for I/O-bound tasks
-                    with concurrent.futures.ThreadPoolExecutor() as executor:
-                        futures = {
-                            executor.submit(
-                                call_exp_planner,
-                                experiment,
-                                init_state,
-                            ): experiment
-                            for experiment in orchestrator_response.experiments
-                        }
-                        for future in concurrent.futures.as_completed(futures):
-                            experiment = futures[future]
-                            logger.debug(
-                                f"Processing experiment: {experiment.filename}"
-                            )
-                            planner_response = future.result()
-                            if isinstance(planner_response, Error):
-                                logger.error(
-                                    f"Error generating abstract plan for experiment {experiment.filename}: {planner_response.error}"
-                                )
-                                yield AgentResponse(
-                                    response=f"ERROR: {planner_response.error}"
-                                )
-                            else:
-                                yield AgentResponse(
-                                    status=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {planner_response}"
-                                )
-
-                                logger.debug(
-                                    f"Calling ExpExecutor with plan: '{planner_response}', filename: '{experiment.filename}'"
-                                )
-                                experiment_tools = call_exp_executor(
-                                    plan=planner_response,
-                                    filename=experiment.filename,
-                                )
-                                if isinstance(experiment_tools, Error):
-                                    logger.error(
-                                        f"ExpExecutor error: {experiment_tools.error}"
-                                    )
-                                    yield AgentResponse(
-                                        response=f"ERROR: {experiment_tools.error}"
-                                    )
-                                else:
-                                    plans_to_save.append(
-                                        ExperimentPlan(
-                                            filename=experiment.filename,
-                                            experiment=experiment_tools,
-                                        )
-                                    )
-                    if plans_to_save:
-                        metadata = project_manager.get_mode_metadata(
-                            project_manager.current_mode
-                        )
-                        if not isinstance(metadata, ExperimentsMetadata):
-                            raise ValueError(
-                                "Metadata is not ExperimentsMetadata"
-                            )
-                        plans_path = metadata.plans_path
-                        save_result = save_experiment_plans(
-                            plans_to_save,
-                            plans_path,
-                        )
-                        if save_result["success"]:
-                            yield AgentResponse(
-                                response="Plans generated and saved."
-                            )
-                        else:
-                            yield AgentResponse(
-                                response=f"Plans generated but save failed: {save_result.get('error', 'Unknown error')}"
-                            )
-                    else:
-                        yield AgentResponse(response="No plans generated.")
+    if router_response.reformatted_message:
+        yield from orchestrate_experiments(
+            router_response.reformatted_message,
+            project_manager,
+            router_response.action,
+        )
