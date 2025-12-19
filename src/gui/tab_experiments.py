@@ -139,6 +139,31 @@ def save_experiment_changes(
         gr.Info(error_msg)
 
 
+def reload_plans(
+    plans_path: Path | None,
+) -> Tuple[gr.Dropdown, gr.Dataframe, List[ExperimentPlan]]:
+    if not plans_path:
+        gr.Info("Error: Plans path not configured")
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
+    try:
+        plans = load_experiment_plans(plans_path)
+        filenames = [plan.filename for plan in plans]
+        initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+        gr.Info("Successfully reloaded experiment plans")
+        return (
+            gr.Dropdown(
+                choices=filenames, value=filenames[0] if filenames else None
+            ),
+            gr.Dataframe(value=initial_data),
+            plans,
+        )
+    except Exception as e:
+        error_msg = f"Error reloading plans: {str(e)}"
+        logger.error(error_msg)
+        gr.Info(error_msg)
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
+
+
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
@@ -149,6 +174,7 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             plans = load_experiment_plans(plans_path)
     filenames = [plan.filename for plan in plans]
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+    plans_state = gr.State(plans)
     with gr.Tab("Plans Viewer") as tab:
         dropdown = gr.Dropdown(
             choices=filenames,
@@ -160,17 +186,26 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=initial_data,
             interactive=True,
         )
-        save_button = gr.Button("Save Changes")
+        with gr.Row():
+            save_button = gr.Button("Save Changes")
+            reload_button = gr.Button("Reload Plans")
         dropdown.change(
-            lambda filename: _update_experiment_details(plans, filename),
-            inputs=dropdown,
+            lambda filename, current_plans: _update_experiment_details(
+                current_plans, filename
+            ),
+            inputs=[dropdown, plans_state],
             outputs=details_df,
         )
         save_button.click(
-            lambda filename, data: save_experiment_changes(
-                plans, plans_path, filename, data
+            lambda filename, data, current_plans: save_experiment_changes(
+                current_plans, plans_path, filename, data
             ),
-            inputs=[dropdown, details_df],
+            inputs=[dropdown, details_df, plans_state],
             outputs=[],
+        )
+        reload_button.click(
+            lambda: reload_plans(plans_path),
+            inputs=[],
+            outputs=[dropdown, details_df, plans_state],
         )
     return tab
