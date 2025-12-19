@@ -44,9 +44,9 @@ class LlmResponseParser:
 
     def ExpRouter(
         self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> typing.Union["types.ExpRouterOutput", "types.Error"]:
+    ) -> types.ExpRouterOutput:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="request")
-        return typing.cast(typing.Union["types.ExpRouterOutput", "types.Error"], __result__)
+        return typing.cast(types.ExpRouterOutput, __result__)
 
     
 
@@ -76,8 +76,8 @@ class LlmStreamParser:
 
     def ExpRouter(
         self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> typing.Union["stream_types.ExpRouterOutput", "stream_types.Error"]:
+    ) -> stream_types.ExpRouterOutput:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="stream")
-        return typing.cast(typing.Union["stream_types.ExpRouterOutput", "stream_types.Error"], __result__)
+        return typing.cast(stream_types.ExpRouterOutput, __result__)
 
-    
+    

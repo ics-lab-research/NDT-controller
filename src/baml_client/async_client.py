@@ -126,7 +126,7 @@ class BamlAsyncClient:
             return typing.cast(typing.Union[str, "types.Error"], __result__.cast_to(types, types, stream_types, False, __runtime__))
     async def ExpRouter(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
         baml_options: BamlCallOptions = {},
-    ) -> typing.Union["types.ExpRouterOutput", "types.Error"]:
+    ) -> types.ExpRouterOutput:
         # Check if on_tick is provided
         if 'on_tick' in baml_options:
             # Use streaming internally when on_tick is provided
@@ -138,7 +138,7 @@ class BamlAsyncClient:
             __result__ = await self.__options.merge_options(baml_options).call_function_async(function_name="ExpRouter", args={
                 "user_message": user_message,"conversation_history": conversation_history,
             })
-            return typing.cast(typing.Union["types.ExpRouterOutput", "types.Error"], __result__.cast_to(types, types, stream_types, False, __runtime__))
+            return typing.cast(types.ExpRouterOutput, __result__.cast_to(types, types, stream_types, False, __runtime__))
     
 
 
@@ -186,14 +186,14 @@ class BamlStreamClient:
         )
     def ExpRouter(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
         baml_options: BamlCallOptions = {},
-    ) -> baml_py.BamlStream[typing.Union["stream_types.ExpRouterOutput", "stream_types.Error"], typing.Union["types.ExpRouterOutput", "types.Error"]]:
+    ) -> baml_py.BamlStream[stream_types.ExpRouterOutput, types.ExpRouterOutput]:
         __ctx__, __result__ = self.__options.merge_options(baml_options).create_async_stream(function_name="ExpRouter", args={
             "user_message": user_message,"conversation_history": conversation_history,
         })
-        return baml_py.BamlStream[typing.Union["stream_types.ExpRouterOutput", "stream_types.Error"], typing.Union["types.ExpRouterOutput", "types.Error"]](
+        return baml_py.BamlStream[stream_types.ExpRouterOutput, types.ExpRouterOutput](
           __result__,
-          lambda x: typing.cast(typing.Union["stream_types.ExpRouterOutput", "stream_types.Error"], x.cast_to(types, types, stream_types, True, __runtime__)),
-          lambda x: typing.cast(typing.Union["types.ExpRouterOutput", "types.Error"], x.cast_to(types, types, stream_types, False, __runtime__)),
+          lambda x: typing.cast(stream_types.ExpRouterOutput, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.ExpRouterOutput, x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
     
@@ -270,4 +270,4 @@ class BamlHttpStreamRequestClient:
         return __result__
     
 
-b = BamlAsyncClient(DoNotUseDirectlyCallManager({}))
+b = BamlAsyncClient(DoNotUseDirectlyCallManager({}))

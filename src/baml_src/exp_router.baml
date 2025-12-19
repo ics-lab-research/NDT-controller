@@ -1,7 +1,7 @@
 function ExpRouter(
   user_message: string,
   conversation_history: ConversationMessage[]?
-) -> ExpRouterOutput | Error{
+) -> ExpRouterOutput {
   client GroqRouter
   prompt #"
 You are a routing agent for the PECT lab automation system. Your task is to analyze user requests, categorize them into one of four actions, and reformat messages into standardized commands.

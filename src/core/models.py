@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Union
-
+from typing import Any, Dict, List, Union
 
 from ..baml_client.types import (
     ConnectToViTool,
+    GetNumericIndicatorTool,
+    GetViStatusTool,
     HandleSaveDialogTool,
     PressButtonTool,
     RunOpenViTool,
@@ -13,19 +14,24 @@ from ..baml_client.types import (
     SelectTabTool,
     SetButtonStateTool,
     SetNumericControlTool,
+    StopViTool,
+    WaitForOperationCompleteTool,
 )
 
 # Type alias for experiment tools
 ExperimentTool = Union[
-    SetNumericControlTool,
-    SelectTabTool,
-    RunOpenViTool,
     ConnectToViTool,
+    GetNumericIndicatorTool,
+    GetViStatusTool,
     HandleSaveDialogTool,
     PressButtonTool,
-    SetButtonStateTool,
+    RunOpenViTool,
     SelectComboBoxTool,
-    Literal["unknown"],
+    SelectTabTool,
+    SetButtonStateTool,
+    SetNumericControlTool,
+    StopViTool,
+    WaitForOperationCompleteTool,
 ]
 
 

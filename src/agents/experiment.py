@@ -35,11 +35,18 @@ def handle_experiment_mode(
             yield AgentResponse(thinking="Performing single scan.")
 
             if router_response.reformatted_message:
-                # orchestrator_response = call_exp_orchestrator(
-                #     router_response.reformatted_message
-                # )
-                orchestrator_response = call_exp_orchestrator(
-                    "fasdfds fadsf fsdf"
+                yield AgentResponse(
+                    thinking=f"Calling ExpOrchestrator with message: {router_response.reformatted_message}"
                 )
 
-                yield AgentResponse(response="Error: Orchestration failed")
+                orchestrator_response = call_exp_orchestrator(
+                    router_response.reformatted_message
+                )
+
+                # check if error
+                if isinstance(orchestrator_response, Error):
+                    yield AgentResponse(
+                        response=f"Error: {orchestrator_response.error}"
+                    )
+                else:
+                    pass
