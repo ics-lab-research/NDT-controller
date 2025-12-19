@@ -22,15 +22,16 @@ from ..baml_client.types import (
 from ..core.models import (
     ExperimentPlan,
     ExperimentsMetadata,
+    ExperimentStatus,
     ExperimentTool,
     Mode,
 )
 from ..core.project_manager import ProjectManager
 
 
-def _get_experiment_statuses(plans: List[ExperimentPlan]) -> List[str]:
-    # Placeholder: return "pending" for each experiment; replace with actual status logic
-    return ["pending"] * len(plans)
+def _get_experiment_statuses(plans: List[ExperimentPlan]) -> List[ExperimentStatus]:
+    # Placeholder: return PENDING for each experiment; replace with actual status logic
+    return [ExperimentStatus.PENDING] * len(plans)
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
@@ -222,7 +223,7 @@ def create_experiments_tab(
         with gr.TabItem("Scan Status"):
             status_df = gr.Dataframe(
                 headers=["Experiment Name", "Status"],
-                value=[[f, s] for f, s in zip(filenames, statuses)],
+                value=[[f, s.value] for f, s in zip(filenames, statuses)],
                 interactive=False,
             )
 
