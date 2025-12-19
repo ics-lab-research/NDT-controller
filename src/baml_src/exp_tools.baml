@@ -4,14 +4,14 @@ class ConnectToViTool {
     vi_path string @description("Path to the LabVIEW VI to connect to")
 }
 
-class GetNumericIndicatorTool {
-    tool_name "get_numeric_indicator" @description("Use this tool to get a numeric indicator value from the front panel.")
-    indicator_name string @description("Name of the numeric indicator to get")
-}
+// class GetNumericIndicatorTool {
+//     tool_name "get_numeric_indicator" @description("Use this tool to get a numeric indicator value from the front panel.")
+//     indicator_name string @description("Name of the numeric indicator to get")
+// }
 
-class GetViStatusTool {
-    tool_name "get_vi_status" @description("Use this tool to get the current status of the connected VI.")
-}
+// class GetViStatusTool {
+//     tool_name "get_vi_status" @description("Use this tool to get the current status of the connected VI.")
+// }
 
 class HandleSaveDialogTool {
     tool_name "handle_save_dialog" @description("Use this tool to handle the save dialog in LabVIEW")

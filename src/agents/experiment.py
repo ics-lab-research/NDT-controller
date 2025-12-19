@@ -75,7 +75,7 @@ def process_single_experiment(
         return plan
 
     yield AgentResponse(
-        status=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {plan}"
+        status=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
     )
     logger.debug(
         f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
