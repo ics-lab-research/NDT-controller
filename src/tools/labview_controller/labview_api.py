@@ -284,11 +284,11 @@ def tool_stop_vi(close_labview: bool = True) -> ToolResult:
 
 
 def tool_handle_save_dialog(
-    save_directory: str, filename: str, **kwargs
+    save_directory: Path, filename: str, **kwargs
 ) -> ToolResult:
     """Handle the Windows Save File dialog."""
     result = controller.handle_save_file_dialog(
-        save_directory=save_directory, filename=filename, **kwargs
+        save_directory=str(save_directory), filename=filename, **kwargs
     )
     return ToolResult(
         name="tool_handle_save_dialog",
