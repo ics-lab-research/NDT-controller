@@ -81,7 +81,7 @@ def save_plans(
 
 
 def process_single_experiment(
-    experiment: Experiment, state: State
+    experiment: Experiment, state: State, orchestrator_output: ExpOrchestratorOutput
 ) -> Generator[AgentResponse, None, ExperimentPlan | Error]:
     """Process a single experiment through planning and execution."""
     yield AgentResponse(
@@ -108,6 +108,8 @@ def process_single_experiment(
         yield from yield_error(tools)
         return tools
 
+    state = update_state(state, orchestrator_output)
+
     return ExperimentPlan(filename=experiment.filename, experiment=tools)
 
 
@@ -122,7 +124,7 @@ def handle_single_scan(
 
     state = create_initial_state()
     experiment = orchestrator_output.experiments[0]
-    result = yield from process_single_experiment(experiment, state)
+    result = yield from process_single_experiment(experiment, state, orchestrator_output)
 
     if isinstance(result, ExperimentPlan):
         yield from save_plans([result], project_manager)
@@ -169,6 +171,8 @@ def handle_multiple_scan(
             if isinstance(tools, Error):
                 yield from yield_error(tools)
                 continue
+
+            state = update_state(state, orchestrator_output)
 
             plans_to_save.append(
                 ExperimentPlan(filename=experiment.filename, experiment=tools)
