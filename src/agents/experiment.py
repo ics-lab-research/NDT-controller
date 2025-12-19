@@ -97,10 +97,13 @@ def handle_experiment_mode(
                                 f"Calling ExpExecutor with plan: '{planner_response}', filename: '{single_experiment.filename}'"
                             )
                             experiment_tools = call_exp_executor(
-                                plan=planner_response, filename=single_experiment.filename
+                                plan=planner_response,
+                                filename=single_experiment.filename,
                             )
                             if isinstance(experiment_tools, Error):
-                                logger.error(f"ExpExecutor error: {experiment_tools.error}")
+                                logger.error(
+                                    f"ExpExecutor error: {experiment_tools.error}"
+                                )
                                 yield AgentResponse(
                                     response=f"ERROR: {experiment_tools.error}"
                                 )
@@ -164,10 +167,13 @@ def handle_experiment_mode(
                                     f"Calling ExpExecutor with plan: '{planner_response}', filename: '{experiment.filename}'"
                                 )
                                 experiment_tools = call_exp_executor(
-                                    plan=planner_response, filename=experiment.filename
+                                    plan=planner_response,
+                                    filename=experiment.filename,
                                 )
                                 if isinstance(experiment_tools, Error):
-                                    logger.error(f"ExpExecutor error: {experiment_tools.error}")
+                                    logger.error(
+                                        f"ExpExecutor error: {experiment_tools.error}"
+                                    )
                                     yield AgentResponse(
                                         response=f"ERROR: {experiment_tools.error}"
                                     )
