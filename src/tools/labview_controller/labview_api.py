@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 from ...baml_client.types import ToolResult
@@ -25,7 +26,7 @@ def tool_run_open_vi(run_vi: bool = True) -> ToolResult:
     )
 
 
-def tool_connect_to_vi(vi_path: str | None = None) -> ToolResult:
+def tool_connect_to_vi(vi_path: Path | None = None) -> ToolResult:
     """
     Connect to an existing LabVIEW VI and also opens the front panel if not already open.
     """
