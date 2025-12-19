@@ -31,14 +31,20 @@ def generate_plan_for_experiment(
     experiment: Experiment, state: State
 ) -> Tuple[ExperimentPlan | None, Error | None]:
     """Generate a plan for a single experiment, returning the plan or an error."""
-    logger.debug(f"Generating plan for experiment: {experiment.filename}, state: {state}")
-    logger.debug(f"Calling ExpPlanner with experiment: {experiment}, state: {state}")
+    logger.debug(
+        f"Generating plan for experiment: {experiment.filename}, state: {state}"
+    )
+    logger.debug(
+        f"Calling ExpPlanner with experiment: {experiment}, state: {state}"
+    )
     planner_response = call_exp_planner(experiment, state)
     if isinstance(planner_response, Error):
         logger.error(f"ExpPlanner error: {planner_response.error}")
         return None, planner_response
 
-    logger.debug(f"Calling ExpExecutor with plan: '{planner_response}', filename: '{experiment.filename}'")
+    logger.debug(
+        f"Calling ExpExecutor with plan: '{planner_response}', filename: '{experiment.filename}'"
+    )
     experiment_tools = call_exp_executor(
         plan=planner_response, filename=experiment.filename
     )
@@ -65,7 +71,9 @@ def save_experiment_plans_to_project(
     if save_status["success"]:
         yield AgentResponse(action="Experiment plans saved successfully.")
     else:
-        logger.error(f"Failed to save plans: {save_status.get('error', 'Unknown error')}")
+        logger.error(
+            f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
+        )
         yield AgentResponse(
             action=f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
         )
@@ -78,7 +86,9 @@ def handle_experiment_mode(
 ) -> Generator[AgentResponse, None, None]:
     """Handle EXPERIMENTS mode: orchestrate experiments based on user message."""
     logger.info("Handling experiment mode")
-    logger.debug(f"Calling ExpRouter with user_message: '{user_message}', conversation_history length: {len(conversation_history)}")
+    logger.debug(
+        f"Calling ExpRouter with user_message: '{user_message}', conversation_history length: {len(conversation_history)}"
+    )
 
     router_response = call_exp_router(user_message, conversation_history)
 
@@ -98,13 +108,17 @@ def handle_experiment_mode(
                 yield AgentResponse(
                     status=f"Calling ExpOrchestrator with message: `{router_response.reformatted_message}`"
                 )
-                logger.debug(f"Calling ExpOrchestrator with reformatted_message: '{router_response.reformatted_message}'")
+                logger.debug(
+                    f"Calling ExpOrchestrator with reformatted_message: '{router_response.reformatted_message}'"
+                )
                 orchestrator_response = call_exp_orchestrator(
                     reformatted_message=router_response.reformatted_message
                 )
 
                 if isinstance(orchestrator_response, Error):
-                    logger.error(f"ExpOrchestrator error: {orchestrator_response.error}")
+                    logger.error(
+                        f"ExpOrchestrator error: {orchestrator_response.error}"
+                    )
                     yield AgentResponse(
                         response=f"ERROR: `{orchestrator_response.error}`"
                     )
@@ -114,12 +128,16 @@ def handle_experiment_mode(
                         yield AgentResponse(
                             status=f"Number of scans is 1, calling ExpPlanner with this experiment {single_experiment}"
                         )
-                        logger.debug(f"Generating plan for single experiment: {single_experiment.filename}")
+                        logger.debug(
+                            f"Generating plan for single experiment: {single_experiment.filename}"
+                        )
                         plan, error = generate_plan_for_experiment(
                             single_experiment, init_state
                         )
                         if error:
-                            logger.error(f"Error generating plan for single experiment: {error.error}")
+                            logger.error(
+                                f"Error generating plan for single experiment: {error.error}"
+                            )
                             yield AgentResponse(
                                 response=f"ERROR: {error.error}"
                             )
@@ -157,7 +175,9 @@ def handle_experiment_mode(
                     yield AgentResponse(
                         status=f"Number of scans is {orchestrator_response.number_of_scans}, calling ExpPlanner for each experiment."
                     )
-                    logger.debug(f"Generating plans for experiments: {[e.filename for e in orchestrator_response.experiments]}")
+                    logger.debug(
+                        f"Generating plans for experiments: {[e.filename for e in orchestrator_response.experiments]}"
+                    )
                     plans: List[ExperimentPlan] = []
                     # TODO: change for loop later
                     # TODO: have to update state between scans
@@ -165,12 +185,16 @@ def handle_experiment_mode(
                         yield AgentResponse(
                             status=f"Calling ExpPlanner with this experiment {experiment}"
                         )
-                        logger.debug(f"Processing experiment: {experiment.filename}")
+                        logger.debug(
+                            f"Processing experiment: {experiment.filename}"
+                        )
                         plan, error = generate_plan_for_experiment(
                             experiment, init_state
                         )
                         if error:
-                            logger.error(f"Error generating plan for experiment {experiment.filename}: {error.error}")
+                            logger.error(
+                                f"Error generating plan for experiment {experiment.filename}: {error.error}"
+                            )
                             yield AgentResponse(
                                 response=f"ERROR: {error.error}"
                             )
