@@ -1,4 +1,3 @@
-import concurrent.futures
 import random
 from typing import Generator, List
 
@@ -138,7 +137,7 @@ def handle_multiple_scan(
     orchestrator_output: ExpOrchestratorOutput,
     project_manager: ProjectManager,
 ) -> Generator[AgentResponse, None, None]:
-    """Handle multiple scan experiments workflow with concurrent execution."""
+    """Handle multiple scan experiments workflow."""
     yield AgentResponse(
         status=f"Number of scans is {orchestrator_output.number_of_scans}, generating abstract plans for each experiment."
     )
@@ -149,38 +148,31 @@ def handle_multiple_scan(
     state = create_initial_state()
     plans_to_save = []
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = {
-            executor.submit(call_exp_planner, experiment, state): experiment
-            for experiment in orchestrator_output.experiments
-        }
+    for experiment in orchestrator_output.experiments:
+        logger.debug(f"Processing experiment: {experiment.filename}")
 
-        for future in concurrent.futures.as_completed(futures):
-            experiment = futures[future]
-            logger.debug(f"Processing experiment: {experiment.filename}")
+        plan = call_exp_planner(experiment, state)
+        if isinstance(plan, Error):
+            yield from yield_error(plan)
+            continue
 
-            plan = future.result()
-            if isinstance(plan, Error):
-                yield from yield_error(plan)
-                continue
+        yield AgentResponse(
+            status=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {plan}"
+        )
+        logger.debug(
+            f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
+        )
 
-            yield AgentResponse(
-                status=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {plan}"
-            )
-            logger.debug(
-                f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
-            )
+        tools = call_exp_executor(plan, experiment.filename)
+        if isinstance(tools, Error):
+            yield from yield_error(tools)
+            continue
 
-            tools = call_exp_executor(plan, experiment.filename)
-            if isinstance(tools, Error):
-                yield from yield_error(tools)
-                continue
+        state = update_state(state, orchestrator_output)
 
-            state = update_state(state, orchestrator_output)
-
-            plans_to_save.append(
-                ExperimentPlan(filename=experiment.filename, experiment=tools)
-            )
+        plans_to_save.append(
+            ExperimentPlan(filename=experiment.filename, experiment=tools)
+        )
 
     if plans_to_save:
         yield from save_plans(plans_to_save, project_manager)
