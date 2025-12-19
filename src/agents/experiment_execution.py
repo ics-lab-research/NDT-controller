@@ -78,7 +78,9 @@ def reinit_system(project_manager: ProjectManager) -> str | None:
     return None
 
 
-def tool_wait_for_operation_complete(exp_type: ExpType, project_manager: ProjectManager) -> ToolResult:
+def tool_wait_for_operation_complete(
+    exp_type: ExpType, project_manager: ProjectManager
+) -> ToolResult:
     if exp_type == ExpType.SCAN:
         metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
         if not isinstance(metadata, ExperimentsMetadata):
@@ -88,9 +90,9 @@ def tool_wait_for_operation_complete(exp_type: ExpType, project_manager: Project
                 output=None,
                 error="Not in experiments mode",
             )
-    
+
         vi_path = str(metadata.vi_path)
-    
+
         logger.info("Waiting for scan to complete...")
         while True:
             connect_result = tool_connect_to_vi(vi_path=vi_path)
@@ -116,16 +118,16 @@ def tool_wait_for_operation_complete(exp_type: ExpType, project_manager: Project
             ):
                 logger.info("Scan completed!")
                 break
-    
+
             time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
-    
+
         return ToolResult(
             name="wait_for_operation_complete",
             success=True,
             output=None,
             error=None,
         )
-    
+
     elif exp_type == ExpType.MOVEMENT:
         time.sleep(HARDWARE_SETTLE_DELAY)
         return ToolResult(
