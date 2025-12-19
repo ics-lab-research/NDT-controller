@@ -113,27 +113,42 @@ def _update_experiment_details(
     return convert_plan_to_table_data(plan)
 
 
+def _reload_plans(project_manager: ProjectManager) -> Tuple[List[str], List[List[str]]]:
+    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+    plans = []
+    if isinstance(metadata, ExperimentsMetadata):
+        plans_path = metadata.plans_path
+        if isinstance(plans_path, Path):
+            plans = load_experiment_plans(plans_path)
+    filenames = [plan.filename for plan in plans]
+    initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+    return filenames, initial_data
+
+
 def save_experiment_changes(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
     selected_filename: str,
     table_data: pd.DataFrame,
-) -> str:
+) -> None:
     if not selected_filename:
-        return "Error: No experiment selected"
+        gr.Info("Error: No experiment selected")
+        return
     if not plans_path:
-        return "Error: Plans path not configured"
+        gr.Info("Error: Plans path not configured")
+        return
     plan = next((p for p in plans if p.filename == selected_filename), None)
     if not plan:
-        return f"Error: Plan not found for {selected_filename}"
+        gr.Info(f"Error: Plan not found for {selected_filename}")
+        return
     try:
         plan.experiment = _convert_table_data_to_tools(table_data)
         save_experiment_plans(plans, plans_path)
-        return f"Successfully saved changes to {selected_filename}"
+        gr.Info(f"Successfully saved changes to {selected_filename}")
     except Exception as e:
         error_msg = f"Error saving changes: {str(e)}"
         logger.error(error_msg)
-        return error_msg
+        gr.Info(error_msg)
 
 
 def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
@@ -157,18 +172,23 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.Tab:
             value=initial_data,
             interactive=True,
         )
+        reload_button = gr.Button("Reload Plans")
         save_button = gr.Button("Save Changes")
-        save_status = gr.Textbox(label="Status", interactive=False)
         dropdown.change(
             lambda filename: _update_experiment_details(plans, filename),
             inputs=dropdown,
             outputs=details_df,
+        )
+        reload_button.click(
+            lambda: _reload_plans(project_manager),
+            inputs=[],
+            outputs=[dropdown, details_df],
         )
         save_button.click(
             lambda filename, data: save_experiment_changes(
                 plans, plans_path, filename, data
             ),
             inputs=[dropdown, details_df],
-            outputs=save_status,
+            outputs=[],
         )
     return tab
