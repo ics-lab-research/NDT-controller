@@ -5,6 +5,7 @@ from loguru import logger
 
 from ..baml_client.types import (
     ConnectToViTool,
+    ExpType,
     HandleSaveDialogTool,
     PressButtonTool,
     RunOpenViTool,
@@ -12,11 +13,12 @@ from ..baml_client.types import (
     SelectTabTool,
     SetButtonStateTool,
     SetNumericControlTool,
+    StopViTool,
     ToolResult,
     WaitForOperationCompleteTool,
-    ExpType,
 )
 from ..core.models import (
+    ExperimentPlan,
     ExperimentsMetadata,
     ExperimentTool,
     Mode,
@@ -35,47 +37,9 @@ from ..tools.labview_controller import (
     tool_stop_vi,
 )
 
+BUTTON_STATE_DELAY = 1
 SCAN_COMPLETION_CHECK_INTERVAL = 1
 HARDWARE_SETTLE_DELAY = 5
-BUTTON_STATE_DELAY = 1
-
-
-def reinit_system(project_manager: ProjectManager) -> str | None:
-    """Reinitialize the system between experiments."""
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
-    if not isinstance(metadata, ExperimentsMetadata):
-        raise ValueError("Not in experiments mode")
-
-    vi_path = str(metadata.vi_path)
-
-    logger.info("Waiting for scan to complete...")
-    while True:
-        connect_result = tool_connect_to_vi(vi_path=vi_path)
-        if not connect_result.success:
-            return connect_result.error
-        status_result = tool_get_numeric_indicator("Completed")
-        if not status_result.success:
-            return status_result.error
-        if (
-            status_result.output
-            and isinstance(status_result.output, dict)
-            and status_result.output.get("value") == "1.0"
-        ):
-            logger.info("Scan completed!")
-            break
-
-        time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
-
-    # --- Return home and quit ---
-    result = tool_set_button_state("gohome", True)
-    if not result.success:
-        return result.error
-    time.sleep(HARDWARE_SETTLE_DELAY)
-
-    result = tool_stop_vi(close_labview=True)
-    if not result.success:
-        return result.error
-    return None
 
 
 def tool_wait_for_operation_complete(
@@ -91,11 +55,10 @@ def tool_wait_for_operation_complete(
                 error="Not in experiments mode",
             )
 
-        vi_path = str(metadata.vi_path)
-
+        vi_path = metadata.vi_path
         logger.info("Waiting for scan to complete...")
         while True:
-            connect_result = tool_connect_to_vi(vi_path=vi_path)
+            connect_result = tool_connect_to_vi(vi_path)
             if not connect_result.success:
                 return ToolResult(
                     name="wait_for_operation_complete",
@@ -147,20 +110,26 @@ def execute_tool(
         raise ValueError("Not in experiments mode")
 
     if isinstance(tool, SetNumericControlTool):
-        return tool_set_numeric_control(tool.control_name, tool.value)
+        return tool_set_numeric_control(
+            control_name=tool.control_name, value=tool.value
+        )
     elif isinstance(tool, SelectTabTool):
-        return tool_select_tab(tool.tab_control_name, tool.index)
+        return tool_select_tab(
+            tab_control_name=tool.tab_control_name, tab=tool.index
+        )
     elif isinstance(tool, RunOpenViTool):
-        return tool_run_open_vi(tool.run_vi)
+        return tool_run_open_vi(run_vi=tool.run_vi)
     elif isinstance(tool, PressButtonTool):
-        return tool_press_button(tool.button_name)
+        return tool_press_button(button_name=tool.button_name)
     elif isinstance(tool, SetButtonStateTool):
         time.sleep(BUTTON_STATE_DELAY)
-        return tool_set_button_state(tool.button_name, tool.state)
+        return tool_set_button_state(
+            button_name=tool.button_name, state=tool.state
+        )
     elif isinstance(tool, ConnectToViTool):
         vi_path = metadata.vi_path
         if vi_path and vi_path.exists():
-            return tool_connect_to_vi(str(vi_path))
+            return tool_connect_to_vi(vi_path)
         else:
             logger.warning(f"VI path {vi_path} does not exist or is None")
             return ToolResult(
@@ -173,42 +142,37 @@ def execute_tool(
         save_directory = metadata.data_dir_path
         for existing_file in save_directory.glob(f"{tool.file_name}.*"):
             existing_file.unlink()
-        return tool_handle_save_dialog(str(save_directory), tool.file_name)
+        return tool_handle_save_dialog(save_directory, filename=tool.file_name)
     elif isinstance(tool, SelectComboBoxTool):
-        return tool_select_combo_box(tool.combo_box_name, tool.item)
-    elif isinstance(tool, WaitForOperationCompleteTool):
-        return tool_wait_for_operation_complete(tool.exp_type, project_manager)
-    else:
-        logger.error(f"Unknown tool type: {type(tool).__name__}")
-        return ToolResult(
-            name="unknown_tool",
-            success=False,
-            output=None,
-            error=f"Unsupported tool: {type(tool).__name__}",
+        return tool_select_combo_box(
+            combo_box_name=tool.combo_box_name, item=tool.item
         )
+    elif isinstance(tool, WaitForOperationCompleteTool):
+        return tool_wait_for_operation_complete(
+            exp_type=tool.exp_type, project_manager=project_manager
+        )
+    elif isinstance(tool, StopViTool):
+        return tool_stop_vi(close_labview=tool.close_labview)
 
 
-def execute_single_plan(
-    tools: List[ExperimentTool], project_manager: ProjectManager
-) -> str | None:
-    """Execute the experiment plan generated by the experiment planner."""
-    for tool in tools:
-        result = execute_tool(tool, project_manager)
-        if not result.success:
-            return result.error
-    return None
+# def execute_single_plan(
+#     plan: ExperimentPlan, project_manager: ProjectManager
+# ) -> str | None:
+#     """Execute the experiment plan generated by the experiment planner."""
+#     for tool in tools:
+#         result = execute_tool(tool, project_manager)
+#         if not result.success:
+#             return result.error
+#     return None
 
 
-def execute_multiple_plans(
-    plans: List[List[ExperimentTool]], project_manager: ProjectManager
-) -> str | None:
-    """Execute multiple experiment plans with system reinitialization after each plan."""
-    for plan in plans:
-        error = execute_single_plan(plan, project_manager)
-        if error:
-            return error
-        reinit_error = reinit_system(project_manager)
-        if reinit_error:
-            return reinit_error
-        time.sleep(HARDWARE_SETTLE_DELAY)
-    return None
+# def execute_multiple_plans(
+#     plans: List[ExperimentPlan], project_manager: ProjectManager
+# ) -> str | None:
+#     """Execute multiple experiment plans with system reinitialization after each plan."""
+#     for plan in plans:
+#         error = execute_single_plan(plan, project_manager)
+#         if error:
+#             return error
+#         time.sleep(HARDWARE_SETTLE_DELAY)
+#     return None
