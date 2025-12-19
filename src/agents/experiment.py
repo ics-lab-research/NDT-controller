@@ -42,5 +42,4 @@ def handle_experiment_mode(
                     "fasdfds fadsf fsdf"
                 )
 
-                if isinstance(orchestrator_response, Error):
-                    yield AgentResponse(response=orchestrator_response.error)
+                # yield error here AI!
