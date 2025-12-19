@@ -23,7 +23,7 @@ class ProjectManager:
         """Initialize project context."""
         self._current_mode = current_mode
         self._pwd_path = pwd_path
-        self._state = self.create_initial_state()
+        self._experiment_state = self.create_initial_experiment_state()
 
     @property
     def current_mode(self) -> Mode:
@@ -36,24 +36,24 @@ class ProjectManager:
         return self._pwd_path
 
     @property
-    def state(self) -> State:
-        """Get the current state."""
-        return self._state
+    def experiment_state(self) -> State:
+        """Get the current experiment state."""
+        return self._experiment_state
 
-    def create_initial_state(self) -> State:
-        """Create the initial state for experiments."""
+    def create_initial_experiment_state(self) -> State:
+        """Create the initial experiment state for experiments."""
         position = RelativeOffset(x=0, y=0, z=1)
         return State(current_position=position, home_position=position)
 
-    def update_state(self, relative_offset_mm: RelativeOffset) -> None:
-        """Update the state based on executed tools."""
+    def update_experiment_state(self, relative_offset_mm: RelativeOffset) -> None:
+        """Update the experiment state based on executed tools."""
         new_x = relative_offset_mm.x
         new_y = relative_offset_mm.y
         new_z = relative_offset_mm.z
         new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
-        self._state = State(
+        self._experiment_state = State(
             current_position=new_position,
-            home_position=self._state.home_position,
+            home_position=self._experiment_state.home_position,
         )
 
     def _get_experiments_metadata(self) -> ExperimentsMetadata:

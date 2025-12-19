@@ -68,10 +68,10 @@ def process_single_experiment(
         status=f"Generating abstract plan for {experiment.filename}"
     )
     logger.debug(
-        f"Calling ExpPlanner with experiment: {experiment}, state: {project_manager.state}"
+        f"Calling ExpPlanner with experiment: {experiment}, experiment_state: {project_manager.experiment_state}"
     )
 
-    plan = call_exp_planner(experiment, project_manager.state)
+    plan = call_exp_planner(experiment, project_manager.experiment_state)
     if isinstance(plan, Error):
         yield from yield_error(plan)
         return plan
@@ -128,7 +128,7 @@ def handle_multiple_scan(
     for experiment in orchestrator_output.experiments:
         logger.debug(f"Processing experiment: {experiment.filename}")
 
-        plan = call_exp_planner(experiment, project_manager.state)
+        plan = call_exp_planner(experiment, project_manager.experiment_state)
         if isinstance(plan, Error):
             yield from yield_error(plan)
             continue
@@ -145,7 +145,7 @@ def handle_multiple_scan(
             yield from yield_error(tools)
             continue
 
-        project_manager.update_state(experiment.relative_offset_mm)
+        project_manager.update_experiment_state(experiment.relative_offset_mm)
 
         plans_to_save.append(
             ExperimentPlan(filename=experiment.filename, experiment=tools)
