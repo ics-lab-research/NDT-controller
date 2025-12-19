@@ -164,7 +164,9 @@ def reload_plans(
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
 
 
-def create_experiments_tab(project_manager: ProjectManager) -> gr.TabbedInterface:
+def create_experiments_tab(
+    project_manager: ProjectManager,
+) -> gr.TabbedInterface:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
     plans_path = None
@@ -210,4 +212,6 @@ def create_experiments_tab(project_manager: ProjectManager) -> gr.TabbedInterfac
         )
     with gr.Tab("Scan Status") as scan_tab:
         gr.Markdown("# Scan Status\n\nStatus: Idle")
-    return gr.TabbedInterface([plans_tab, scan_tab], ["Plans Viewer", "Scan Status"])
+    return gr.TabbedInterface(
+        [plans_tab, scan_tab], ["Plans Viewer", "Scan Status"]
+    )
