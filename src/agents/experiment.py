@@ -19,6 +19,7 @@ from .experiment_api import (
     call_exp_router,
     call_exp_executor,
 )
+from .experiment_planning import save_experiment_plans
 
 current_position = RelativeOffset(x=0, y=0, z=1)
 home_position = RelativeOffset(x=0, y=0, z=1)
@@ -91,7 +92,7 @@ def handle_experiment_mode(
                             )
                         else:
                             yield AgentResponse(
-                                status=f"Calling ExpExecutor with filename: {single_experiment.filename} and abstract plan: {planner_response}"
+                                status=f"Calling ExpExecutor with filename: {single_experiment.filename} and abstract plan:\n {planner_response}"
                             )
                             logger.debug(
                                 f"Calling ExpExecutor with plan: '{planner_response}', filename: '{single_experiment.filename}'"
@@ -161,8 +162,9 @@ def handle_experiment_mode(
                                 )
                             else:
                                 yield AgentResponse(
-                                    status=f"Abstract plan for {experiment.filename}:\n {planner_response}"
+                                    status=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {planner_response}"
                                 )
+
                                 logger.debug(
                                     f"Calling ExpExecutor with plan: '{planner_response}', filename: '{experiment.filename}'"
                                 )
