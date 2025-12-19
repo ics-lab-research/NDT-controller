@@ -1,4 +1,5 @@
 import concurrent.futures
+import random
 from typing import Generator, List
 
 from loguru import logger
@@ -27,6 +28,15 @@ def create_initial_state() -> State:
     """Create the initial state for experiments."""
     position = RelativeOffset(x=0, y=0, z=1)
     return State(current_position=position, home_position=position)
+
+
+def update_state(state: State, tools: List[ExperimentTool]) -> State:
+    """Update the state based on executed tools. Placeholder with random values."""
+    new_x = random.randint(-10, 10)
+    new_y = random.randint(-10, 10)
+    new_z = random.randint(0, 5)
+    new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
+    return State(current_position=new_position, home_position=state.home_position)
 
 
 def yield_error(error: Error) -> Generator[AgentResponse, None, None]:
