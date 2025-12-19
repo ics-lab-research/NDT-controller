@@ -34,14 +34,16 @@ def generate_plan_for_experiment(
     planner_response = call_exp_planner(experiment, state)
     if isinstance(planner_response, Error):
         return None, planner_response
-    
+
     experiment_tools = call_exp_executor(
         plan=planner_response, filename=experiment.filename
     )
     if isinstance(experiment_tools, Error):
         return None, experiment_tools
-    
-    plan = ExperimentPlan(filename=experiment.filename, experiment=experiment_tools)
+
+    plan = ExperimentPlan(
+        filename=experiment.filename, experiment=experiment_tools
+    )
     return plan, None
 
 
