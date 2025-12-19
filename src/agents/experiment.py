@@ -108,6 +108,7 @@ def handle_single_scan(
     )
 
     if isinstance(result, ExperimentPlan):
+        project_manager.update_experiment_state(experiment.relative_offset_mm)
         yield from save_plans([result], project_manager)
 
 
