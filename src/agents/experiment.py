@@ -184,7 +184,9 @@ def handle_experiment_mode(
                     with concurrent.futures.ThreadPoolExecutor() as executor:
                         futures = {
                             executor.submit(
-                                generate_plan_for_experiment, experiment, init_state
+                                generate_plan_for_experiment,
+                                experiment,
+                                init_state,
                             ): experiment
                             for experiment in orchestrator_response.experiments
                         }
