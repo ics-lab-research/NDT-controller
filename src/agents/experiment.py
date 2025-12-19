@@ -11,7 +11,7 @@ from ..baml_client.types import (
     RelativeOffset,
     State,
 )
-from ..core.models import AgentResponse
+from ..core.models import AgentResponse, ExperimentPlan
 from ..core.project_manager import ProjectManager
 from .experiment_api import (
     call_exp_orchestrator,
@@ -109,7 +109,19 @@ def handle_experiment_mode(
                                     response=f"ERROR: {experiment_tools.error}"
                                 )
                             else:
-                                yield AgentResponse(response="Plan generated.")
+                                plan = ExperimentPlan(
+                                    filename=single_experiment.filename,
+                                    experiment=experiment_tools,
+                                )
+                                save_result = save_experiment_plans(
+                                    [plan], project_manager.get_experiment_plans_path()
+                                )
+                                if save_result["success"]:
+                                    yield AgentResponse(response="Plan generated and saved.")
+                                else:
+                                    yield AgentResponse(
+                                        response=f"Plan generated but save failed: {save_result.get('error', 'Unknown error')}"
+                                    )
                     else:
                         yield AgentResponse(
                             response="ERROR: Number of scan is not 1"
@@ -137,6 +149,7 @@ def handle_experiment_mode(
                     logger.debug(
                         f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_response.experiments]}"
                     )
+                    plans_to_save = []
                     # Use concurrent execution for I/O-bound tasks
                     with concurrent.futures.ThreadPoolExecutor() as executor:
                         futures = {
@@ -179,4 +192,22 @@ def handle_experiment_mode(
                                     yield AgentResponse(
                                         response=f"ERROR: {experiment_tools.error}"
                                     )
-                    yield AgentResponse(response="Plans generated.")
+                                else:
+                                    plans_to_save.append(
+                                        ExperimentPlan(
+                                            filename=experiment.filename,
+                                            experiment=experiment_tools,
+                                        )
+                                    )
+                    if plans_to_save:
+                        save_result = save_experiment_plans(
+                            plans_to_save, project_manager.get_experiment_plans_path()
+                        )
+                        if save_result["success"]:
+                            yield AgentResponse(response="Plans generated and saved.")
+                        else:
+                            yield AgentResponse(
+                                response=f"Plans generated but save failed: {save_result.get('error', 'Unknown error')}"
+                            )
+                    else:
+                        yield AgentResponse(response="No plans generated.")
