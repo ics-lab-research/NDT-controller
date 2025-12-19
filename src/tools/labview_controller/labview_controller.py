@@ -21,7 +21,7 @@ class LabVIEWController:
     def __init__(self):
         self.labview_app = None
         self.vi_reference = None
-        self.vi_path = None
+        self.vi_path: Path | None = None
 
     def handle_error(self, operation: str, error: Exception) -> Dict[str, Any]:
         """Standardized error handling."""
@@ -69,7 +69,7 @@ class LabVIEWController:
             env["PYTHONIOENCODING"] = "ascii:replace"
             env["PYTHONLEGACYWINDOWSSTDIO"] = "1"
             
-            cmd = [sys.executable, str(open_vi_path), self.vi_path]
+            cmd = [sys.executable, str(open_vi_path), str(self.vi_path)]
             if not run_vi:
                 cmd.append("--no-run")
             logger.debug(f"Running command: {' '.join(cmd)}")
@@ -95,7 +95,7 @@ class LabVIEWController:
         except Exception as e:
             return self.handle_error("run open_vi.py subprocess", e)
 
-    def _validate_existing_connection(self, vi_path: str | None) -> bool:
+    def _validate_existing_connection(self, vi_path: Path | None) -> bool:
         """Validate and update existing VI connection if valid."""
         if not self.labview_app or not self.vi_reference:
             return False
@@ -108,7 +108,7 @@ class LabVIEWController:
                 logger.debug(
                     f"Updating VI path from {self.vi_path} to {vi_path}"
                 )
-                self.vi_reference = self.labview_app.GetVIReference(vi_path)
+                self.vi_reference = self.labview_app.GetVIReference(str(vi_path))
                 self.vi_path = vi_path
             if not self.vi_reference.FPWinOpen:
                 self.vi_reference.FPWinOpen = True
@@ -123,7 +123,7 @@ class LabVIEWController:
             self.vi_path = None
             return False
 
-    def _create_new_connection(self, vi_path: str | None) -> bool:
+    def _create_new_connection(self, vi_path: Path | None) -> bool:
         """Create a new LabVIEW connection."""
         logger.debug("Creating new LabVIEW connection...")
         if win32com is None:
@@ -140,7 +140,7 @@ class LabVIEWController:
         if vi_path:
             logger.debug(f"Connecting to VI: {vi_path}")
             try:
-                self.vi_reference = self.labview_app.GetVIReference(vi_path)
+                self.vi_reference = self.labview_app.GetVIReference(str(vi_path))
                 self.vi_path = vi_path
             except Exception as vi_error:
                 logger.error(
@@ -173,7 +173,7 @@ class LabVIEWController:
         logger.debug("Successfully connected to LabVIEW application")
         return True
 
-    def connect_to_existing_vi(self, vi_path: str | None = None) -> bool:
+    def connect_to_existing_vi(self, vi_path: Path | None = None) -> bool:
         """Connect to an already opened LabVIEW VI."""
         if win32com is None:
             logger.error(
@@ -315,7 +315,7 @@ class LabVIEWController:
                 "status_text": status_map.get(
                     exec_state, f"Unknown({exec_state})"
                 ),
-                "vi_path": self.vi_path,
+                "vi_path": str(self.vi_path) if self.vi_path else None,
                 **additional_info,
             }
         except Exception as e:
