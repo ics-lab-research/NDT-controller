@@ -52,7 +52,8 @@ class ProjectManager:
         new_z = relative_offset_mm.z
         new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
         self._state = State(
-            current_position=new_position, home_position=self._state.home_position
+            current_position=new_position,
+            home_position=self._state.home_position,
         )
 
     def _get_experiments_metadata(self) -> ExperimentsMetadata:
