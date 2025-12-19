@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from typing import List
 
 from loguru import logger
@@ -140,9 +141,9 @@ def execute_tool(
             )
     elif isinstance(tool, HandleSaveDialogTool):
         save_directory = metadata.data_dir_path
-        for existing_file in save_directory.glob(f"{tool.file_name}.*"):
-            existing_file.unlink()
-        return tool_handle_save_dialog(save_directory, filename=tool.file_name)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{tool.file_name}_{timestamp}"
+        return tool_handle_save_dialog(save_directory, filename=filename)
     elif isinstance(tool, SelectComboBoxTool):
         return tool_select_combo_box(
             combo_box_name=tool.combo_box_name, item=tool.item
