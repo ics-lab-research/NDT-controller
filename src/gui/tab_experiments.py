@@ -29,7 +29,9 @@ from ..core.models import (
 from ..core.project_manager import ProjectManager
 
 
-def _get_experiment_statuses(plans: List[ExperimentPlan]) -> List[ExperimentStatus]:
+def _get_experiment_statuses(
+    plans: List[ExperimentPlan],
+) -> List[ExperimentStatus]:
     # Placeholder: return PENDING for each experiment; replace with actual status logic
     return [ExperimentStatus.PENDING] * len(plans)
 
