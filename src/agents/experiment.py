@@ -11,13 +11,13 @@ from ..baml_client.types import (
     RelativeOffset,
     State,
 )
-from ..core.models import AgentResponse, ExperimentPlan
+from ..core.models import AgentResponse, ExperimentPlan, ExperimentsMetadata
 from ..core.project_manager import ProjectManager
 from .experiment_api import (
+    call_exp_executor,
     call_exp_orchestrator,
     call_exp_planner,
     call_exp_router,
-    call_exp_executor,
 )
 from .experiment_planning import save_experiment_plans
 
@@ -113,6 +113,18 @@ def handle_experiment_mode(
                                     filename=single_experiment.filename,
                                     experiment=experiment_tools,
                                 )
+
+                                metadata = project_manager.get_mode_metadata(
+                                    project_manager.current_mode
+                                )
+                                if not isinstance(
+                                    metadata, ExperimentsMetadata
+                                ):
+                                    raise ValueError(
+                                        "Metadata is not ExperimentsMetadata"
+                                    )
+                                plans_path = metadata.plans_path
+
                                 save_result = save_experiment_plans(
                                     [plan],
                                     project_manager.get_experiment_plans_path(),
