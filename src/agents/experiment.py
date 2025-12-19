@@ -1,9 +1,8 @@
 import concurrent.futures
-from typing import Generator, List, Tuple
+from typing import Generator, List
 
 from loguru import logger
 
-from ..agents.experiment_planning import save_experiment_plans
 from ..baml_client.types import (
     ConversationMessage,
     Error,
@@ -12,13 +11,12 @@ from ..baml_client.types import (
     RelativeOffset,
     State,
 )
-from ..core.models import AgentResponse, ExperimentPlan, ExperimentsMetadata
+from ..core.models import AgentResponse
 from ..core.project_manager import ProjectManager
 from .experiment_api import (
     call_exp_orchestrator,
     call_exp_planner,
     call_exp_router,
-    call_exp_executor,
 )
 
 current_position = RelativeOffset(x=0, y=0, z=1)
@@ -26,58 +24,6 @@ home_position = RelativeOffset(x=0, y=0, z=1)
 init_state = State(
     current_position=current_position, home_position=home_position
 )
-
-
-def generate_plan_for_experiment(
-    experiment: Experiment, state: State
-) -> Tuple[ExperimentPlan | None, Error | None]:
-    """Generate a plan for a single experiment, returning the plan or an error."""
-    logger.debug(
-        f"Generating plan for experiment: {experiment.filename}, state: {state}"
-    )
-    logger.debug(
-        f"Calling ExpPlanner with experiment: {experiment}, state: {state}"
-    )
-    planner_response = call_exp_planner(experiment, state)
-    if isinstance(planner_response, Error):
-        logger.error(f"ExpPlanner error: {planner_response.error}")
-        return None, planner_response
-
-    logger.debug(
-        f"Calling ExpExecutor with plan: '{planner_response}', filename: '{experiment.filename}'"
-    )
-    experiment_tools = call_exp_executor(
-        plan=planner_response, filename=experiment.filename
-    )
-    if isinstance(experiment_tools, Error):
-        logger.error(f"ExpExecutor error: {experiment_tools.error}")
-        return None, experiment_tools
-
-    plan = ExperimentPlan(
-        filename=experiment.filename, experiment=experiment_tools
-    )
-    return plan, None
-
-
-def save_experiment_plans_to_project(
-    plans: List[ExperimentPlan], project_manager: ProjectManager
-) -> Generator[AgentResponse, None, None]:
-    """Save experiment plans to the project and yield responses."""
-    logger.debug(f"Saving {len(plans)} experiment plans")
-    metadata = project_manager.get_mode_metadata(project_manager.current_mode)
-    if not isinstance(metadata, ExperimentsMetadata):
-        raise ValueError("Metadata is not ExperimentsMetadata")
-    plans_path = metadata.plans_path
-    save_status = save_experiment_plans(plans, plans_path)
-    if save_status["success"]:
-        yield AgentResponse(action="Experiment plans saved successfully.")
-    else:
-        logger.error(
-            f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
-        )
-        yield AgentResponse(
-            action=f"Failed to save plans: {save_status.get('error', 'Unknown error')}"
-        )
 
 
 def handle_experiment_mode(
@@ -127,31 +73,22 @@ def handle_experiment_mode(
                     if orchestrator_response.number_of_scans == 1:
                         single_experiment = orchestrator_response.experiments[0]
                         yield AgentResponse(
-                            status=f"Number of scans is 1, calling ExpPlanner with this experiment {single_experiment}"
+                            status=f"Generating abstract plan for {single_experiment.filename}"
                         )
                         logger.debug(
-                            f"Generating plan for single experiment: {single_experiment.filename}"
+                            f"Calling ExpPlanner with experiment: {single_experiment}, state: {init_state}"
                         )
-                        plan, error = generate_plan_for_experiment(
-                            single_experiment, init_state
-                        )
-                        if error:
-                            logger.error(
-                                f"Error generating plan for single experiment: {error.error}"
-                            )
+                        planner_response = call_exp_planner(single_experiment, init_state)
+                        if isinstance(planner_response, Error):
+                            logger.error(f"ExpPlanner error: {planner_response.error}")
                             yield AgentResponse(
-                                response=f"ERROR: {error.error}"
+                                response=f"ERROR: {planner_response.error}"
                             )
                         else:
                             yield AgentResponse(
-                                status=f"Calling ExpExecutor with file name is `{single_experiment.filename}` and abstract plan:\n {plan}"
+                                status=f"Abstract plan:\n {planner_response}"
                             )
                             yield AgentResponse(response="Plan generated.")
-
-                            if plan:
-                                yield from save_experiment_plans_to_project(
-                                    [plan], project_manager
-                                )
                     else:
                         yield AgentResponse(
                             response="ERROR: Number of scan is not 1"
@@ -174,17 +111,16 @@ def handle_experiment_mode(
                     )
                 else:
                     yield AgentResponse(
-                        status=f"Number of scans is {orchestrator_response.number_of_scans}, calling ExpPlanner for each experiment."
+                        status=f"Number of scans is {orchestrator_response.number_of_scans}, generating abstract plans for each experiment."
                     )
                     logger.debug(
-                        f"Generating plans for experiments: {[e.filename for e in orchestrator_response.experiments]}"
+                        f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_response.experiments]}"
                     )
-                    plans: List[ExperimentPlan] = []
                     # Use concurrent execution for I/O-bound tasks
                     with concurrent.futures.ThreadPoolExecutor() as executor:
                         futures = {
                             executor.submit(
-                                generate_plan_for_experiment,
+                                call_exp_planner,
                                 experiment,
                                 init_state,
                             ): experiment
@@ -195,21 +131,16 @@ def handle_experiment_mode(
                             logger.debug(
                                 f"Processing experiment: {experiment.filename}"
                             )
-                            plan, error = future.result()
-                            if error:
+                            planner_response = future.result()
+                            if isinstance(planner_response, Error):
                                 logger.error(
-                                    f"Error generating plan for experiment {experiment.filename}: {error.error}"
+                                    f"Error generating abstract plan for experiment {experiment.filename}: {planner_response.error}"
                                 )
                                 yield AgentResponse(
-                                    response=f"ERROR: {error.error}"
+                                    response=f"ERROR: {planner_response.error}"
                                 )
                             else:
                                 yield AgentResponse(
-                                    status=f"Processed experiment {experiment.filename} with abstract plan:\n {plan}"
+                                    status=f"Abstract plan for {experiment.filename}:\n {planner_response}"
                                 )
-                                if plan:
-                                    plans.append(plan)
                     yield AgentResponse(response="Plans generated.")
-                    yield from save_experiment_plans_to_project(
-                        plans, project_manager
-                    )
