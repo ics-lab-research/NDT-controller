@@ -145,6 +145,7 @@ def handle_multiple_scan(
             yield from yield_error(tools)
             continue
 
+        # update new state
         project_manager.update_experiment_state(experiment.relative_offset_mm)
 
         plans_to_save.append(
