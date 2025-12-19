@@ -93,7 +93,19 @@ def handle_experiment_mode(
                             yield AgentResponse(
                                 status=f"Abstract plan:\n {planner_response}"
                             )
-                            yield AgentResponse(response="Plan generated.")
+                            logger.debug(
+                                f"Calling ExpExecutor with plan: '{planner_response}', filename: '{single_experiment.filename}'"
+                            )
+                            experiment_tools = call_exp_executor(
+                                plan=planner_response, filename=single_experiment.filename
+                            )
+                            if isinstance(experiment_tools, Error):
+                                logger.error(f"ExpExecutor error: {experiment_tools.error}")
+                                yield AgentResponse(
+                                    response=f"ERROR: {experiment_tools.error}"
+                                )
+                            else:
+                                yield AgentResponse(response="Plan generated.")
                     else:
                         yield AgentResponse(
                             response="ERROR: Number of scan is not 1"
@@ -148,4 +160,15 @@ def handle_experiment_mode(
                                 yield AgentResponse(
                                     status=f"Abstract plan for {experiment.filename}:\n {planner_response}"
                                 )
+                                logger.debug(
+                                    f"Calling ExpExecutor with plan: '{planner_response}', filename: '{experiment.filename}'"
+                                )
+                                experiment_tools = call_exp_executor(
+                                    plan=planner_response, filename=experiment.filename
+                                )
+                                if isinstance(experiment_tools, Error):
+                                    logger.error(f"ExpExecutor error: {experiment_tools.error}")
+                                    yield AgentResponse(
+                                        response=f"ERROR: {experiment_tools.error}"
+                                    )
                     yield AgentResponse(response="Plans generated.")
