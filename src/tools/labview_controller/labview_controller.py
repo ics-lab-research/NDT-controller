@@ -33,7 +33,7 @@ class LabVIEWController:
         """Standardized success response."""
         response = {"success": True, "message": message}
         response.update(kwargs)
-        return response 
+        return response
 
     def run_open_vi_subprocess(self, run_vi: bool = True) -> Dict[str, Any]:
         """Run open_vi.py in a subprocess to open and run the VI"""
@@ -68,7 +68,7 @@ class LabVIEWController:
             env = environ.copy()
             env["PYTHONIOENCODING"] = "ascii:replace"
             env["PYTHONLEGACYWINDOWSSTDIO"] = "1"
-            
+
             cmd = [sys.executable, str(open_vi_path), str(self.vi_path)]
             if not run_vi:
                 cmd.append("--no-run")
@@ -108,7 +108,9 @@ class LabVIEWController:
                 logger.debug(
                     f"Updating VI path from {self.vi_path} to {vi_path}"
                 )
-                self.vi_reference = self.labview_app.GetVIReference(str(vi_path))
+                self.vi_reference = self.labview_app.GetVIReference(
+                    str(vi_path)
+                )
                 self.vi_path = vi_path
             if not self.vi_reference.FPWinOpen:
                 self.vi_reference.FPWinOpen = True
@@ -140,7 +142,9 @@ class LabVIEWController:
         if vi_path:
             logger.debug(f"Connecting to VI: {vi_path}")
             try:
-                self.vi_reference = self.labview_app.GetVIReference(str(vi_path))
+                self.vi_reference = self.labview_app.GetVIReference(
+                    str(vi_path)
+                )
                 self.vi_path = vi_path
             except Exception as vi_error:
                 logger.error(
