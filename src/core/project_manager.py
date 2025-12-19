@@ -2,14 +2,13 @@ import dataclasses
 import os
 import shutil
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 from loguru import logger
 from .models import (
     ExperimentsMetadata,
     Mode,
     ModeMetadata,
 )
-from .utils import read_file
 
 
 class ProjectManager:
@@ -19,12 +18,10 @@ class ProjectManager:
         self,
         current_mode: Mode = Mode.EXPERIMENTS,
         pwd_path: Path = Path.cwd(),
-        uploaded_docs: List[str] | None = None,
     ):
         """Initialize project context."""
         self._current_mode = current_mode
         self._pwd_path = pwd_path
-        self._uploaded_docs = uploaded_docs or []
 
     @property
     def current_mode(self) -> Mode:
@@ -36,16 +33,8 @@ class ProjectManager:
         """Get the present working directory path."""
         return self._pwd_path
 
-    @property
-    def uploaded_docs(self) -> List[str]:
-        """Get the uploaded document paths."""
-        return self._uploaded_docs
-
     def _get_experiments_metadata(self) -> ExperimentsMetadata:
         experiments_base = os.environ.get("EXPERIMENTS_BASE", "EXPERIMENTS")
-        exp_constraint_path = os.environ.get(
-            "EXPERIMENTS_EXP_CONSTRAINT_PATH", "LABVIEW.md"
-        )
         data_dir_path = os.environ.get("EXPERIMENTS_DATA_DIR_PATH", "data")
         plans_path = os.environ.get(
             "EXPERIMENTS_PLANS_PATH", "labview_experiment_plans.json"
@@ -55,9 +44,6 @@ class ProjectManager:
             "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi",
         )
         return ExperimentsMetadata(
-            exp_constraint_path=self._pwd_path
-            / experiments_base
-            / exp_constraint_path,
             data_dir_path=self._pwd_path / experiments_base / data_dir_path,
             plans_path=self._pwd_path / experiments_base / plans_path,
             vi_path=Path(vi_path_str),
@@ -76,31 +62,6 @@ class ProjectManager:
 
         all_metadata = self._get_all_mode_metadata()
         return all_metadata[mode]
-
-    # TODO: should contain description of file
-    def get_available_files(self) -> List[str]:
-        """Get available files based on current mode."""
-        files = []
-        metadata = self.get_mode_metadata(self.current_mode)
-        for field in dataclasses.fields(metadata):
-            value = getattr(metadata, field.name)
-            # Normalize to a list if it's a single Path
-            if isinstance(value, Path):
-                value = [value]
-            for item in value:
-                if isinstance(item, Path) and item.is_file() and item.exists():
-                    files.append(str(item))
-
-        return files
-
-    # TODO: should add docs with mode
-    def add_docs(self, docs: List[str]):
-        """Add additional uploaded doc paths to the current context."""
-        self._uploaded_docs.extend(docs)
-
-    def set_uploaded_docs(self, docs: List[str]):
-        """Set the uploaded document paths, replacing any existing ones."""
-        self._uploaded_docs = docs
 
     def set_mode(self, mode: Mode):
         """Set the mode for the current context."""
@@ -165,24 +126,6 @@ class ProjectManager:
                 else:  # It's a directory
                     self._ensure_directory_exists(path)
         logger.info("Mode-specific paths ensured")
-
-
-def get_exp_constraint_content(project_manager: ProjectManager) -> str:
-    """Get the content of the experiment constraint file."""
-    logger.debug("Retrieving experiment constraint content")
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
-    if not isinstance(metadata, ExperimentsMetadata):
-        logger.error(
-            "Attempted to get exp constraint content not in experiments mode"
-        )
-        raise ValueError("Not in experiments mode")
-    path = metadata.exp_constraint_path
-    if path.exists():
-        content = read_file(path)
-        logger.debug(f"Read content from {path}")
-        return content
-    logger.warning(f"Experiment constraint file does not exist: {path}")
-    return ""
 
 
 # Backward compatibility function

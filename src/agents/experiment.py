@@ -1,4 +1,3 @@
-import random
 from typing import Generator, List
 
 from loguru import logger
@@ -30,12 +29,12 @@ def create_initial_state() -> State:
 
 
 def update_state(
-    current_state: State, metadata: ExpOrchestratorOutput
+    current_state: State, relative_offset_mm: RelativeOffset
 ) -> State:
     """Update the state based on executed tools. Placeholder with random values."""
-    new_x = random.randint(-10, 10)
-    new_y = random.randint(-10, 10)
-    new_z = random.randint(0, 5)
+    new_x = relative_offset_mm.x
+    new_y = relative_offset_mm.y
+    new_z = relative_offset_mm.z
     new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
     return State(
         current_position=new_position, home_position=current_state.home_position
@@ -109,7 +108,7 @@ def process_single_experiment(
         yield from yield_error(tools)
         return tools
 
-    state = update_state(state, orchestrator_output)
+    # state = update_state(state, orchestrator_output)
 
     return ExperimentPlan(filename=experiment.filename, experiment=tools)
 
@@ -168,7 +167,7 @@ def handle_multiple_scan(
             yield from yield_error(tools)
             continue
 
-        state = update_state(state, orchestrator_output)
+        state = update_state(state, experiment.relative_offset_mm)
 
         plans_to_save.append(
             ExperimentPlan(filename=experiment.filename, experiment=tools)
