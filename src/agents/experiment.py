@@ -78,9 +78,13 @@ def handle_experiment_mode(
                         logger.debug(
                             f"Calling ExpPlanner with experiment: {single_experiment}, state: {init_state}"
                         )
-                        planner_response = call_exp_planner(single_experiment, init_state)
+                        planner_response = call_exp_planner(
+                            single_experiment, init_state
+                        )
                         if isinstance(planner_response, Error):
-                            logger.error(f"ExpPlanner error: {planner_response.error}")
+                            logger.error(
+                                f"ExpPlanner error: {planner_response.error}"
+                            )
                             yield AgentResponse(
                                 response=f"ERROR: {planner_response.error}"
                             )
