@@ -29,8 +29,6 @@ from ..core.project_manager import ProjectManager
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
-    if tool == "unknown":
-        return []
     tool_name = str(tool.tool_name)
     params = {k: v for k, v in vars(tool).items() if k != "tool_name"}
     param_list = [f"{k}={v}" for k, v in params.items()]
@@ -68,10 +66,10 @@ def _extract_params_from_row(row: pd.Series) -> Dict[str, str]:
 
 def _create_tool_from_row(
     row: pd.Series, tool_map: Dict[str, Any]
-) -> ExperimentTool:
+) -> ExperimentTool | None:
     tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
     if not tool_name or tool_name == "nan":
-        return "unknown"
+        return None
     params = _extract_params_from_row(row)
     tool_class = tool_map.get(tool_name)
     if tool_class:
@@ -79,9 +77,9 @@ def _create_tool_from_row(
             return tool_class(tool_name=tool_name, **params)
         except Exception as e:
             logger.error(f"Failed to create tool {tool_name}: {e}")
-            return "unknown"
+            return None
     logger.warning(f"Unknown tool type: {tool_name}")
-    return "unknown"
+    return None
 
 
 def _convert_table_data_to_tools(
@@ -97,9 +95,10 @@ def _convert_table_data_to_tools(
         "set_button_state": SetButtonStateTool,
         "select_combo_box": SelectComboBoxTool,
     }
-    return [
+    tools = [
         _create_tool_from_row(row, tool_map) for _, row in table_data.iterrows()
     ]
+    return [tool for tool in tools if tool is not None]
 
 
 def _update_experiment_details(
