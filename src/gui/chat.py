@@ -16,7 +16,7 @@ def respond_stream(
     """Handle chat responses with streaming."""
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history)
-    
+
     # Add user message to history
     history.append({"role": "user", "content": message})
 
