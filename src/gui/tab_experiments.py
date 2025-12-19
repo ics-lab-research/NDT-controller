@@ -166,7 +166,7 @@ def reload_plans(
 
 def create_experiments_tab(
     project_manager: ProjectManager,
-) -> gr.TabbedInterface:
+) -> gr.Tabs:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
     plans_path = None
@@ -178,7 +178,7 @@ def create_experiments_tab(
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []
     plans_state = gr.State(plans)
 
-    with gr.TabbedInterface() as interface:
+    with gr.Tabs() as interface:
         with gr.TabItem("Plans Viewer"):
             dropdown = gr.Dropdown(
                 choices=filenames,
