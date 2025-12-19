@@ -18,7 +18,6 @@ def respond_stream(
     history.append({"role": "user", "content": message})
     # Add response placeholder
     history.append({"role": "assistant", "content": ""})
-    response_index = len(history) - 1
     yield history, ""
 
     thinking_added = False
@@ -32,7 +31,7 @@ def respond_stream(
     ):
         if agent_response.response:
             # Update response message
-            history[response_index]["content"] = agent_response.response
+            history[-1]["content"] = agent_response.response
             yield history, ""
 
         if agent_response.thinking and agent_response.thinking.strip():
