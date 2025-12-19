@@ -17,6 +17,7 @@ from .experiment_api import (
     call_exp_orchestrator,
     call_exp_planner,
     call_exp_router,
+    call_exp_executor,
 )
 
 current_position = RelativeOffset(x=0, y=0, z=1)
