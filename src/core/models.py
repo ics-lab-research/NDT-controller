@@ -65,7 +65,6 @@ class IdeaMetadata:
 class ExperimentsMetadata:
     """Metadata for experiments mode."""
 
-    exp_constraint_path: Path
     data_dir_path: Path
     plans_path: Path
     vi_path: Path
@@ -110,7 +109,6 @@ class AgentResponse:
 
     response: str | None = None
     status: str | None = None
-    metadata: Dict[str, Any] | None = None
     action: str | None = None
 
 

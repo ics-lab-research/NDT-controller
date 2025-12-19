@@ -5,10 +5,9 @@ from loguru import logger
 from ..baml_client.types import (
     ConversationMessage,
     Error,
-    Experiment,
     ExpAction,
+    Experiment,
     ExpOrchestratorOutput,
-    State,
 )
 from ..core.models import AgentResponse, ExperimentPlan, ExperimentsMetadata
 from ..core.project_manager import ProjectManager
@@ -61,7 +60,6 @@ def save_plans(
 def process_single_experiment(
     experiment: Experiment,
     project_manager: ProjectManager,
-    orchestrator_output: ExpOrchestratorOutput,
 ) -> Generator[AgentResponse, None, ExperimentPlan | Error]:
     """Process a single experiment through planning and execution."""
     yield AgentResponse(
@@ -88,8 +86,6 @@ def process_single_experiment(
         yield from yield_error(tools)
         return tools
 
-    # project_manager.update_state(orchestrator_output)
-
     return ExperimentPlan(filename=experiment.filename, experiment=tools)
 
 
@@ -104,7 +100,8 @@ def handle_single_scan(
 
     experiment = orchestrator_output.experiments[0]
     result = yield from process_single_experiment(
-        experiment, project_manager, orchestrator_output
+        experiment,
+        project_manager,
     )
 
     if isinstance(result, ExperimentPlan):
