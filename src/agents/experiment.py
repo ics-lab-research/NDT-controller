@@ -114,10 +114,13 @@ def handle_experiment_mode(
                                     experiment=experiment_tools,
                                 )
                                 save_result = save_experiment_plans(
-                                    [plan], project_manager.get_experiment_plans_path()
+                                    [plan],
+                                    project_manager.get_experiment_plans_path(),
                                 )
                                 if save_result["success"]:
-                                    yield AgentResponse(response="Plan generated and saved.")
+                                    yield AgentResponse(
+                                        response="Plan generated and saved."
+                                    )
                                 else:
                                     yield AgentResponse(
                                         response=f"Plan generated but save failed: {save_result.get('error', 'Unknown error')}"
@@ -201,10 +204,13 @@ def handle_experiment_mode(
                                     )
                     if plans_to_save:
                         save_result = save_experiment_plans(
-                            plans_to_save, project_manager.get_experiment_plans_path()
+                            plans_to_save,
+                            project_manager.get_experiment_plans_path(),
                         )
                         if save_result["success"]:
-                            yield AgentResponse(response="Plans generated and saved.")
+                            yield AgentResponse(
+                                response="Plans generated and saved."
+                            )
                         else:
                             yield AgentResponse(
                                 response=f"Plans generated but save failed: {save_result.get('error', 'Unknown error')}"
