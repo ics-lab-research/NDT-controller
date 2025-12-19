@@ -28,6 +28,11 @@ from ..core.models import (
 from ..core.project_manager import ProjectManager
 
 
+def _get_experiment_statuses(plans: List[ExperimentPlan]) -> List[str]:
+    # Placeholder: return "pending" for each experiment; replace with actual status logic
+    return ["pending"] * len(plans)
+
+
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
     tool_name = str(tool.tool_name)
     params = {k: v for k, v in vars(tool).items() if k != "tool_name"}
@@ -177,6 +182,8 @@ def create_experiments_tab(
     filenames = [plan.filename for plan in plans]
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []
     plans_state = gr.State(plans)
+    statuses = _get_experiment_statuses(plans)
+    status_state = gr.State(statuses)
 
     with gr.Tabs() as interface:
         with gr.TabItem("Plans Viewer"):
@@ -213,6 +220,10 @@ def create_experiments_tab(
                 outputs=[dropdown, details_df, plans_state],
             )
         with gr.TabItem("Scan Status"):
-            gr.Markdown("# Scan Status\n\nStatus: Idle")
+            status_df = gr.Dataframe(
+                headers=["Experiment Name", "Status"],
+                value=[[f, s] for f, s in zip(filenames, statuses)],
+                interactive=False,
+            )
 
     return interface
