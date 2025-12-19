@@ -172,7 +172,7 @@ def execute_single_plan(
 
 def execute_multiple_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
-) -> str | None:
+) -> ExperimentExecutionError | None:
     """Execute multiple experiment plans with system reinitialization after each plan."""
     for plan in plans:
         error = execute_single_plan(plan, project_manager)
