@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 from typing import Dict
 from loguru import logger
+from ..baml_client.types import RelativeOffset, State
 from .models import (
     ExperimentsMetadata,
     Mode,
@@ -22,6 +23,7 @@ class ProjectManager:
         """Initialize project context."""
         self._current_mode = current_mode
         self._pwd_path = pwd_path
+        self._state = self.create_initial_state()
 
     @property
     def current_mode(self) -> Mode:
@@ -32,6 +34,26 @@ class ProjectManager:
     def pwd_path(self) -> Path:
         """Get the present working directory path."""
         return self._pwd_path
+
+    @property
+    def state(self) -> State:
+        """Get the current state."""
+        return self._state
+
+    def create_initial_state(self) -> State:
+        """Create the initial state for experiments."""
+        position = RelativeOffset(x=0, y=0, z=1)
+        return State(current_position=position, home_position=position)
+
+    def update_state(self, relative_offset_mm: RelativeOffset) -> None:
+        """Update the state based on executed tools."""
+        new_x = relative_offset_mm.x
+        new_y = relative_offset_mm.y
+        new_z = relative_offset_mm.z
+        new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
+        self._state = State(
+            current_position=new_position, home_position=self._state.home_position
+        )
 
     def _get_experiments_metadata(self) -> ExperimentsMetadata:
         experiments_base = os.environ.get("EXPERIMENTS_BASE", "EXPERIMENTS")

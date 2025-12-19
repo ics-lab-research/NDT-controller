@@ -8,7 +8,6 @@ from ..baml_client.types import (
     Experiment,
     ExpAction,
     ExpOrchestratorOutput,
-    RelativeOffset,
     State,
 )
 from ..core.models import AgentResponse, ExperimentPlan, ExperimentsMetadata
@@ -20,25 +19,6 @@ from .experiment_api import (
     call_exp_router,
 )
 from .experiment_planning import save_experiment_plans
-
-
-def create_initial_state() -> State:
-    """Create the initial state for experiments."""
-    position = RelativeOffset(x=0, y=0, z=1)
-    return State(current_position=position, home_position=position)
-
-
-def update_state(
-    current_state: State, relative_offset_mm: RelativeOffset
-) -> State:
-    """Update the state based on executed tools. Placeholder with random values."""
-    new_x = relative_offset_mm.x
-    new_y = relative_offset_mm.y
-    new_z = relative_offset_mm.z
-    new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
-    return State(
-        current_position=new_position, home_position=current_state.home_position
-    )
 
 
 def yield_error(error: Error) -> Generator[AgentResponse, None, None]:
@@ -80,7 +60,7 @@ def save_plans(
 
 def process_single_experiment(
     experiment: Experiment,
-    state: State,
+    project_manager: ProjectManager,
     orchestrator_output: ExpOrchestratorOutput,
 ) -> Generator[AgentResponse, None, ExperimentPlan | Error]:
     """Process a single experiment through planning and execution."""
@@ -88,10 +68,10 @@ def process_single_experiment(
         status=f"Generating abstract plan for {experiment.filename}"
     )
     logger.debug(
-        f"Calling ExpPlanner with experiment: {experiment}, state: {state}"
+        f"Calling ExpPlanner with experiment: {experiment}, state: {project_manager.state}"
     )
 
-    plan = call_exp_planner(experiment, state)
+    plan = call_exp_planner(experiment, project_manager.state)
     if isinstance(plan, Error):
         yield from yield_error(plan)
         return plan
@@ -108,7 +88,7 @@ def process_single_experiment(
         yield from yield_error(tools)
         return tools
 
-    # state = update_state(state, orchestrator_output)
+    # project_manager.update_state(orchestrator_output)
 
     return ExperimentPlan(filename=experiment.filename, experiment=tools)
 
@@ -122,10 +102,9 @@ def handle_single_scan(
         yield AgentResponse(response="ERROR: Number of scan is not 1")
         return
 
-    state = create_initial_state()
     experiment = orchestrator_output.experiments[0]
     result = yield from process_single_experiment(
-        experiment, state, orchestrator_output
+        experiment, project_manager, orchestrator_output
     )
 
     if isinstance(result, ExperimentPlan):
@@ -144,13 +123,12 @@ def handle_multiple_scan(
         f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_output.experiments]}"
     )
 
-    state = create_initial_state()
     plans_to_save = []
 
     for experiment in orchestrator_output.experiments:
         logger.debug(f"Processing experiment: {experiment.filename}")
 
-        plan = call_exp_planner(experiment, state)
+        plan = call_exp_planner(experiment, project_manager.state)
         if isinstance(plan, Error):
             yield from yield_error(plan)
             continue
@@ -167,7 +145,7 @@ def handle_multiple_scan(
             yield from yield_error(tools)
             continue
 
-        state = update_state(state, experiment.relative_offset_mm)
+        project_manager.update_state(experiment.relative_offset_mm)
 
         plans_to_save.append(
             ExperimentPlan(filename=experiment.filename, experiment=tools)
