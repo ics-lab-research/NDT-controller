@@ -205,7 +205,7 @@ def handle_experiment_mode(
                                 )
                             else:
                                 yield AgentResponse(
-                                    status=f"Processed experiment {experiment.filename}"
+                                    status=f"Processed experiment {experiment.filename} with plan: {plan}"
                                 )
                                 if plan:
                                     plans.append(plan)
