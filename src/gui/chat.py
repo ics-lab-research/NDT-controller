@@ -20,13 +20,13 @@ def respond_stream(
     history.append({"role": "assistant", "content": ""})
     response_index = len(history) - 1
     yield history, ""
-    
+
     thinking_added = False
     action_added = False
-    
+
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history[:-2])
-    
+
     for agent_response in get_agent_response(
         message, conversation_history, ctx
     ):
@@ -34,7 +34,7 @@ def respond_stream(
             # Update response message
             history[response_index]["content"] = agent_response.response
             yield history, ""
-    
+
         if agent_response.thinking and agent_response.thinking.strip():
             if not thinking_added:
                 # Append thinking message
@@ -51,7 +51,7 @@ def respond_stream(
                 # Update existing thinking message
                 history[-1]["content"] = agent_response.thinking
                 yield history, ""
-    
+
         if agent_response.action and agent_response.action.strip():
             if not action_added:
                 # Append action message
