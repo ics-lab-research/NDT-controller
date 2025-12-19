@@ -117,17 +117,12 @@ def handle_experiment_mode(
                                 metadata = project_manager.get_mode_metadata(
                                     project_manager.current_mode
                                 )
-                                if not isinstance(
-                                    metadata, ExperimentsMetadata
-                                ):
-                                    raise ValueError(
-                                        "Metadata is not ExperimentsMetadata"
-                                    )
+                                if not isinstance(metadata, ExperimentsMetadata):
+                                    raise ValueError("Metadata is not ExperimentsMetadata")
                                 plans_path = metadata.plans_path
-
                                 save_result = save_experiment_plans(
                                     [plan],
-                                    project_manager.get_experiment_plans_path(),
+                                    plans_path,
                                 )
                                 if save_result["success"]:
                                     yield AgentResponse(
@@ -215,9 +210,15 @@ def handle_experiment_mode(
                                         )
                                     )
                     if plans_to_save:
+                        metadata = project_manager.get_mode_metadata(
+                            project_manager.current_mode
+                        )
+                        if not isinstance(metadata, ExperimentsMetadata):
+                            raise ValueError("Metadata is not ExperimentsMetadata")
+                        plans_path = metadata.plans_path
                         save_result = save_experiment_plans(
                             plans_to_save,
-                            project_manager.get_experiment_plans_path(),
+                            plans_path,
                         )
                         if save_result["success"]:
                             yield AgentResponse(
