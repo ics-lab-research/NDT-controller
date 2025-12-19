@@ -41,12 +41,12 @@ def respond_stream(
                 history[-1]["content"] = agent_response.response
                 yield history, ""
 
-        if agent_response.thinking and agent_response.thinking.strip():
-            # Append thinking message
+        if agent_response.status and agent_response.status.strip():
+            # Append status message
             history.append(
                 {
                     "role": "assistant",
-                    "content": agent_response.thinking,
+                    "content": agent_response.status,
                     "metadata": {"title": "🧠 Thinking"},
                 },
             )
