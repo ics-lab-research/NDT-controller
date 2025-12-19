@@ -24,6 +24,7 @@ class ExperimentStatus(Enum):
     ERROR = "❌ Error"
     IDLE = "🟢 Idle"
 
+
 # Type alias for experiment tools
 ExperimentTool = Union[
     ConnectToViTool,
