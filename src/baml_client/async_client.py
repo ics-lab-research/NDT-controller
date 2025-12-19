@@ -94,19 +94,19 @@ class BamlAsyncClient:
                 "plan": plan,"filename": filename,
             })
             return typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.GetNumericIndicatorTool", "types.GetViStatusTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"], __result__.cast_to(types, types, stream_types, False, __runtime__))
-    async def ExpOrchestrator(self, user_message: str,
+    async def ExpOrchestrator(self, reformatted_message: str,
         baml_options: BamlCallOptions = {},
     ) -> typing.Union["types.ExpOrchestratorOutput", "types.Error"]:
         # Check if on_tick is provided
         if 'on_tick' in baml_options:
             # Use streaming internally when on_tick is provided
-            __stream__ = self.stream.ExpOrchestrator(user_message=user_message,
+            __stream__ = self.stream.ExpOrchestrator(reformatted_message=reformatted_message,
                 baml_options=baml_options)
             return await __stream__.get_final_response()
         else:
             # Original non-streaming code
             __result__ = await self.__options.merge_options(baml_options).call_function_async(function_name="ExpOrchestrator", args={
-                "user_message": user_message,
+                "reformatted_message": reformatted_message,
             })
             return typing.cast(typing.Union["types.ExpOrchestratorOutput", "types.Error"], __result__.cast_to(types, types, stream_types, False, __runtime__))
     async def ExpPlanner(self, experiment: types.Experiment,state: types.State,
@@ -124,21 +124,6 @@ class BamlAsyncClient:
                 "experiment": experiment,"state": state,
             })
             return typing.cast(typing.Union[str, "types.Error"], __result__.cast_to(types, types, stream_types, False, __runtime__))
-    async def ExpPlanner2(self, user_message: str,filename: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]]:
-        # Check if on_tick is provided
-        if 'on_tick' in baml_options:
-            # Use streaming internally when on_tick is provided
-            __stream__ = self.stream.ExpPlanner2(user_message=user_message,filename=filename,
-                baml_options=baml_options)
-            return await __stream__.get_final_response()
-        else:
-            # Original non-streaming code
-            __result__ = await self.__options.merge_options(baml_options).call_function_async(function_name="ExpPlanner2", args={
-                "user_message": user_message,"filename": filename,
-            })
-            return typing.cast(typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]], __result__.cast_to(types, types, stream_types, False, __runtime__))
     async def ExpRouter(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
         baml_options: BamlCallOptions = {},
     ) -> typing.Union["types.ExpRouterOutput", "types.Error"]:
@@ -175,11 +160,11 @@ class BamlStreamClient:
           lambda x: typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.GetNumericIndicatorTool", "types.GetViStatusTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"], x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
-    def ExpOrchestrator(self, user_message: str,
+    def ExpOrchestrator(self, reformatted_message: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlStream[typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.Error"], typing.Union["types.ExpOrchestratorOutput", "types.Error"]]:
         __ctx__, __result__ = self.__options.merge_options(baml_options).create_async_stream(function_name="ExpOrchestrator", args={
-            "user_message": user_message,
+            "reformatted_message": reformatted_message,
         })
         return baml_py.BamlStream[typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.Error"], typing.Union["types.ExpOrchestratorOutput", "types.Error"]](
           __result__,
@@ -197,18 +182,6 @@ class BamlStreamClient:
           __result__,
           lambda x: typing.cast(typing.Union[str, "stream_types.Error"], x.cast_to(types, types, stream_types, True, __runtime__)),
           lambda x: typing.cast(typing.Union[str, "types.Error"], x.cast_to(types, types, stream_types, False, __runtime__)),
-          __ctx__,
-        )
-    def ExpPlanner2(self, user_message: str,filename: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.BamlStream[typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]], typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]]]:
-        __ctx__, __result__ = self.__options.merge_options(baml_options).create_async_stream(function_name="ExpPlanner2", args={
-            "user_message": user_message,"filename": filename,
-        })
-        return baml_py.BamlStream[typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]], typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]]](
-          __result__,
-          lambda x: typing.cast(typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]], x.cast_to(types, types, stream_types, True, __runtime__)),
-          lambda x: typing.cast(typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]], x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
     def ExpRouter(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
@@ -238,11 +211,11 @@ class BamlHttpRequestClient:
             "plan": plan,"filename": filename,
         }, mode="request")
         return __result__
-    async def ExpOrchestrator(self, user_message: str,
+    async def ExpOrchestrator(self, reformatted_message: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExpOrchestrator", args={
-            "user_message": user_message,
+            "reformatted_message": reformatted_message,
         }, mode="request")
         return __result__
     async def ExpPlanner(self, experiment: types.Experiment,state: types.State,
@@ -250,13 +223,6 @@ class BamlHttpRequestClient:
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExpPlanner", args={
             "experiment": experiment,"state": state,
-        }, mode="request")
-        return __result__
-    async def ExpPlanner2(self, user_message: str,filename: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExpPlanner2", args={
-            "user_message": user_message,"filename": filename,
         }, mode="request")
         return __result__
     async def ExpRouter(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,
@@ -281,11 +247,11 @@ class BamlHttpStreamRequestClient:
             "plan": plan,"filename": filename,
         }, mode="stream")
         return __result__
-    async def ExpOrchestrator(self, user_message: str,
+    async def ExpOrchestrator(self, reformatted_message: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExpOrchestrator", args={
-            "user_message": user_message,
+            "reformatted_message": reformatted_message,
         }, mode="stream")
         return __result__
     async def ExpPlanner(self, experiment: types.Experiment,state: types.State,
@@ -293,13 +259,6 @@ class BamlHttpStreamRequestClient:
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExpPlanner", args={
             "experiment": experiment,"state": state,
-        }, mode="stream")
-        return __result__
-    async def ExpPlanner2(self, user_message: str,filename: typing.Optional[str] = None,
-        baml_options: BamlCallOptions = {},
-    ) -> baml_py.baml_py.HTTPRequest:
-        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExpPlanner2", args={
-            "user_message": user_message,"filename": filename,
         }, mode="stream")
         return __result__
     async def ExpRouter(self, user_message: str,conversation_history: typing.Optional[typing.List["types.ConversationMessage"]] = None,

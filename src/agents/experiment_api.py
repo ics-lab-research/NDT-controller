@@ -27,15 +27,13 @@ def call_exp_router(
 
 
 def call_exp_orchestrator(
-    user_message: str,
-    conversation_history: List[ConversationMessage] | None = None,
+    reformatted_message: str,
 ) -> ExpOrchestratorOutput:
-    """Call the orchestrator agent with a user message and conversation history"""
+    """Call the orchestrator agent with a reformatted message"""
     cr = get_client_registry("exp-orchestrator")
 
     response = b.ExpOrchestrator(
-        user_message,
-        conversation_history,
+        reformatted_message,
         baml_options={"client_registry": cr},
     )
 
@@ -49,6 +47,19 @@ def call_exp_planner(
     cr = get_client_registry("exp-planner")
 
     response = b.ExpPlanner(
+        user_message,
+        filename,
+        baml_options={"client_registry": cr},
+    )
+    return response
+
+
+def call_exp_executor(
+    user_message: str, filename: str | None = None
+) -> List[ExperimentTool]:
+    """Get the experiment plan tools from BAML (synchronous)."""
+    cr = get_client_registry("exp-executor")
+    response = b.ExpExecutor(
         user_message,
         filename,
         baml_options={"client_registry": cr},

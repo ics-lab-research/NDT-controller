@@ -42,12 +42,6 @@ class LlmResponseParser:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner", llm_response=llm_response, mode="request")
         return typing.cast(typing.Union[str, "types.Error"], __result__)
 
-    def ExpPlanner2(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]]:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner2", llm_response=llm_response, mode="request")
-        return typing.cast(typing.List[typing.Union["types.SetNumericControlTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.RunOpenViTool", "types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.SetButtonStateTool"]], __result__)
-
     def ExpRouter(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union["types.ExpRouterOutput", "types.Error"]:
@@ -79,12 +73,6 @@ class LlmStreamParser:
     ) -> typing.Union[str, "stream_types.Error"]:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner", llm_response=llm_response, mode="stream")
         return typing.cast(typing.Union[str, "stream_types.Error"], __result__)
-
-    def ExpPlanner2(
-        self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]]:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpPlanner2", llm_response=llm_response, mode="stream")
-        return typing.cast(typing.List[typing.Union["stream_types.SetNumericControlTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.RunOpenViTool", "stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.SetButtonStateTool"]], __result__)
 
     def ExpRouter(
         self, llm_response: str, baml_options: BamlCallOptions = {},
