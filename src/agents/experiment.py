@@ -39,9 +39,7 @@ def get_experiments_metadata(
     project_manager: ProjectManager,
 ) -> ExperimentsMetadata:
     """Get and validate experiments metadata from project manager."""
-    metadata = project_manager.get_mode_metadata(
-        project_manager.current_mode
-    )
+    metadata = project_manager.get_mode_metadata(project_manager.current_mode)
     if not isinstance(metadata, ExperimentsMetadata):
         raise ValueError("Metadata is not ExperimentsMetadata")
     return metadata
@@ -159,9 +157,7 @@ def handle_multiple_scan(
                 continue
 
             plans_to_save.append(
-                ExperimentPlan(
-                    filename=experiment.filename, experiment=tools
-                )
+                ExperimentPlan(filename=experiment.filename, experiment=tools)
             )
 
     if plans_to_save:
