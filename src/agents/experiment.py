@@ -49,11 +49,11 @@ def save_plans(
             if len(plans) == 1
             else "Plans generated and saved."
         )
-        yield AgentResponse(response=message)
+        yield AgentResponse(action=message)
     else:
         error_msg = save_result.get("error", "Unknown error")
         yield AgentResponse(
-            response=f"Plans generated but save failed: {error_msg}"
+            action=f"ERROR: Plans generated but save failed: {error_msg}"
         )
 
 
