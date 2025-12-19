@@ -177,6 +177,7 @@ def create_experiments_tab(
     filenames = [plan.filename for plan in plans]
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []
     plans_state = gr.State(plans)
+
     with gr.Tab("Plans Viewer") as plans_tab:
         dropdown = gr.Dropdown(
             choices=filenames,
@@ -212,6 +213,7 @@ def create_experiments_tab(
         )
     with gr.Tab("Scan Status") as scan_tab:
         gr.Markdown("# Scan Status\n\nStatus: Idle")
+
     return gr.TabbedInterface(
         [plans_tab, scan_tab], ["Plans Viewer", "Scan Status"]
     )
