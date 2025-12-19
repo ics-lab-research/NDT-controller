@@ -1,7 +1,7 @@
 from typing import Generator, List, Tuple
-  
+
 from loguru import logger
-  
+
 from ..agents.experiment_planning import save_experiment_plans
 from ..baml_client.types import (
     ConversationMessage,
@@ -19,14 +19,14 @@ from .experiment_api import (
     call_exp_router,
     call_exp_executor,
 )
-  
+
 current_position = RelativeOffset(x=0, y=0, z=1)
 home_position = RelativeOffset(x=0, y=0, z=1)
 init_state = State(
     current_position=current_position, home_position=home_position
 )
-  
-  
+
+
 def generate_plan_for_experiment(
     experiment: Experiment, state: State
 ) -> Tuple[ExperimentPlan | None, Error | None]:
@@ -36,21 +36,21 @@ def generate_plan_for_experiment(
     if isinstance(planner_response, Error):
         logger.error(f"Planner error: {planner_response.error}")
         return None, planner_response
-  
+
     experiment_tools = call_exp_executor(
         plan=planner_response, filename=experiment.filename
     )
     if isinstance(experiment_tools, Error):
         logger.error(f"Executor error: {experiment_tools.error}")
         return None, experiment_tools
-  
+
     plan = ExperimentPlan(
         filename=experiment.filename, experiment=experiment_tools
     )
     logger.info("Plan generated successfully")
     return plan, None
-  
-  
+
+
 def save_experiment_plans_to_project(
     plans: List[ExperimentPlan], project_manager: ProjectManager
 ) -> Generator[AgentResponse, None, None]:
@@ -70,27 +70,27 @@ def save_experiment_plans_to_project(
         error = save_status.get("error", "Unknown error")
         logger.error(f"Failed to save plans: {error}")
         yield AgentResponse(action=f"Failed to save plans: {error}")
-  
-  
+
+
 def handle_ask_clarification() -> Generator[AgentResponse, None, None]:
     """Handle ask clarification action: no operation."""
     logger.info("Handling ask clarification")
     # No specific action required for clarification
-  
-  
+
+
 def handle_basic_control() -> Generator[AgentResponse, None, None]:
     """Handle basic control action: no operation."""
     logger.info("Handling basic control")
     # No specific action required for basic control
-  
-  
+
+
 def handle_single_scan(
     reformatted_message: str, project_manager: ProjectManager
 ) -> Generator[AgentResponse, None, None]:
     """Handle single scan action."""
     logger.info("Handling single scan")
     yield AgentResponse(status="Performing single scan.")
-  
+
     if reformatted_message:
         yield AgentResponse(
             status=f"Calling ExpOrchestrator with message: `{reformatted_message}`"
@@ -98,7 +98,7 @@ def handle_single_scan(
         orchestrator_response = call_exp_orchestrator(
             reformatted_message=reformatted_message
         )
-  
+
         if isinstance(orchestrator_response, Error):
             logger.error(f"Orchestrator error: {orchestrator_response.error}")
             yield AgentResponse(
@@ -120,7 +120,7 @@ def handle_single_scan(
                         status=f"Calling ExpExecutor with file name is `{single_experiment.filename}` and this abstract plan:\n {plan}"
                     )
                     yield AgentResponse(response="Plan generated.")
-  
+
                     if plan:
                         yield from save_experiment_plans_to_project(
                             [plan], project_manager
@@ -129,15 +129,15 @@ def handle_single_scan(
                 error_msg = "ERROR: Number of scan is not 1"
                 logger.error(error_msg)
                 yield AgentResponse(response=error_msg)
-  
-  
+
+
 def handle_multiple_scan(
     reformatted_message: str, project_manager: ProjectManager
 ) -> Generator[AgentResponse, None, None]:
     """Handle multiple scan action."""
     logger.info("Handling multiple scan")
     yield AgentResponse(status="Performing multiple scan.")
-  
+
     if reformatted_message:
         yield AgentResponse(
             status=f"Calling ExpOrchestrator with message: `{reformatted_message}`"
@@ -145,7 +145,7 @@ def handle_multiple_scan(
         orchestrator_response = call_exp_orchestrator(
             reformatted_message=reformatted_message
         )
-  
+
         if isinstance(orchestrator_response, Error):
             logger.error(f"Orchestrator error: {orchestrator_response.error}")
             yield AgentResponse(
@@ -175,8 +175,8 @@ def handle_multiple_scan(
                         plans.append(plan)
             yield AgentResponse(response="Plans generated.")
             yield from save_experiment_plans_to_project(plans, project_manager)
-  
-  
+
+
 def handle_experiment_mode(
     user_message: str,
     conversation_history: List[ConversationMessage],
@@ -184,12 +184,12 @@ def handle_experiment_mode(
 ) -> Generator[AgentResponse, None, None]:
     """Handle EXPERIMENTS mode: orchestrate experiments based on user message."""
     logger.info("Handling experiment mode")
-  
+
     router_response = call_exp_router(user_message, conversation_history)
-  
+
     if router_response:
         yield AgentResponse(response=router_response.response)
-  
+
         action_handlers = {
             ExpAction.ASK_CLARIFICATION: handle_ask_clarification,
             ExpAction.BASIC_CONTROL: handle_basic_control,
@@ -200,7 +200,7 @@ def handle_experiment_mode(
                 router_response.reformatted_message, project_manager
             ),
         }
-  
+
         handler = action_handlers.get(router_response.action)
         if handler:
             yield from handler()
