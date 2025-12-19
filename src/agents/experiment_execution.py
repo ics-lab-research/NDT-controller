@@ -13,6 +13,8 @@ from ..baml_client.types import (
     SetButtonStateTool,
     SetNumericControlTool,
     ToolResult,
+    WaitForOperationCompleteTool,
+    ExpType,
 )
 from ..core.models import (
     ExperimentsMetadata,
@@ -76,26 +78,12 @@ def reinit_system(project_manager: ProjectManager) -> str | None:
     return None
 
 
-def describe_tool(tool: ExperimentTool) -> str:
-    """Generate a human-readable description of an experiment tool."""
-    if isinstance(tool, SetNumericControlTool):
-        return f"Set numeric control '{tool.control_name}' to {tool.value}"
-    elif isinstance(tool, SelectTabTool):
-        return f"Select tab '{tool.tab_control_name}' at index {tool.index}"
-    elif isinstance(tool, RunOpenViTool):
-        return f"Run open VI (run_vi={tool.run_vi})"
-    elif isinstance(tool, PressButtonTool):
-        return f"Press button '{tool.button_name}'"
-    elif isinstance(tool, SetButtonStateTool):
-        return f"Set button '{tool.button_name}' to {tool.state}"
-    elif isinstance(tool, SelectComboBoxTool):
-        return f"Select combo box '{tool.combo_box_name}' to '{tool.item}'"
-    elif isinstance(tool, ConnectToViTool):
-        return f"Connect to VI at path '{tool.vi_path}'"
-    elif isinstance(tool, HandleSaveDialogTool):
-        return f"Handle save dialog for file '{tool.file_name}' in directory '{tool.save_directory}'"
-    else:
-        return f"Unknown tool: {type(tool).__name__}"
+def tool_wait_for_operation_complete(exp_type: ExpType) -> ToolResult:
+    if exp_type == ExpType.SCAN:
+        pass
+
+    elif exp_type == ExpType.MOVEMENT:
+        pass
 
 
 def execute_tool(
@@ -105,8 +93,6 @@ def execute_tool(
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     if not isinstance(metadata, ExperimentsMetadata):
         raise ValueError("Not in experiments mode")
-
-    logger.info(f"Executing tool: {describe_tool(tool)}")
 
     if isinstance(tool, SetNumericControlTool):
         return tool_set_numeric_control(tool.control_name, tool.value)
@@ -138,6 +124,8 @@ def execute_tool(
         return tool_handle_save_dialog(str(save_directory), tool.file_name)
     elif isinstance(tool, SelectComboBoxTool):
         return tool_select_combo_box(tool.combo_box_name, tool.item)
+    elif isinstance(tool, WaitForOperationCompleteTool):
+        pass
     else:
         logger.error(f"Unknown tool type: {type(tool).__name__}")
         return ToolResult(
