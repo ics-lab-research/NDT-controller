@@ -91,7 +91,7 @@ def handle_experiment_mode(
                             )
                         else:
                             yield AgentResponse(
-                                status=f"Abstract plan:\n {planner_response}"
+                                status=f"Calling ExpExecutor with filename: {single_experiment.filename} and abstract plan: {planner_response}"
                             )
                             logger.debug(
                                 f"Calling ExpExecutor with plan: '{planner_response}', filename: '{single_experiment.filename}'"
