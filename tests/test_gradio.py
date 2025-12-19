@@ -26,6 +26,7 @@ class OptionDict(TypedDict):
     label: NotRequired[str]
     value: str
 
+
 with gr.Blocks() as demo:
     chatbot = gr.Chatbot(
         value=[
