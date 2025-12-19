@@ -36,7 +36,9 @@ def update_state(state: State, tools: List[ExperimentTool]) -> State:
     new_y = random.randint(-10, 10)
     new_z = random.randint(0, 5)
     new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
-    return State(current_position=new_position, home_position=state.home_position)
+    return State(
+        current_position=new_position, home_position=state.home_position
+    )
 
 
 def yield_error(error: Error) -> Generator[AgentResponse, None, None]:
