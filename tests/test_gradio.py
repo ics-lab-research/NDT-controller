@@ -1,12 +1,16 @@
-MessageContent = Union[str, FileDataDict, FileData, Component]
+from typing import Union, Literal, Optional, List, NotRequired, TypedDict
+from dataclasses import dataclass
+import gradio as gr
+
+MessageContent = Union[str, gr.FileDataDict, gr.FileData, gr.Component]
 
 
 @dataclass
 class ChatMessage:
-    content: MessageContent | [MessageContent]
+    content: MessageContent | list[MessageContent]
     role: Literal["user", "assistant"]
-    metadata: MetadataDict = None
-    options: list[OptionDict] = None
+    metadata: Optional[MetadataDict] = None
+    options: Optional[list[OptionDict]] = None
 
 
 class MetadataDict(TypedDict):
@@ -21,9 +25,6 @@ class MetadataDict(TypedDict):
 class OptionDict(TypedDict):
     label: NotRequired[str]
     value: str
-
-
-import gradio as gr
 
 with gr.Blocks() as demo:
     chatbot = gr.Chatbot(
