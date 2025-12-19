@@ -4,8 +4,9 @@ from typing import Dict, List, Union
 
 from loguru import logger
 
-from ..baml_client import types
+from ..baml_client import types as baml_types
 from ..core.models import ExperimentPlan
+from ..baml_client.types import State, RelativeOffset
 
 
 def save_experiment_plans(
@@ -54,8 +55,8 @@ def load_experiment_plans(filepath: Path) -> List[ExperimentPlan]:
             tools = []
             for tool_dict in plan_data.get("tools", []):
                 type_name = tool_dict.pop("type", None)
-                if type_name and hasattr(types, type_name):
-                    tool_class = getattr(types, type_name)
+                if type_name and hasattr(baml_types, type_name):
+                    tool_class = getattr(baml_types, type_name)
                     try:
                         tool = tool_class(**tool_dict)
                         tools.append(tool)

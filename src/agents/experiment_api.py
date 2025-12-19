@@ -56,7 +56,6 @@ def call_exp_planner(experiment: Experiment, state: State) -> str | Error:
 
 
 def call_exp_executor(plan: str, filename: str) -> List[ExperimentTool] | Error:
-    """Get the experiment plan tools from BAML (synchronous)."""
     cr = get_client_registry("exp-executor")
     response = b.ExpExecutor(
         plan,

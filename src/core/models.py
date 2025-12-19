@@ -109,7 +109,7 @@ class AgentResponse:
     """Unified response structure for all agents."""
 
     response: str | None = None
-    thinking: str | None = None
+    status: str | None = None
     metadata: Dict[str, Any] | None = None
     action: str | None = None
 
