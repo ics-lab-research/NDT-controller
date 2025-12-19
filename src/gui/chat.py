@@ -20,8 +20,6 @@ def respond_stream(
     # Add user message to history
     history.append({"role": "user", "content": message})
 
-    thinking_added = False
-    action_added = False
     response_added = False
 
     for agent_response in get_agent_response(
@@ -44,38 +42,26 @@ def respond_stream(
                 yield history, ""
 
         if agent_response.thinking and agent_response.thinking.strip():
-            if not thinking_added:
-                # Append thinking message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.thinking,
-                        "metadata": {"title": "🧠 Thinking"},
-                    },
-                )
-                thinking_added = True
-                yield history, ""
-            else:
-                # Update existing thinking message
-                history[-1]["content"] = agent_response.thinking
-                yield history, ""
+            # Append thinking message
+            history.append(
+                {
+                    "role": "assistant",
+                    "content": agent_response.thinking,
+                    "metadata": {"title": "🧠 Thinking"},
+                },
+            )
+            yield history, ""
 
         if agent_response.action and agent_response.action.strip():
-            if not action_added:
-                # Append action message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.action,
-                        "metadata": {"title": "⚡ Action"},
-                    },
-                )
-                action_added = True
-                yield history, ""
-            else:
-                # Update existing action message
-                history[-1]["content"] = agent_response.action
-                yield history, ""
+            # Append action message
+            history.append(
+                {
+                    "role": "assistant",
+                    "content": agent_response.action,
+                    "metadata": {"title": "⚡ Action"},
+                },
+            )
+            yield history, ""
 
 
 def create_chat_interface(
