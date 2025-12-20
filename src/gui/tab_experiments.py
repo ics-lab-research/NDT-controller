@@ -303,7 +303,12 @@ def create_experiments_tab(
                 lambda plans, plans_path, current_chatbot: (
                     start_all_approved_plans(plans, plans_path),
                     current_chatbot
-                    + [{"role": "assistant", "content": "All approved plans started"}],
+                    + [
+                        {
+                            "role": "assistant",
+                            "content": "All approved plans started",
+                        }
+                    ],
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
                 outputs=[status_df, chatbot],
