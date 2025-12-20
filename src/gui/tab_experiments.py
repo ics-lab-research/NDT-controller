@@ -69,6 +69,26 @@ def approve_all_plans(
     return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
 
 
+def start_all_approved_plans(
+    plans: List[ExperimentPlan], plans_path: Path | None
+) -> gr.Dataframe:
+    if not plans_path:
+        gr.Info("Error: Plans path not configured")
+        return gr.Dataframe(value=[])
+    for plan in plans:
+        if plan.status == ExperimentStatus.APPROVED:
+            plan.status = ExperimentStatus.PENDING
+    try:
+        save_experiment_plans(plans, plans_path)
+    except Exception as e:
+        error_msg = f"Error saving plans: {e}"
+        logger.error(error_msg)
+        gr.Info(error_msg)
+    filenames = [plan.filename for plan in plans]
+    statuses = _get_experiment_statuses(plans)
+    return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
+
+
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
     tool_name = str(tool.tool_name)
     params = {k: v for k, v in vars(tool).items() if k != "tool_name"}
@@ -274,6 +294,16 @@ def create_experiments_tab(
                     approve_all_plans(plans, plans_path),
                     current_chatbot
                     + [{"role": "assistant", "content": "All plans approved"}],
+                ),
+                inputs=[plans_state, plans_path_state, chatbot],
+                outputs=[status_df, chatbot],
+            )
+
+            start_button.click(
+                lambda plans, plans_path, current_chatbot: (
+                    start_all_approved_plans(plans, plans_path),
+                    current_chatbot
+                    + [{"role": "assistant", "content": "All approved plans started"}],
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
                 outputs=[status_df, chatbot],
