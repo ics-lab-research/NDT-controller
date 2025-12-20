@@ -229,13 +229,20 @@ def reload_plans(
 
 
 def start_execution(
-    plans: List[ExperimentPlan], plans_path: Path | None, current_chatbot, project_manager: ProjectManager
+    plans: List[ExperimentPlan],
+    plans_path: Path | None,
+    current_chatbot,
+    project_manager: ProjectManager,
 ) -> Tuple[gr.Dataframe, gr.Chatbot]:
     if not plans_path:
-        return gr.Dataframe(value=[]), current_chatbot + [{"role": "assistant", "content": "Error: Plans path not configured"}]
+        return gr.Dataframe(value=[]), current_chatbot + [
+            {"role": "assistant", "content": "Error: Plans path not configured"}
+        ]
     approved_plans = [p for p in plans if p.status == ExperimentStatus.APPROVED]
     if not approved_plans:
-        return update_scan_status(plans_path), current_chatbot + [{"role": "assistant", "content": "No approved plans to start"}]
+        return update_scan_status(plans_path), current_chatbot + [
+            {"role": "assistant", "content": "No approved plans to start"}
+        ]
     # Set to PENDING
     for plan in approved_plans:
         plan.status = ExperimentStatus.PENDING
@@ -244,18 +251,31 @@ def start_execution(
     except Exception as e:
         error_msg = f"Error saving plans: {e}"
         logger.error(error_msg)
-        return update_scan_status(plans_path), current_chatbot + [{"role": "assistant", "content": error_msg}]
+        return update_scan_status(plans_path), current_chatbot + [
+            {"role": "assistant", "content": error_msg}
+        ]
     # Execute all plans
     try:
         error, messages = execute_multiple_plans(plans, project_manager)
         for msg in messages:
-            current_chatbot = current_chatbot + [{"role": "assistant", "content": msg}]
+            current_chatbot = current_chatbot + [
+                {"role": "assistant", "content": msg}
+            ]
         if error:
-            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Execution error: {error.error_message}"}]
+            current_chatbot = current_chatbot + [
+                {
+                    "role": "assistant",
+                    "content": f"Execution error: {error.error_message}",
+                }
+            ]
         else:
-            current_chatbot = current_chatbot + [{"role": "assistant", "content": "Execution completed"}]
+            current_chatbot = current_chatbot + [
+                {"role": "assistant", "content": "Execution completed"}
+            ]
     except Exception as e:
-        current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Error during execution: {e}"}]
+        current_chatbot = current_chatbot + [
+            {"role": "assistant", "content": f"Error during execution: {e}"}
+        ]
     # Update status_df
     return update_scan_status(plans_path), current_chatbot
 
@@ -337,7 +357,11 @@ def create_experiments_tab(
 
             start_button.click(
                 start_execution,
-                inputs=[plans_state, plans_path_state, chatbot, project_manager],
+                inputs=[
+                    plans_state,
+                    plans_path_state,
+                    chatbot,
+                ],
                 outputs=[status_df, chatbot],
             )
 

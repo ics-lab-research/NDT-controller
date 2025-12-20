@@ -188,7 +188,9 @@ def execute_multiple_plans(
                 save_experiment_plans(plans, metadata.plans_path)
             error = execute_single_plan(plan, project_manager)
             if error:
-                messages.append(f"Plan {plan.filename} errored: {error.error_message}")
+                messages.append(
+                    f"Plan {plan.filename} errored: {error.error_message}"
+                )
                 if isinstance(metadata, ExperimentsMetadata):
                     save_experiment_plans(plans, metadata.plans_path)
                 return error, messages
