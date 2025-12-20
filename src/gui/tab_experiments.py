@@ -185,6 +185,7 @@ def reload_plans(
 
 def create_experiments_tab(
     project_manager: ProjectManager,
+    chatbot: gr.Chatbot,
 ) -> gr.Tabs:
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
@@ -241,6 +242,11 @@ def create_experiments_tab(
                 interactive=False,
             )
             approve_button = gr.Button("Approve and Start Scan")
+            approve_button.click(
+                lambda h: h + [{"role": "assistant", "content": "Hello"}],
+                inputs=[chatbot],
+                outputs=[chatbot],
+            )
             timer = gr.Timer(5)
             timer.tick(
                 update_scan_status,
