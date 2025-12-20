@@ -51,7 +51,7 @@ ExperimentTool = Union[
 class ExperimentPlan:
     filename: str
     experiment: List[ExperimentTool]
-    status: ExperimentStatus
+    status: ExperimentStatus = ExperimentStatus.NOT_APPROVED
 
 
 # TODO: metadata should have description of file
