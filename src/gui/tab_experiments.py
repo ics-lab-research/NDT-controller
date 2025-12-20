@@ -272,7 +272,8 @@ def create_experiments_tab(
             approve_button.click(
                 lambda plans, plans_path, current_chatbot: (
                     approve_all_plans(plans, plans_path),
-                    current_chatbot + [{"role": "assistant", "content": "All plans approved"}]
+                    current_chatbot
+                    + [{"role": "assistant", "content": "All plans approved"}],
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
                 outputs=[status_df, chatbot],
