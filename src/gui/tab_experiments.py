@@ -31,8 +31,8 @@ from ..core.project_manager import ProjectManager
 
 def _get_experiment_statuses(
     plans: List[ExperimentPlan],
-) -> List[ExperimentStatus]:
-    return [plan.status for plan in plans]
+) -> List[str]:
+    return [plan.status.value for plan in plans]
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
@@ -224,7 +224,7 @@ def create_experiments_tab(
         with gr.TabItem("Scan Status"):
             status_df = gr.Dataframe(
                 headers=["Experiment Name", "Status"],
-                value=[[f, s.value] for f, s in zip(filenames, statuses)],
+                value=[[f, s] for f, s in zip(filenames, statuses)],
                 interactive=False,
             )
 
