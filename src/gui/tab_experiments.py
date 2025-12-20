@@ -21,6 +21,7 @@ from ..baml_client.types import (
     SetNumericControlTool,
 )
 from ..core.models import (
+    ChatHistory,
     ExperimentExecutionError,
     ExperimentPlan,
     ExperimentsMetadata,
@@ -232,7 +233,7 @@ def reload_plans(
 def start_execution(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
-    current_chatbot,
+    current_chatbot: ChatHistory,
     project_manager: ProjectManager,
 ):
     if not plans_path:
@@ -370,6 +371,7 @@ def create_experiments_tab(
                     plans_state,
                     plans_path_state,
                     chatbot,
+                    project_manager,
                 ],
                 outputs=[status_df, chatbot],
             )
