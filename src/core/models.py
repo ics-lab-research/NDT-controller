@@ -51,6 +51,7 @@ ExperimentTool = Union[
 class ExperimentPlan:
     filename: str
     experiment: List[ExperimentTool]
+    status: ExperimentStatus
 
 
 # TODO: metadata should have description of file
