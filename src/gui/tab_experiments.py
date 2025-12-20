@@ -21,9 +21,10 @@ from ..baml_client.types import (
     SetNumericControlTool,
 )
 from ..core.models import (
+    ExperimentExecutionError,
     ExperimentPlan,
-    ExperimentStatus,
     ExperimentsMetadata,
+    ExperimentStatus,
     ExperimentTool,
     Mode,
 )
@@ -304,7 +305,6 @@ def create_experiments_tab(
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []
     plans_state = gr.State(plans)
     statuses = _get_experiment_statuses(plans)
-    status_state = gr.State(statuses)
     plans_path_state = gr.State(plans_path)
     log_state = gr.State(False)
 
