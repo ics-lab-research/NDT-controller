@@ -28,6 +28,19 @@ from ..core.models import (
 from ..core.project_manager import ProjectManager
 
 
+def update_scan_status(plans_path: Path | None) -> gr.Dataframe:
+    if not plans_path:
+        return gr.Dataframe(value=[])
+    try:
+        plans = load_experiment_plans(plans_path)
+        filenames = [plan.filename for plan in plans]
+        statuses = _get_experiment_statuses(plans)
+        return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
+    except Exception as e:
+        logger.error(f"Error updating scan status: {e}")
+        return gr.Dataframe(value=[])
+
+
 def _get_experiment_statuses(
     plans: List[ExperimentPlan],
 ) -> List[str]:
@@ -185,6 +198,7 @@ def create_experiments_tab(
     plans_state = gr.State(plans)
     statuses = _get_experiment_statuses(plans)
     status_state = gr.State(statuses)
+    plans_path_state = gr.State(plans_path)
 
     with gr.Tabs() as interface:
         with gr.TabItem("Plans Viewer"):
@@ -225,6 +239,12 @@ def create_experiments_tab(
                 headers=["Experiment Name", "Status"],
                 value=[[f, s] for f, s in zip(filenames, statuses)],
                 interactive=False,
+            )
+            timer = gr.Timer(5)
+            timer.tick(
+                update_scan_status,
+                inputs=[plans_path_state],
+                outputs=status_df,
             )
 
     return interface
