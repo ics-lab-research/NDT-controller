@@ -215,7 +215,6 @@ def create_experiments_tab(
             with gr.Row():
                 save_button = gr.Button("Save Changes")
                 reload_button = gr.Button("Reload Plans")
-                approve_button = gr.Button("Approve and Start Scan")
             dropdown.change(
                 lambda filename, current_plans: _update_experiment_details(
                     current_plans, filename
@@ -241,6 +240,7 @@ def create_experiments_tab(
                 value=[[f, s] for f, s in zip(filenames, statuses)],
                 interactive=False,
             )
+            approve_button = gr.Button("Approve and Start Scan")
             timer = gr.Timer(5)
             timer.tick(
                 update_scan_status,
