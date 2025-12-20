@@ -71,7 +71,9 @@ def load_experiment_plans(filepath: Path) -> List[ExperimentPlan]:
                     filename=plan_data["experiment"],
                     experiment=tools,
                     status=ExperimentStatus(
-                        plan_data.get("status", ExperimentStatus.NOT_APPROVED.value)
+                        plan_data.get(
+                            "status", ExperimentStatus.NOT_APPROVED.value
+                        )
                     ),
                 )
             )
