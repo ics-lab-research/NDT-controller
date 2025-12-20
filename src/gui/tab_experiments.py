@@ -228,6 +228,35 @@ def reload_plans(
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
 
 
+def start_execution(
+    plans: List[ExperimentPlan], plans_path: Path | None, current_chatbot
+) -> Tuple[gr.Dataframe, gr.Chatbot]:
+    if not plans_path:
+        return gr.Dataframe(value=[]), current_chatbot + [{"role": "assistant", "content": "Error: Plans path not configured"}]
+    approved_plans = [p for p in plans if p.status == ExperimentStatus.APPROVED]
+    if not approved_plans:
+        return update_scan_status(plans_path), current_chatbot + [{"role": "assistant", "content": "No approved plans to start"}]
+    # Set to PENDING
+    for plan in approved_plans:
+        plan.status = ExperimentStatus.PENDING
+    try:
+        save_experiment_plans(plans, plans_path)
+    except Exception as e:
+        error_msg = f"Error saving plans: {e}"
+        logger.error(error_msg)
+        return update_scan_status(plans_path), current_chatbot + [{"role": "assistant", "content": error_msg}]
+    # Execute each plan
+    for plan in approved_plans:
+        current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Running plan {plan.filename}"}]
+        try:
+            execute_multiple_plans([plan])
+            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Plan {plan.filename} done"}]
+        except Exception as e:
+            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Error running plan {plan.filename}: {e}"}]
+    # Update status_df
+    return update_scan_status(plans_path), current_chatbot
+
+
 def create_experiments_tab(
     project_manager: ProjectManager,
     chatbot: gr.Chatbot,
@@ -304,16 +333,7 @@ def create_experiments_tab(
             )
 
             start_button.click(
-                lambda plans, plans_path, current_chatbot: (
-                    start_all_approved_plans(plans, plans_path),
-                    current_chatbot
-                    + [
-                        {
-                            "role": "assistant",
-                            "content": "All approved plans started",
-                        }
-                    ],
-                ),
+                start_execution,
                 inputs=[plans_state, plans_path_state, chatbot],
                 outputs=[status_df, chatbot],
             )
