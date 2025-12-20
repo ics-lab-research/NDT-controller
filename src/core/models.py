@@ -27,7 +27,7 @@ class ExperimentStatus(Enum):
     NOT_APPROVED = "❌ Not Approved"
     APPROVED = "✅ Approved"
     PENDING = "⏳ Pending"
-    SCANNING = "🔍 Scanning"
+    SCANNING = "⚡ Scanning"
     COMPLETED = "✅ Completed"
     ERROR = "❌ Error"
 
