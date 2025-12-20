@@ -60,7 +60,6 @@ def approve_all_plans(
             plan.status = ExperimentStatus.APPROVED
     try:
         save_experiment_plans(plans, plans_path)
-        gr.Info("All plans approved")
     except Exception as e:
         error_msg = f"Error saving plans: {e}"
         logger.error(error_msg)
@@ -271,9 +270,12 @@ def create_experiments_tab(
 
             # link to logic
             approve_button.click(
-                approve_all_plans,
-                inputs=[plans_state, plans_path_state],
-                outputs=[status_df],
+                lambda plans, plans_path, current_chatbot: (
+                    approve_all_plans(plans, plans_path),
+                    current_chatbot + [{"role": "assistant", "content": "All plans approved"}]
+                ),
+                inputs=[plans_state, plans_path_state, chatbot],
+                outputs=[status_df, chatbot],
             )
 
             timer = gr.Timer(5)
