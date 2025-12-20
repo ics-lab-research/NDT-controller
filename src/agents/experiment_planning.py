@@ -37,7 +37,9 @@ def save_experiment_plans(
         return {"success": False, "error": str(e)}
 
 
-def load_experiment_plans(filepath: Path, log: bool = False) -> List[ExperimentPlan]:
+def load_experiment_plans(
+    filepath: Path, log: bool = False
+) -> List[ExperimentPlan]:
     """Load experiment plans from a JSON file."""
     if log:
         logger.info(f"Loading experiment plans from {filepath}")
