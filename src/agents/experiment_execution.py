@@ -4,6 +4,7 @@ from typing import List
 
 from loguru import logger
 
+from ..agents.experiment_planning import save_experiment_plans
 from ..baml_client.types import (
     ConnectToViTool,
     ExpType,
@@ -165,6 +166,10 @@ def execute_single_plan(
     for tool in plan.experiment:
         result = execute_tool(tool, project_manager)
         if not result.success:
+            plan.status = ExperimentStatus.ERROR
+            metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+            if isinstance(metadata, ExperimentsMetadata):
+                save_experiment_plans([plan], metadata.plans_path)
             return ExperimentExecutionError(
                 filename=plan.filename, error_message=result.error
             )
