@@ -22,6 +22,7 @@ from ..baml_client.types import (
 )
 from ..core.models import (
     ExperimentPlan,
+    ExperimentStatus,
     ExperimentsMetadata,
     ExperimentTool,
     Mode,
@@ -46,6 +47,27 @@ def _get_experiment_statuses(
     plans: List[ExperimentPlan],
 ) -> List[str]:
     return [plan.status.value for plan in plans]
+
+
+def approve_all_plans(
+    plans: List[ExperimentPlan], plans_path: Path | None
+) -> gr.Dataframe:
+    if not plans_path:
+        gr.Info("Error: Plans path not configured")
+        return gr.Dataframe(value=[])
+    for plan in plans:
+        if plan.status == ExperimentStatus.NOT_APPROVED:
+            plan.status = ExperimentStatus.APPROVED
+    try:
+        save_experiment_plans(plans, plans_path)
+        gr.Info("All plans approved")
+    except Exception as e:
+        error_msg = f"Error saving plans: {e}"
+        logger.error(error_msg)
+        gr.Info(error_msg)
+    filenames = [plan.filename for plan in plans]
+    statuses = _get_experiment_statuses(plans)
+    return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
@@ -249,9 +271,9 @@ def create_experiments_tab(
 
             # link to logic
             approve_button.click(
-                lambda h: h + [{"role": "assistant", "content": "Hello"}],
-                inputs=[chatbot],
-                outputs=[chatbot],
+                approve_all_plans,
+                inputs=[plans_state, plans_path_state],
+                outputs=[status_df],
             )
 
             timer = gr.Timer(5)
