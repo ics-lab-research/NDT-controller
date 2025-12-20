@@ -95,6 +95,7 @@ def create_main_interface() -> gr.Blocks:
                     # Sidebar with tabs (hidden by default)
                     sidebar_column = create_sidebar(
                         project_manager,
+                        chatbot,
                     )
                     sidebar_column.visible = False
 
