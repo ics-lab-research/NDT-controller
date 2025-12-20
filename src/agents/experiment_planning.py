@@ -5,7 +5,7 @@ from typing import Dict, List, Union
 from loguru import logger
 
 from ..baml_client import types as baml_types
-from ..core.models import ExperimentPlan, ExperimentStatus
+from ..core.models import ExperimentPlan
 
 
 def save_experiment_plans(
@@ -22,7 +22,7 @@ def save_experiment_plans(
                     {"type": type(tool).__name__, **tool.__dict__}
                     for tool in plan.experiment
                 ],
-                "status": ExperimentStatus.NOT_APPROVED.value,
+                "status": plan.status,
             }
             for plan in plans
         ]
