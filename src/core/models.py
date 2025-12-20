@@ -25,10 +25,11 @@ class ExperimentExecutionError:
 
 class ExperimentStatus(Enum):
     PENDING = "⏳ Pending"
+    APPROVED = "✅ Approved"
+    NOT_APPROVED = "❌ Not Approved"
     SCANNING = "🔍 Scanning"
     COMPLETED = "✅ Completed"
     ERROR = "❌ Error"
-    IDLE = "🟢 Idle"
 
 
 # Type alias for experiment tools
