@@ -24,9 +24,9 @@ class ExperimentExecutionError:
 
 
 class ExperimentStatus(Enum):
-    PENDING = "⏳ Pending"
-    APPROVED = "✅ Approved"
     NOT_APPROVED = "❌ Not Approved"
+    APPROVED = "✅ Approved"
+    PENDING = "⏳ Pending"
     SCANNING = "🔍 Scanning"
     COMPLETED = "✅ Completed"
     ERROR = "❌ Error"
