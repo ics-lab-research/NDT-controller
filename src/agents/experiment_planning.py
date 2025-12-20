@@ -37,18 +37,21 @@ def save_experiment_plans(
         return {"success": False, "error": str(e)}
 
 
-def load_experiment_plans(filepath: Path) -> List[ExperimentPlan]:
+def load_experiment_plans(filepath: Path, log: bool = False) -> List[ExperimentPlan]:
     """Load experiment plans from a JSON file."""
-    logger.info(f"Loading experiment plans from {filepath}")
+    if log:
+        logger.info(f"Loading experiment plans from {filepath}")
     if not filepath.exists():
-        logger.warning(f"Experiment plans file {filepath} does not exist")
+        if log:
+            logger.warning(f"Experiment plans file {filepath} does not exist")
         return []
     try:
         with filepath.open("r") as f:
             plans_data = json.load(f)
-        logger.info(
-            f"Successfully loaded {len(plans_data)} experiment plans from {filepath}"
-        )
+        if log:
+            logger.info(
+                f"Successfully loaded {len(plans_data)} experiment plans from {filepath}"
+            )
         plans = []
         for plan_data in plans_data:
             tools = []
@@ -60,9 +63,10 @@ def load_experiment_plans(filepath: Path) -> List[ExperimentPlan]:
                         tool = tool_class(**tool_dict)
                         tools.append(tool)
                     except Exception as e:
-                        logger.warning(
-                            f"Failed to instantiate {type_name}: {e}"
-                        )
+                        if log:
+                            logger.warning(
+                                f"Failed to instantiate {type_name}: {e}"
+                            )
                         tools.append("unknown")
                 else:
                     tools.append("unknown")

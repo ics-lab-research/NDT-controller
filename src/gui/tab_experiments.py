@@ -36,7 +36,7 @@ def update_scan_status(
     if not plans_path:
         return gr.Dataframe(value=[])
     try:
-        plans = load_experiment_plans(plans_path)
+        plans = load_experiment_plans(plans_path, log=log)
         filenames = [plan.filename for plan in plans]
         statuses = _get_experiment_statuses(plans)
         return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
@@ -210,7 +210,7 @@ def reload_plans(
         gr.Info("Error: Plans path not configured")
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
     try:
-        plans = load_experiment_plans(plans_path)
+        plans = load_experiment_plans(plans_path, log=True)
         filenames = [plan.filename for plan in plans]
         initial_data = convert_plan_to_table_data(plans[0]) if plans else []
         gr.Info("Successfully reloaded experiment plans")
@@ -238,7 +238,7 @@ def create_experiments_tab(
     if isinstance(metadata, ExperimentsMetadata):
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
-            plans = load_experiment_plans(plans_path)
+            plans = load_experiment_plans(plans_path, log=True)
     filenames = [plan.filename for plan in plans]
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []
     plans_state = gr.State(plans)
