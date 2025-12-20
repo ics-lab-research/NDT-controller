@@ -5,6 +5,7 @@ import gradio as gr
 import pandas as pd
 from loguru import logger
 
+from ..agents.experiment_execution import execute_multiple_plans
 from ..agents.experiment_planning import (
     load_experiment_plans,
     save_experiment_plans,
@@ -241,12 +242,18 @@ def create_experiments_tab(
                 value=[[f, s] for f, s in zip(filenames, statuses)],
                 interactive=False,
             )
-            approve_button = gr.Button("Approve and Start Scan")
+
+            with gr.Row():
+                approve_button = gr.Button("Approve all plans")
+                start_button = gr.Button("Start scan")
+
+            # link to logic
             approve_button.click(
                 lambda h: h + [{"role": "assistant", "content": "Hello"}],
                 inputs=[chatbot],
                 outputs=[chatbot],
             )
+
             timer = gr.Timer(5)
             timer.tick(
                 update_scan_status,
