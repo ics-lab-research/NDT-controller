@@ -63,7 +63,7 @@ def process_single_experiment(
 ) -> Generator[AgentResponse, None, ExperimentPlan | Error]:
     """Process a single experiment through planning and execution."""
     yield AgentResponse(
-        status=f"Generating abstract plan for {experiment.filename}"
+        status=f"Generating abstract plan for `{experiment.filename}`"
     )
     logger.debug(
         f"Calling ExpPlanner with experiment: {experiment}, experiment_state: {project_manager.experiment_state}"
