@@ -22,7 +22,6 @@ from ..baml_client.types import (
 from ..core.models import (
     ExperimentPlan,
     ExperimentsMetadata,
-    ExperimentStatus,
     ExperimentTool,
     Mode,
 )
