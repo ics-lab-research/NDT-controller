@@ -177,18 +177,21 @@ def execute_multiple_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
 ) -> ExperimentExecutionError | None:
     """Execute multiple experiment plans with system reinitialization after each plan."""
+    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     for plan in plans:
         if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):
             plan.status = ExperimentStatus.SCANNING
+            if isinstance(metadata, ExperimentsMetadata):
+                save_experiment_plans(plans, metadata.plans_path)
             error = execute_single_plan(plan, project_manager)
             if error:
-                metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
                 if isinstance(metadata, ExperimentsMetadata):
                     save_experiment_plans(plans, metadata.plans_path)
                 return error
             plan.status = ExperimentStatus.COMPLETED
+            if isinstance(metadata, ExperimentsMetadata):
+                save_experiment_plans(plans, metadata.plans_path)
             time.sleep(HARDWARE_SETTLE_DELAY)
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     if isinstance(metadata, ExperimentsMetadata):
         save_experiment_plans(plans, metadata.plans_path)
     return None
