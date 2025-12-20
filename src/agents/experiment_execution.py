@@ -167,9 +167,6 @@ def execute_single_plan(
         result = execute_tool(tool, project_manager)
         if not result.success:
             plan.status = ExperimentStatus.ERROR
-            metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
-            if isinstance(metadata, ExperimentsMetadata):
-                save_experiment_plans([plan], metadata.plans_path)
             return ExperimentExecutionError(
                 filename=plan.filename, error_message=result.error
             )
@@ -184,6 +181,12 @@ def execute_multiple_plans(
         if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):
             error = execute_single_plan(plan, project_manager)
             if error:
+                metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+                if isinstance(metadata, ExperimentsMetadata):
+                    save_experiment_plans(plans, metadata.plans_path)
                 return error
             time.sleep(HARDWARE_SETTLE_DELAY)
+    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+    if isinstance(metadata, ExperimentsMetadata):
+        save_experiment_plans(plans, metadata.plans_path)
     return None
