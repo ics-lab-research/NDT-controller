@@ -18,7 +18,7 @@ from ..baml_client.types import (
 
 
 @dataclass
-class ExperimentExecutionError:
+class ExperimentExecutionError(Exception):
     filename: str
     error_message: str | None
 
