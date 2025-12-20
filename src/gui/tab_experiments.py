@@ -229,7 +229,7 @@ def reload_plans(
 
 
 def start_execution(
-    plans: List[ExperimentPlan], plans_path: Path | None, current_chatbot
+    plans: List[ExperimentPlan], plans_path: Path | None, current_chatbot, project_manager: ProjectManager
 ) -> Tuple[gr.Dataframe, gr.Chatbot]:
     if not plans_path:
         return gr.Dataframe(value=[]), current_chatbot + [{"role": "assistant", "content": "Error: Plans path not configured"}]
@@ -247,12 +247,12 @@ def start_execution(
         return update_scan_status(plans_path), current_chatbot + [{"role": "assistant", "content": error_msg}]
     # Execute each plan
     for plan in approved_plans:
-        current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Running plan {plan.filename}"}]
+        current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Running plan `{plan.filename}`"}]
         try:
             execute_multiple_plans([plan])
-            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Plan {plan.filename} done"}]
+            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Plan `{plan.filename}` done"}]
         except Exception as e:
-            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Error running plan {plan.filename}: {e}"}]
+            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Error running plan `{plan.filename}`: {e}"}]
     # Update status_df
     return update_scan_status(plans_path), current_chatbot
 
@@ -334,7 +334,7 @@ def create_experiments_tab(
 
             start_button.click(
                 start_execution,
-                inputs=[plans_state, plans_path_state, chatbot],
+                inputs=[plans_state, plans_path_state, chatbot, project_manager],
                 outputs=[status_df, chatbot],
             )
 
