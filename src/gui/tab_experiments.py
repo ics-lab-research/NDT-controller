@@ -273,7 +273,7 @@ def start_execution(
     try:
         for msg in execute_multiple_plans(plans, project_manager):
             current_chatbot = current_chatbot + [
-                {"role": "assistant", "content": msg}
+                {"role": "assistant", "content": str(msg)}
             ]
             yield update_scan_status(plans_path), current_chatbot
     except ExperimentExecutionError as e:
