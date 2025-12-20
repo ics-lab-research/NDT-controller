@@ -22,6 +22,7 @@ from ..core.models import (
     ExperimentExecutionError,
     ExperimentPlan,
     ExperimentsMetadata,
+    ExperimentStatus,
     ExperimentTool,
     Mode,
 )
@@ -175,8 +176,9 @@ def execute_multiple_plans(
 ) -> ExperimentExecutionError | None:
     """Execute multiple experiment plans with system reinitialization after each plan."""
     for plan in plans:
-        error = execute_single_plan(plan, project_manager)
-        if error:
-            return error
-        time.sleep(HARDWARE_SETTLE_DELAY)
+        if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):
+            error = execute_single_plan(plan, project_manager)
+            if error:
+                return error
+            time.sleep(HARDWARE_SETTLE_DELAY)
     return None
