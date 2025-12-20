@@ -308,6 +308,7 @@ def create_experiments_tab(
     statuses = _get_experiment_statuses(plans)
     plans_path_state = gr.State(plans_path)
     log_state = gr.State(False)
+    project_manager_state = gr.State(project_manager)
 
     with gr.Tabs() as interface:
         with gr.TabItem("Plans Viewer"):
@@ -371,7 +372,7 @@ def create_experiments_tab(
                     plans_state,
                     plans_path_state,
                     chatbot,
-                    project_manager,
+                    project_manager_state,
                 ],
                 outputs=[status_df, chatbot],
             )
