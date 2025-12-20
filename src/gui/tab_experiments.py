@@ -30,7 +30,9 @@ from ..core.models import (
 from ..core.project_manager import ProjectManager
 
 
-def update_scan_status(plans_path: Path | None, log: bool = False) -> gr.Dataframe:
+def update_scan_status(
+    plans_path: Path | None, log: bool = False
+) -> gr.Dataframe:
     if not plans_path:
         return gr.Dataframe(value=[])
     try:
