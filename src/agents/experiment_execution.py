@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 from loguru import logger
 
@@ -175,23 +175,28 @@ def execute_single_plan(
 
 def execute_multiple_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
-) -> ExperimentExecutionError | None:
+) -> Tuple[ExperimentExecutionError | None, List[str]]:
     """Execute multiple experiment plans with system reinitialization after each plan."""
+    messages = []
+    messages.append("Starting execution of approved plans")
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     for plan in plans:
         if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):
+            messages.append(f"Executing plan: {plan.filename}")
             plan.status = ExperimentStatus.SCANNING
             if isinstance(metadata, ExperimentsMetadata):
                 save_experiment_plans(plans, metadata.plans_path)
             error = execute_single_plan(plan, project_manager)
             if error:
+                messages.append(f"Plan {plan.filename} errored: {error.error_message}")
                 if isinstance(metadata, ExperimentsMetadata):
                     save_experiment_plans(plans, metadata.plans_path)
-                return error
+                return error, messages
+            messages.append(f"Plan {plan.filename} completed")
             plan.status = ExperimentStatus.COMPLETED
             if isinstance(metadata, ExperimentsMetadata):
                 save_experiment_plans(plans, metadata.plans_path)
             time.sleep(HARDWARE_SETTLE_DELAY)
     if isinstance(metadata, ExperimentsMetadata):
         save_experiment_plans(plans, metadata.plans_path)
-    return None
+    return None, messages

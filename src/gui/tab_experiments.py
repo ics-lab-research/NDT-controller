@@ -246,9 +246,10 @@ def start_execution(
         logger.error(error_msg)
         return update_scan_status(plans_path), current_chatbot + [{"role": "assistant", "content": error_msg}]
     # Execute all plans
-    current_chatbot = current_chatbot + [{"role": "assistant", "content": "Starting execution of approved plans"}]
     try:
-        error = execute_multiple_plans(plans, project_manager)
+        error, messages = execute_multiple_plans(plans, project_manager)
+        for msg in messages:
+            current_chatbot = current_chatbot + [{"role": "assistant", "content": msg}]
         if error:
             current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Execution error: {error.error_message}"}]
         else:
