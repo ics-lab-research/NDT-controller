@@ -245,14 +245,16 @@ def start_execution(
         error_msg = f"Error saving plans: {e}"
         logger.error(error_msg)
         return update_scan_status(plans_path), current_chatbot + [{"role": "assistant", "content": error_msg}]
-    # Execute each plan
-    for plan in approved_plans:
-        current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Running plan `{plan.filename}`"}]
-        try:
-            execute_multiple_plans([plan])
-            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Plan `{plan.filename}` done"}]
-        except Exception as e:
-            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Error running plan `{plan.filename}`: {e}"}]
+    # Execute all plans
+    current_chatbot = current_chatbot + [{"role": "assistant", "content": "Starting execution of approved plans"}]
+    try:
+        error = execute_multiple_plans(plans, project_manager)
+        if error:
+            current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Execution error: {error.error_message}"}]
+        else:
+            current_chatbot = current_chatbot + [{"role": "assistant", "content": "Execution completed"}]
+    except Exception as e:
+        current_chatbot = current_chatbot + [{"role": "assistant", "content": f"Error during execution: {e}"}]
     # Update status_df
     return update_scan_status(plans_path), current_chatbot
 
