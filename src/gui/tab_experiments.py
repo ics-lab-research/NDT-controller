@@ -5,7 +5,7 @@ import gradio as gr
 import pandas as pd
 from loguru import logger
 
-# from ..agents.experiment_execution import execute_multiple_plans
+from ..agents.experiment_execution import execute_multiple_plans
 from ..agents.experiment_planning import (
     load_experiment_plans,
     save_experiment_plans,
