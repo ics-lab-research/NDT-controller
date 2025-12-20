@@ -30,7 +30,7 @@ from ..core.models import (
 from ..core.project_manager import ProjectManager
 
 
-def update_scan_status(plans_path: Path | None) -> gr.Dataframe:
+def update_scan_status(plans_path: Path | None, log: bool = False) -> gr.Dataframe:
     if not plans_path:
         return gr.Dataframe(value=[])
     try:
@@ -39,7 +39,8 @@ def update_scan_status(plans_path: Path | None) -> gr.Dataframe:
         statuses = _get_experiment_statuses(plans)
         return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
     except Exception as e:
-        logger.error(f"Error updating scan status: {e}")
+        if log:
+            logger.error(f"Error updating scan status: {e}")
         return gr.Dataframe(value=[])
 
 
@@ -242,6 +243,7 @@ def create_experiments_tab(
     statuses = _get_experiment_statuses(plans)
     status_state = gr.State(statuses)
     plans_path_state = gr.State(plans_path)
+    log_state = gr.State(False)
 
     with gr.Tabs() as interface:
         with gr.TabItem("Plans Viewer"):
@@ -317,7 +319,7 @@ def create_experiments_tab(
             timer = gr.Timer(5)
             timer.tick(
                 update_scan_status,
-                inputs=[plans_path_state],
+                inputs=[plans_path_state, log_state],
                 outputs=status_df,
             )
 
