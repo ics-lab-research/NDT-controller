@@ -1,14 +1,9 @@
-import platform
 import re
 import time
 from pathlib import Path
 from typing import Any, Dict
 
 from loguru import logger
-
-if platform.system() != "Windows":
-    raise ImportError("windows_dialog_handler is only supported on Windows")
-
 from pywinauto.keyboard import send_keys  # type: ignore
 from pywinauto import Desktop  # type: ignore
 import win32api
