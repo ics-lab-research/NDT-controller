@@ -128,6 +128,8 @@ def _set_filename_uia(dlg: Any, filename: str) -> None:
 
 def _click_ok_uia(dlg: Any, ok_button_regex: str) -> None:
     """Click the OK/Save button in UIA dialog."""
+    if send_keys is None:
+        raise RuntimeError("send_keys not available")
     btn = None
     for b in dlg.descendants(control_type="Button"):
         name = (b.window_text() or "").strip()
