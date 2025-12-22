@@ -52,6 +52,20 @@ def respond_stream(
             )
             yield history, ""
 
+        if (
+            agent_response.intermediate_step
+            and agent_response.intermediate_step.strip()
+        ):
+            # Append status message
+            history.append(
+                {
+                    "role": "assistant",
+                    "content": agent_response.intermediate_step,
+                    "metadata": {"title": "Intermediate step"},
+                },
+            )
+            yield history, ""
+
         if agent_response.action and agent_response.action.strip():
             # Append action message
             history.append(
