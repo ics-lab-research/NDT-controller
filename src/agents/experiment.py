@@ -24,7 +24,7 @@ from .experiment_planning import save_experiment_plans
 def yield_error(error: Error) -> Generator[AgentResponse, None, None]:
     """Yield an error response."""
     logger.error(f"Error: {error.error}")
-    yield AgentResponse(response=f"ERROR: {error.error}")
+    yield AgentResponse(status=f"ERROR: {error.error}")
 
 
 def get_experiments_metadata(
@@ -64,7 +64,7 @@ def process_single_experiment(
 ) -> Generator[AgentResponse, None, ExperimentPlan | Error]:
     """Process a single experiment through planning and execution."""
     yield AgentResponse(
-        status=f"Generating abstract plan for `{experiment.filename}`"
+        intermediate_step=f"Generating abstract plan for `{experiment.filename}`"
     )
     logger.debug(
         f"Calling ExpPlanner with experiment: {experiment}, experiment_state: {project_manager.experiment_state}"
@@ -76,7 +76,7 @@ def process_single_experiment(
         return plan
 
     yield AgentResponse(
-        status=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
+        intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
     )
     logger.debug(
         f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
@@ -96,7 +96,7 @@ def handle_single_scan(
 ) -> Generator[AgentResponse, None, None]:
     """Handle single scan experiment workflow."""
     if orchestrator_output.number_of_scans != 1:
-        yield AgentResponse(response="ERROR: Number of scan is not 1")
+        yield AgentResponse(status="ERROR: Number of scan is not 1")
         return
 
     experiment = orchestrator_output.experiments[0]
@@ -117,7 +117,7 @@ def handle_multiple_scan(
 ) -> Generator[AgentResponse, None, None]:
     """Handle multiple scan experiments workflow."""
     yield AgentResponse(
-        status=f"Number of scans is {orchestrator_output.number_of_scans}, generating abstract plans for each experiment."
+        intermediate_step=f"Number of scans is {orchestrator_output.number_of_scans}, generating abstract plans for each experiment."
     )
     logger.debug(
         f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_output.experiments]}"
@@ -134,7 +134,7 @@ def handle_multiple_scan(
             continue
 
         yield AgentResponse(
-            status=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {plan}"
+            intermediate_step=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {plan}"
         )
         logger.debug(
             f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
@@ -155,7 +155,7 @@ def handle_multiple_scan(
     if plans_to_save:
         yield from save_plans(plans_to_save, project_manager)
     else:
-        yield AgentResponse(response="No plans generated.")
+        yield AgentResponse(status="No plans generated.")
 
 
 def orchestrate_experiments(
@@ -163,7 +163,7 @@ def orchestrate_experiments(
 ) -> Generator[AgentResponse, None, None]:
     """Orchestrate experiment workflow based on action type."""
     yield AgentResponse(
-        status=f"Calling ExpOrchestrator with message: `{reformatted_message}`"
+        intermediate_step=f"Calling ExpOrchestrator with message: `{reformatted_message}`"
     )
     logger.debug(
         f"Calling ExpOrchestrator with reformatted_message: '{reformatted_message}'"
@@ -204,9 +204,9 @@ def handle_experiment_mode(
         return
 
     if router_response.action == ExpAction.SINGLE_SCAN:
-        yield AgentResponse(status="Performing single scan.")
+        yield AgentResponse(intermediate_step="Performing single scan.")
     elif router_response.action == ExpAction.MULTIPLE_SCAN:
-        yield AgentResponse(status="Performing multiple scan.")
+        yield AgentResponse(intermediate_step="Performing multiple scan.")
 
     if router_response.reformatted_message:
         yield from orchestrate_experiments(

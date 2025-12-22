@@ -121,6 +121,7 @@ class AgentResponse:
     """Unified response structure for all agents."""
 
     response: str | None = None
+    intermediate_step: str | None = None
     status: str | None = None
     action: str | None = None
 

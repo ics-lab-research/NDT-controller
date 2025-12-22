@@ -91,6 +91,20 @@ class BamlSyncClient:
     def parse_stream(self):
       return self.__llm_stream_parser
 
+    def ExpBasicExecutor(self, plan: str,filename: typing.Optional[str] = None,
+        baml_options: BamlCallOptions = {},
+    ) -> typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"]:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            __stream__ = self.stream.ExpBasicExecutor(plan=plan,filename=filename,
+                baml_options=baml_options)
+            return __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="ExpBasicExecutor", args={
+                "plan": plan,"filename": filename,
+            })
+            return typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"], __result__.cast_to(types, types, stream_types, False, __runtime__))
     def ExpExecutor(self, plan: str,filename: typing.Optional[str] = None,
         baml_options: BamlCallOptions = {},
     ) -> typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"]:
@@ -156,6 +170,18 @@ class BamlStreamClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    def ExpBasicExecutor(self, plan: str,filename: typing.Optional[str] = None,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlSyncStream[typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.Error"], typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"]]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="ExpBasicExecutor", args={
+            "plan": plan,"filename": filename,
+        })
+        return baml_py.BamlSyncStream[typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.Error"], typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"]](
+          __result__,
+          lambda x: typing.cast(typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.Error"], x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"], x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
     def ExpExecutor(self, plan: str,filename: typing.Optional[str] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlSyncStream[typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.Error"], typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.Error"]]:
@@ -212,6 +238,13 @@ class BamlHttpRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    def ExpBasicExecutor(self, plan: str,filename: typing.Optional[str] = None,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpBasicExecutor", args={
+            "plan": plan,"filename": filename,
+        }, mode="request")
+        return __result__
     def ExpExecutor(self, plan: str,filename: typing.Optional[str] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
@@ -248,6 +281,13 @@ class BamlHttpStreamRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    def ExpBasicExecutor(self, plan: str,filename: typing.Optional[str] = None,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpBasicExecutor", args={
+            "plan": plan,"filename": filename,
+        }, mode="stream")
+        return __result__
     def ExpExecutor(self, plan: str,filename: typing.Optional[str] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
@@ -278,4 +318,4 @@ class BamlHttpStreamRequestClient:
         return __result__
     
 
-b = BamlSyncClient(DoNotUseDirectlyCallManager({}))
+b = BamlSyncClient(DoNotUseDirectlyCallManager({}))
