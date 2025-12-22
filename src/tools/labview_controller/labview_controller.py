@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Union
 
 try:
-    import win32com.client
+    import win32com.client  # type: ignore
 except ImportError:
     win32com = None
 

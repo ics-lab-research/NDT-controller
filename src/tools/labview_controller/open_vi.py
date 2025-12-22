@@ -8,7 +8,7 @@ import sys
 from loguru import logger
 
 try:
-    import win32com.client
+    import win32com.client  # type: ignore
 except ImportError:
     win32com = None
 
@@ -16,17 +16,17 @@ except ImportError:
 def parse_arguments():
     """Parse command line arguments to determine if the VI should be run and get the VI path."""
     run_vi = "--no-run" not in sys.argv
-    
+
     # Find the VI path (skip the script name and any flags)
     vi_path = None
     for arg in sys.argv[1:]:  # Skip script name
-        if not arg.startswith('-'):  # First non-flag argument is the VI path
+        if not arg.startswith("-"):  # First non-flag argument is the VI path
             vi_path = arg
             break
-    
+
     if vi_path is None:
         raise ValueError("VI path must be provided as a command line argument.")
-    
+
     return run_vi, vi_path
 
 

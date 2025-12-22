@@ -326,7 +326,6 @@ def handle_save_file_dialog(
         )
     try:
         filename = _ensure_tdms_extension(filename)
-        full_path = str(Path(save_directory) / filename)
 
         # Try UIA first
         if uia_available:
