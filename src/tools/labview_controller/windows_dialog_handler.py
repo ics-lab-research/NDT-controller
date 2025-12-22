@@ -12,6 +12,8 @@ try:
 
     uia_available = True
 except ImportError:
+    send_keys = None
+    Desktop = None
     uia_available = False
 
 try:
@@ -22,6 +24,10 @@ try:
 
     win32_available = True
 except ImportError:
+    win32api = None
+    win32clipboard = None
+    win32con = None
+    win32gui = None
     win32_available = False
 
 
