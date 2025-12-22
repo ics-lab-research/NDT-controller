@@ -78,7 +78,7 @@ class RunOpenViTool(BaseModel):
 class SelectComboBoxTool(BaseModel):
     tool_name: typing.Optional[typing_extensions.Literal['select_combo_box']] = None
     combo_box_name: typing.Optional[str] = None
-    item: typing.Optional[str] = None
+    index: typing.Optional[int] = None
 
 class SelectTabTool(BaseModel):
     tool_name: typing.Optional[typing_extensions.Literal['select_tab']] = None

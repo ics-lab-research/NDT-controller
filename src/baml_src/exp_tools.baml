@@ -33,7 +33,7 @@ class RunOpenViTool {
 class SelectComboBoxTool {
     tool_name "select_combo_box" @description("Use this tool to select an item from a combo box control on the VI front panel")
     combo_box_name string @description("Name of the combo box control")
-    item string @description("Item to select from the combo box")
+    index int @description("Index of the item to select from the combo box")
 }
 
 class SelectTabTool {

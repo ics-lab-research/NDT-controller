@@ -28,39 +28,41 @@ GRID SCAN BEHAVIOR:
 
 OUTPUT FORMAT:
 PLAN {{ experiment.id }}:
-  1. move [axis] [direction] (distance [value] mm)
+  1. configure signal (frequency=[value], amplitude=[value], offset=[value], etc.)
+  2. move [axis] [direction] (distance [value] mm)  # move from (current) to (new position)
   ...
-  N. configure signal (frequency=[value], amplitude=[value], offset=[value], etc.)
-  N+1. execute grid scan ([N]x[M])
-  N+2. move X [direction] (distance [value] mm)  # return to target X
-  N+3. move Y [direction] (distance [value] mm)  # return to target Y
+  N. execute grid scan ([N]x[M])  # scan from (X, Y, Z) to (X+N, Y+M, Z)
+  N+1. move X [direction] (distance [value] mm)  # return from (scan_end) to (home X, scan_end Y, scan_end Z)
+  N+2. move Y [direction] (distance [value] mm)  # return from (home X, scan_end Y, scan_end Z) to (home X, home Y, scan_end Z)
+  N+3. move Z [direction] (distance [value] mm)  # return from (home X, home Y, scan_end Z) to (home)
 
 DETAILED INSTRUCTIONS:
 1. Add signal configuration command with the exact parameters provided
 2. Calculate movement deltas: target position minus current position
 3. Generate movement commands in order: X axis first, then Y axis, then Z axis
 4. Omit any movement step where delta equals 0
-5. Add grid scan execution command
+5. Add grid scan execution command with comment showing start and end positions
 6. Calculate scan end position: After NxM grid scan starting at (X, Y, Z), final position is (X+N, Y+M, Z)
-7. Generate return movement commands to reach target position from scan end position
-8. Use movement order X, Y for return (omit Z if unchanged)
-9. Think step-by-step before generating the plan
-10. Only provide a plan if you are confident in all calculations
+7. Generate return movement commands to reach home position from scan end position
+8. Use movement order X, Y, Z for return (omit any axis if already at home coordinate)
+9. Add comments to each movement step showing position transitions
+10. Think step-by-step before generating the plan
+11. Only provide a plan if you are confident in all calculations
 </instructions>
 
 <example>
 EXAMPLE - SUCCESS CASE:
-Input: current=(0, 0, 0), target=(10, -5, 3), signal=(frequency=1200, amplitude=6.0, offset=2.5), grid=2x2
-
+Input: current=(5, 10, -3), target=(10, -5, 3), home=(7, 2, -1), signal=(frequency=1200, amplitude=6.0, offset=2.5), grid=2x2
 Output:
 "PLAN EXP-XXX:
-  1. move X right (distance 10 mm)
-  2. move Y forward (distance 5 mm)
-  3. move Z up (distance 3 mm)
-  4. configure signal (frequency=1200, amplitude=6.0, offset=2.5)
-  5. execute grid scan (2x2)
-  6. move X left (distance 2 mm)  # return from (12, -3, 3) to (10, -3, 3)
-  7. move Y forward (distance 2 mm)  # return from (10, -3, 3) to (10, -5, 3)"
+  1. configure signal (frequency=1200, amplitude=6.0, offset=2.5)
+  2. move X right (distance 5 mm)  # move from (5, 10, -3) to (10, 10, -3)
+  3. move Y forward (distance 15 mm)  # move from (10, 10, -3) to (10, -5, -3)
+  4. move Z up (distance 6 mm)  # move from (10, -5, -3) to (10, -5, 3)
+  5. execute grid scan (2x2)  # scan from (10, -5, 3) to (12, -3, 3)
+  6. move X left (distance 5 mm)  # return from (12, -3, 3) to (7, -3, 3)
+  7. move Y backward (distance 5 mm)  # return from (7, -3, 3) to (7, 2, 3)
+  8. move Z down (distance 4 mm)  # return from (7, 2, 3) to (7, 2, -1)"
 
 EXAMPLE - ERROR CASES:
 Input: current=(unknown), target=(10, -5, 3)
@@ -73,8 +75,7 @@ Output: {"error": "Cannot plan grid scan - scan dimensions are not specified"}
 <critical_reminders>
 - Direction mapping: X negative=left/positive=right, Y negative=forward/positive=backward, Z negative=down/positive=up
 - Grid scan NxM moves from (X, Y, Z) to (X+N, Y+M, Z)
-- For this experiment: 5x5 scan at (10, -20, 15) ends at (15, -15, 15)
-- Return movements must bring position back to exact target (10, -20, 15)
+- After grid scan, return movements must bring position back to home position (0, 0, 0)
 - Think through each calculation step before generating output
 - If you cannot calculate movements or positions confidently, return an error JSON instead of guessing
 - Say "I don't know" via the error schema rather than making uncertain calculations
@@ -124,12 +125,12 @@ test TestBasicMovementFromOrigin {
       current_position {
         x 0
         y 0
-        z 0
+        z 1
       }
       home_position {
         x 0
         y 0
-        z 0
+        z 1
       }
     }
   }

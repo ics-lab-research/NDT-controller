@@ -776,7 +776,7 @@ class SelectComboBoxToolAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
         self._bldr = _tb.class_("SelectComboBoxTool")
-        self._properties: typing.Set[str] = set([  "tool_name",  "combo_box_name",  "item",  ])
+        self._properties: typing.Set[str] = set([  "tool_name",  "combo_box_name",  "index",  ])
         self._props = SelectComboBoxToolProperties(self._bldr, self._properties)
 
     def type(self) -> baml_py.FieldType:
@@ -813,8 +813,8 @@ class SelectComboBoxToolProperties:
         return type_builder.ClassPropertyViewer(self.__bldr.property("combo_box_name"))
     
     @property
-    def item(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("item"))
+    def index(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("index"))
     
     
 
@@ -1182,3 +1182,4 @@ class WaitForOperationCompleteToolProperties:
     
     
 
+

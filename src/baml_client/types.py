@@ -112,7 +112,7 @@ class RunOpenViTool(BaseModel):
 class SelectComboBoxTool(BaseModel):
     tool_name: typing_extensions.Literal['select_combo_box']
     combo_box_name: str
-    item: str
+    index: int
 
 class SelectTabTool(BaseModel):
     tool_name: typing_extensions.Literal['select_tab']

@@ -149,7 +149,7 @@ def execute_tool(
         return tool_handle_save_dialog(save_directory, filename=filename)
     elif isinstance(tool, SelectComboBoxTool):
         return tool_select_combo_box(
-            combo_box_name=tool.combo_box_name, item=tool.item
+            combo_box_name=tool.combo_box_name, index=tool.index
         )
     elif isinstance(tool, WaitForOperationCompleteTool):
         return tool_wait_for_operation_complete(
