@@ -3,21 +3,23 @@ import re
 import time
 from pathlib import Path
 from typing import Any, Dict
-  
+
 from loguru import logger
-  
+
 try:
     from pywinauto.keyboard import send_keys  # type: ignore
     from pywinauto import Desktop  # type: ignore
+
     uia_available = True
 except ImportError:
     uia_available = False
-  
+
 try:
     import win32api
     import win32clipboard
     import win32con
     import win32gui
+
     win32_available = True
 except ImportError:
     win32_available = False
