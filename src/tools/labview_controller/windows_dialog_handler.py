@@ -58,7 +58,7 @@ def _find_uia_dialog(dialog_title_regex: str, timeout_seconds: float) -> Any:
         raise RuntimeError("UIA automation not available")
     deadline = time.time() + timeout_seconds
     while time.time() < deadline:
-        desktop = Desktop(backend="uia")
+        desktop = Desktop(backend="uia")  # type: ignore
         try:
             dlg_candidate = desktop.window(
                 title_re=dialog_title_regex, control_type="Window"
@@ -152,12 +152,12 @@ def _find_win32_dialog(dialog_title_regex: str, timeout_seconds: float) -> int:
         nonlocal target_hwnd
         if target_hwnd is not None:
             return
-        title = win32gui.GetWindowText(hwnd) or ""
+        title = win32gui.GetWindowText(hwnd) or ""  # type: ignore
         if re.search(dialog_title_regex, title):
             target_hwnd = hwnd
 
     while time.time() < deadline and target_hwnd is None:
-        win32gui.EnumWindows(_enum_handler, None)
+        win32gui.EnumWindows(_enum_handler, None)  # type: ignore
         if target_hwnd is None:
             time.sleep(0.2)
     if target_hwnd is None:
@@ -170,30 +170,30 @@ def _navigate_directory_win32(target_hwnd: int, save_directory: str) -> None:
     if win32api is None or win32clipboard is None or win32con is None:
         raise RuntimeError("win32 modules not available")
     try:
-        win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
-        win32api.keybd_event(ord("L"), 0, 0, 0)
-        win32api.keybd_event(ord("L"), 0, win32con.KEYEVENTF_KEYUP, 0)
+        win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # type: ignore
+        win32api.keybd_event(ord("L"), 0, 0, 0)  # type: ignore
+        win32api.keybd_event(ord("L"), 0, win32con.KEYEVENTF_KEYUP, 0)  # type: ignore
         win32api.keybd_event(
             win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0
-        )
+        )  # type: ignore
         time.sleep(0.3)
 
         try:
-            win32clipboard.OpenClipboard()
-            win32clipboard.EmptyClipboard()
+            win32clipboard.OpenClipboard()  # type: ignore
+            win32clipboard.EmptyClipboard()  # type: ignore
             win32clipboard.SetClipboardText(save_directory)  # type: ignore
         finally:
-            win32clipboard.CloseClipboard()
+            win32clipboard.CloseClipboard()  # type: ignore
 
-        win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
-        win32api.keybd_event(ord("V"), 0, 0, 0)
-        win32api.keybd_event(ord("V"), 0, win32con.KEYEVENTF_KEYUP, 0)
+        win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # type: ignore
+        win32api.keybd_event(ord("V"), 0, 0, 0)  # type: ignore
+        win32api.keybd_event(ord("V"), 0, win32con.KEYEVENTF_KEYUP, 0)  # type: ignore
         win32api.keybd_event(
             win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0
-        )
+        )  # type: ignore
         time.sleep(0.2)
-        win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-        win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+        win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)  # type: ignore
+        win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)  # type: ignore
         time.sleep(0.8)
     except Exception as nav_error:
         logger.warning(f"Directory navigation failed: {nav_error}")
@@ -204,25 +204,25 @@ def _set_filename_win32(target_hwnd: int, filename: str) -> None:
     if win32clipboard is None or win32api is None or win32con is None:
         raise RuntimeError("win32 modules not available")
     try:
-        win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
+        win32clipboard.OpenClipboard()  # type: ignore
+        win32clipboard.EmptyClipboard()  # type: ignore
         win32clipboard.SetClipboardText(filename)  # type: ignore
     finally:
-        win32clipboard.CloseClipboard()
+        win32clipboard.CloseClipboard()  # type: ignore
 
     try:
-        win32api.keybd_event(win32con.VK_MENU, 0, 0, 0)
-        win32api.keybd_event(ord("N"), 0, 0, 0)
-        win32api.keybd_event(ord("N"), 0, win32con.KEYEVENTF_KEYUP, 0)
-        win32api.keybd_event(win32con.VK_MENU, 0, win32con.KEYEVENTF_KEYUP, 0)
+        win32api.keybd_event(win32con.VK_MENU, 0, 0, 0)  # type: ignore
+        win32api.keybd_event(ord("N"), 0, 0, 0)  # type: ignore
+        win32api.keybd_event(ord("N"), 0, win32con.KEYEVENTF_KEYUP, 0)  # type: ignore
+        win32api.keybd_event(win32con.VK_MENU, 0, win32con.KEYEVENTF_KEYUP, 0)  # type: ignore
         time.sleep(0.3)
 
-        win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
-        win32api.keybd_event(ord("V"), 0, 0, 0)
-        win32api.keybd_event(ord("V"), 0, win32con.KEYEVENTF_KEYUP, 0)
+        win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)  # type: ignore
+        win32api.keybd_event(ord("V"), 0, 0, 0)  # type: ignore
+        win32api.keybd_event(ord("V"), 0, win32con.KEYEVENTF_KEYUP, 0)  # type: ignore
         win32api.keybd_event(
             win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0
-        )
+        )  # type: ignore
         logger.info("Used Alt+N method to set filename")
     except Exception as alt_error:
         logger.warning(f"Alt+N method failed: {alt_error}")
@@ -237,19 +237,19 @@ def _click_ok_win32(target_hwnd: int, ok_button_regex: str) -> None:
     ok_btn = None
     child = 0
     while True:
-        child = win32gui.FindWindowEx(target_hwnd, child, "Button", None)
+        child = win32gui.FindWindowEx(target_hwnd, child, "Button", None)  # type: ignore
         if not child:
             break
-        text = (win32gui.GetWindowText(child) or "").strip()
+        text = (win32gui.GetWindowText(child) or "").strip()  # type: ignore
         if re.match(ok_button_regex, text):
             ok_btn = child
             break
 
     if ok_btn:
-        win32gui.SendMessage(ok_btn, win32con.BM_CLICK, 1, 0)
+        win32gui.SendMessage(ok_btn, win32con.BM_CLICK, 1, 0)  # type: ignore
     else:
-        win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-        win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+        win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)  # type: ignore
+        win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)  # type: ignore
 
 
 def _handle_via_uia(
@@ -284,8 +284,8 @@ def _handle_via_win32(
 ) -> Dict[str, Any]:
     """Handle save dialog using win32 APIs."""
     target_hwnd = _find_win32_dialog(dialog_title_regex, timeout_seconds)
-    win32gui.ShowWindow(target_hwnd, win32con.SW_SHOWNORMAL)
-    win32gui.SetForegroundWindow(target_hwnd)
+    win32gui.ShowWindow(target_hwnd, win32con.SW_SHOWNORMAL)  # type: ignore
+    win32gui.SetForegroundWindow(target_hwnd)  # type: ignore
     time.sleep(settle_delay_seconds)
 
     _navigate_directory_win32(target_hwnd, save_directory)
