@@ -61,7 +61,7 @@ def respond_stream(
                 {
                     "role": "assistant",
                     "content": agent_response.intermediate_step,
-                    "metadata": {"title": "Intermediate step"},
+                    "metadata": {"title": "🔄 Intermediate step"},
                 },
             )
             yield history, ""
