@@ -173,9 +173,9 @@ def tool_get_vi_status() -> ToolResult:
 
 
 def tool_select_combo_box(
-    combo_box_name: str, item: Union[str, int]
+    combo_box_name: str, index: int
 ) -> ToolResult:
-    """Select an item in a combo box control by index or string value."""
+    """Select an item in a combo box control by index."""
     if not controller.vi_reference:
         return ToolResult(
             name="tool_select_combo_box",
@@ -183,13 +183,13 @@ def tool_select_combo_box(
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.select_combo_box(combo_box_name, item):
+    if controller.select_combo_box(combo_box_name, index):
         return ToolResult(
             name="tool_select_combo_box",
             success=True,
             output={
-                "message": f"Combo box '{combo_box_name}' selected to {item}",
-                "selection": str(item),
+                "message": f"Combo box '{combo_box_name}' selected to index {index}",
+                "selection": str(index),
             },
             error=None,
         )

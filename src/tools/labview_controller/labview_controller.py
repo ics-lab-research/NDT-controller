@@ -249,14 +249,14 @@ class LabVIEWController:
             return False
 
     def select_combo_box(
-        self, combo_box_name: str, item: Union[str, int]
+        self, combo_box_name: str, index: int
     ) -> bool:
         """Select an item in a combo box control by index (int) or string value."""
         try:
             if not self.vi_reference:
                 return False
-            self.vi_reference.SetControlValue(combo_box_name, item)
-            logger.debug(f"Selected combo box '{combo_box_name}' to: {item}")
+            self.vi_reference.SetControlValue(combo_box_name, index)
+            logger.debug(f"Selected combo box '{combo_box_name}' to index: {index}")
             return True
         except Exception as e:
             logger.error(f"Failed to select combo box '{combo_box_name}': {e}")
