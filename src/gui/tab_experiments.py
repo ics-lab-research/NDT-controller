@@ -377,7 +377,7 @@ def create_experiments_tab(
                 outputs=[status_df, chatbot],
             )
 
-            timer = gr.Timer(5)
+            timer = gr.Timer(1)
             timer.tick(
                 update_scan_status,
                 inputs=[plans_path_state, log_state],
