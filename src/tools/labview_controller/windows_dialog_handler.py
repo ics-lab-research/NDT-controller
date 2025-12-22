@@ -1,15 +1,26 @@
+import platform
 import re
 import time
 from pathlib import Path
 from typing import Any, Dict
-
+  
 from loguru import logger
-from pywinauto.keyboard import send_keys  # type: ignore
-from pywinauto import Desktop  # type: ignore
-import win32api
-import win32clipboard
-import win32con
-import win32gui
+  
+try:
+    from pywinauto.keyboard import send_keys  # type: ignore
+    from pywinauto import Desktop  # type: ignore
+    uia_available = True
+except ImportError:
+    uia_available = False
+  
+try:
+    import win32api
+    import win32clipboard
+    import win32con
+    import win32gui
+    win32_available = True
+except ImportError:
+    win32_available = False
 
 
 def _handle_error(operation: str, error: Exception) -> Dict[str, Any]:
@@ -284,13 +295,34 @@ def handle_save_file_dialog(
     The method first tries UI Automation via pywinauto for robustness. If unavailable,
     it falls back to a lightweight win32 approach using window handles and keystrokes.
     """
+    if platform.system() != "Windows":
+        return _handle_error(
+            "handle save dialog",
+            RuntimeError("This function is only supported on Windows"),
+        )
     try:
         filename = _ensure_tdms_extension(filename)
         full_path = str(Path(save_directory) / filename)
 
         # Try UIA first
-        try:
-            return _handle_via_uia(
+        if uia_available:
+            try:
+                return _handle_via_uia(
+                    save_directory,
+                    filename,
+                    dialog_title_regex,
+                    ok_button_regex,
+                    timeout_seconds,
+                    settle_delay_seconds,
+                )
+            except Exception as uia_error:
+                logger.warning(
+                    f"UIA path failed: {uia_error}; falling back to win32"
+                )
+
+        # Fallback to win32
+        if win32_available:
+            return _handle_via_win32(
                 save_directory,
                 filename,
                 dialog_title_regex,
@@ -298,21 +330,10 @@ def handle_save_file_dialog(
                 timeout_seconds,
                 settle_delay_seconds,
             )
-        except ImportError:
-            logger.info("pywinauto not installed; falling back to win32")
-        except Exception as uia_error:
-            logger.warning(
-                f"UIA path failed: {uia_error}; falling back to win32"
+        else:
+            return _handle_error(
+                "handle save dialog",
+                RuntimeError("No supported automation libraries available"),
             )
-
-        # Fallback to win32
-        return _handle_via_win32(
-            save_directory,
-            filename,
-            dialog_title_regex,
-            ok_button_regex,
-            timeout_seconds,
-            settle_delay_seconds,
-        )
     except Exception as e:
         return _handle_error("handle save dialog", e)
