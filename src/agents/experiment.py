@@ -145,7 +145,7 @@ def handle_multiple_scan(
             yield from yield_error(tools)
             continue
 
-        # update new state
+        # NOTE: each scan will return home position
         project_manager.update_experiment_state(State.home_position)
 
         plans_to_save.append(
