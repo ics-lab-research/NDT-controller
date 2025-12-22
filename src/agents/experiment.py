@@ -197,13 +197,17 @@ def handle_experiment_mode(
 
     yield AgentResponse(response=router_response.response)
 
-    if router_response.action in (
-        ExpAction.ASK_CLARIFICATION,
-        ExpAction.BASIC_CONTROL,
-    ):
+    # Determine next steps based on router action
+    if router_response.action == ExpAction.ASK_CLARIFICATION:
         return
-
-    if router_response.action == ExpAction.SINGLE_SCAN:
+    elif router_response.action == ExpAction.BASIC_CONTROL:
+        # yield AgentResponse(
+        #     intermediate_step="Switching to BASIC CONTROL mode for further instructions."
+        # )
+        # project_manager.set_mode("BASIC CONTROL")
+        return
+    
+    elif router_response.action == ExpAction.SINGLE_SCAN:
         yield AgentResponse(intermediate_step="Performing single scan.")
     elif router_response.action == ExpAction.MULTIPLE_SCAN:
         yield AgentResponse(intermediate_step="Performing multiple scan.")

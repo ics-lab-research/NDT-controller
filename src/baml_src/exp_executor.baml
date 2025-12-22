@@ -1,4 +1,4 @@
-function ExpBasicExecutor(
+function ExpExecutor(
     plan: string, filename: string?
 ) -> (ConnectToViTool | HandleSaveDialogTool | PressButtonTool | RunOpenViTool | SelectComboBoxTool | SelectTabTool | SetButtonStateTool | SetNumericControlTool | StopViTool | WaitForOperationCompleteTool)[] | Error {
   client GroqRouter
@@ -176,3 +176,38 @@ Now translate the given experimental plan into the appropriate tool function seq
 "#
 }
 
+test TestBasicPlanExecution {
+  functions [ExpExecutor]
+  args {
+    plan #"
+"PLAN EXP-001:
+1. configure signal (frequency=1000, amplitude=5.0, waveform=triangle)
+2. move X right (distance 10 mm)
+3. move Y forward (distance 20 mm)
+4. move Z up (distance 15 mm)
+5. execute grid scan (5x5)
+6. move X right (distance 5 mm) 
+7. move Y forward (distance 5 mm)"
+    "#
+
+    filename "experiment_exp_001.tdms"
+  }
+}
+
+test TestBasicPlanExecution2 {
+  functions [ExpExecutor]
+  args {
+    plan #"
+"PLAN EXP-002:
+1. configure signal (frequency=1000, amplitude=5.0, waveform=gaussian)
+2. move X right (distance 10 mm)
+3. move Y forward (distance 20 mm)
+5. execute grid scan (15x15)
+6. move X right (distance 5 mm)
+7. move Y forward (distance 10 mm)
+8. move Z down (distance 30 mm)"
+    "#
+
+    filename "experiment_exp_002.tdms"
+  }
+}

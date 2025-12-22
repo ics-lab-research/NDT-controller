@@ -57,7 +57,7 @@ class ScanStatus(str, Enum):
     ERROR = "ERROR"
 
 # #########################################################################
-# Generated classes (20)
+# Generated classes (22)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -86,6 +86,13 @@ class Experiment(BaseModel):
     signal: typing.List["SignalParameter"]
     relative_offset_mm: "RelativeOffset"
     filename: str
+
+class GetNumericIndicatorTool(BaseModel):
+    tool_name: typing_extensions.Literal['get_numeric_indicator']
+    indicator_name: str
+
+class GetViStatusTool(BaseModel):
+    tool_name: typing_extensions.Literal['get_vi_status']
 
 class Grid(BaseModel):
     rows: int

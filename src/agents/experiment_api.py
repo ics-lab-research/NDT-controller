@@ -28,6 +28,15 @@ def call_exp_router(
 
     return response
 
+def call_exp_basic_executor(user_message: str) -> str | Error:
+    """Call the basic experiment executor with a user message."""
+    cr = get_client_registry("exp-basic-executor")
+
+    response = b.ExpBasicExecutor(
+        user_message,
+        baml_options={"client_registry": cr},
+    )
+    return response
 
 def call_exp_orchestrator(
     reformatted_message: str,
@@ -56,6 +65,7 @@ def call_exp_planner(experiment: Experiment, state: State) -> str | Error:
 
 
 def call_exp_executor(plan: str, filename: str) -> List[ExperimentTool] | Error:
+    """Call the experiment executor with a plan and filename."""
     cr = get_client_registry("exp-executor")
     response = b.ExpExecutor(
         plan,

@@ -34,6 +34,12 @@ type_map = {
     "types.Experiment": types.Experiment,
     "stream_types.Experiment": stream_types.Experiment,
 
+    "types.GetNumericIndicatorTool": types.GetNumericIndicatorTool,
+    "stream_types.GetNumericIndicatorTool": stream_types.GetNumericIndicatorTool,
+
+    "types.GetViStatusTool": types.GetViStatusTool,
+    "stream_types.GetViStatusTool": stream_types.GetViStatusTool,
+
     "types.Grid": types.Grid,
     "stream_types.Grid": stream_types.Grid,
 
