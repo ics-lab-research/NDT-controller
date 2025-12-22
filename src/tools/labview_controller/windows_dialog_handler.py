@@ -15,10 +15,10 @@ except ImportError:
     uia_available = False
 
 try:
-    import win32api
-    import win32clipboard
-    import win32con
-    import win32gui
+    import win32api  # type: ignore
+    import win32clipboard  # type: ignore
+    import win32con  # type: ignore
+    import win32gui  # type: ignore
 
     win32_available = True
 except ImportError:
