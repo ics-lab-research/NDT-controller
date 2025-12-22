@@ -54,6 +54,8 @@ def _ensure_tdms_extension(filename: str) -> str:
 
 def _find_uia_dialog(dialog_title_regex: str, timeout_seconds: float) -> Any:
     """Find the UIA dialog window within timeout."""
+    if not uia_available or Desktop is None:
+        raise RuntimeError("UIA automation not available")
     deadline = time.time() + timeout_seconds
     while time.time() < deadline:
         desktop = Desktop(backend="uia")
@@ -71,6 +73,8 @@ def _find_uia_dialog(dialog_title_regex: str, timeout_seconds: float) -> Any:
 
 def _navigate_directory_uia(dlg: Any, save_directory: str) -> None:
     """Navigate to the save directory in UIA dialog."""
+    if send_keys is None:
+        raise RuntimeError("send_keys not available")
     try:
         send_keys("^l")  # Ctrl+L to focus address bar
         time.sleep(0.3)
@@ -87,6 +91,8 @@ def _navigate_directory_uia(dlg: Any, save_directory: str) -> None:
 
 def _set_filename_uia(dlg: Any, filename: str) -> None:
     """Set the filename in UIA dialog."""
+    if send_keys is None:
+        raise RuntimeError("send_keys not available")
     filename_edit = None
     edits = dlg.descendants(control_type="Edit")
     if len(edits) >= 2:
@@ -136,6 +142,8 @@ def _click_ok_uia(dlg: Any, ok_button_regex: str) -> None:
 
 def _find_win32_dialog(dialog_title_regex: str, timeout_seconds: float) -> int:
     """Find the win32 dialog window handle within timeout."""
+    if not win32_available or win32gui is None:
+        raise RuntimeError("win32 automation not available")
 
     deadline = time.time() + timeout_seconds
     target_hwnd = None
@@ -159,6 +167,8 @@ def _find_win32_dialog(dialog_title_regex: str, timeout_seconds: float) -> int:
 
 def _navigate_directory_win32(target_hwnd: int, save_directory: str) -> None:
     """Navigate to the save directory in win32 dialog."""
+    if win32api is None or win32clipboard is None or win32con is None:
+        raise RuntimeError("win32 modules not available")
     try:
         win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
         win32api.keybd_event(ord("L"), 0, 0, 0)
@@ -191,6 +201,8 @@ def _navigate_directory_win32(target_hwnd: int, save_directory: str) -> None:
 
 def _set_filename_win32(target_hwnd: int, filename: str) -> None:
     """Set the filename in win32 dialog."""
+    if win32clipboard is None or win32api is None or win32con is None:
+        raise RuntimeError("win32 modules not available")
     try:
         win32clipboard.OpenClipboard()
         win32clipboard.EmptyClipboard()
@@ -220,6 +232,8 @@ def _set_filename_win32(target_hwnd: int, filename: str) -> None:
 
 def _click_ok_win32(target_hwnd: int, ok_button_regex: str) -> None:
     """Click the OK/Save button in win32 dialog."""
+    if win32gui is None or win32con is None or win32api is None:
+        raise RuntimeError("win32 modules not available")
     ok_btn = None
     child = 0
     while True:
