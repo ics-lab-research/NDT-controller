@@ -21,6 +21,9 @@ def respond_stream(
     history.append({"role": "user", "content": message})
 
     response_added = False
+    status_index = None
+    intermediate_index = None
+    action_index = None
 
     for agent_response in get_agent_response(
         message, conversation_history, ctx
@@ -42,39 +45,56 @@ def respond_stream(
                 yield history, ""
 
         if agent_response.status and agent_response.status.strip():
-            # Append status message
-            history.append(
-                {
-                    "role": "assistant",
-                    "content": agent_response.status,
-                    "metadata": {"title": "📊 Status"},
-                },
-            )
+            if status_index is None:
+                # Append status message
+                history.append(
+                    {
+                        "role": "assistant",
+                        "content": agent_response.status,
+                        "metadata": {"title": "📊 Status"},
+                    },
+                )
+                status_index = len(history) - 1
+            else:
+                # Update existing status message
+                history[status_index]["content"] = agent_response.status
             yield history, ""
 
         if (
             agent_response.intermediate_step
             and agent_response.intermediate_step.strip()
         ):
-            # Append status message
-            history.append(
-                {
-                    "role": "assistant",
-                    "content": agent_response.intermediate_step,
-                    "metadata": {"title": "🔄 Intermediate step"},
-                },
-            )
+            if intermediate_index is None:
+                # Append intermediate step message
+                history.append(
+                    {
+                        "role": "assistant",
+                        "content": agent_response.intermediate_step,
+                        "metadata": {"title": "🔄 Intermediate step"},
+                    },
+                )
+                intermediate_index = len(history) - 1
+            else:
+                # Update existing intermediate step message
+                history[intermediate_index][
+                    "content"
+                ] = agent_response.intermediate_step
             yield history, ""
 
         if agent_response.action and agent_response.action.strip():
-            # Append action message
-            history.append(
-                {
-                    "role": "assistant",
-                    "content": agent_response.action,
-                    "metadata": {"title": "⚡ Action"},
-                },
-            )
+            if action_index is None:
+                # Append action message
+                history.append(
+                    {
+                        "role": "assistant",
+                        "content": agent_response.action,
+                        "metadata": {"title": "⚡ Action"},
+                    },
+                )
+                action_index = len(history) - 1
+            else:
+                # Update existing action message
+                history[action_index]["content"] = agent_response.action
             yield history, ""
 
 
