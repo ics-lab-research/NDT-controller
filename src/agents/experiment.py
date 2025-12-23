@@ -76,20 +76,20 @@ def process_single_experiment(
     if isinstance(plan, Error):
         yield from yield_error(plan)
         return plan
-    else:
-        yield AgentResponse(
-            intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
-        )
-        logger.debug(
-            f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
-        )
 
-        tools = call_exp_executor(plan, experiment.filename)
-        if isinstance(tools, Error):
-            yield from yield_error(tools)
-            return tools
+    yield AgentResponse(
+        intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
+    )
+    logger.debug(
+        f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
+    )
 
-        return ExperimentPlan(filename=experiment.filename, experiment=tools)
+    tools = call_exp_executor(plan, experiment.filename)
+    if isinstance(tools, Error):
+        yield from yield_error(tools)
+        return tools
+
+    return ExperimentPlan(filename=experiment.filename, experiment=tools)
 
 
 def handle_single_scan(
@@ -173,13 +173,14 @@ def orchestrate_experiments(
     orchestrator_output = call_exp_orchestrator(reformatted_message)
     if isinstance(orchestrator_output, Error):
         yield from yield_error(orchestrator_output)
-    else:
-        if action == ExpAction.SINGLE_SCAN:
-            yield from handle_single_scan(orchestrator_output, project_manager)
-        elif action == ExpAction.MULTIPLE_SCAN:
-            yield from handle_multiple_scan(
-                orchestrator_output, project_manager
-            )
+        return
+
+    if action == ExpAction.SINGLE_SCAN:
+        yield from handle_single_scan(orchestrator_output, project_manager)
+    elif action == ExpAction.MULTIPLE_SCAN:
+        yield from handle_multiple_scan(
+            orchestrator_output, project_manager
+        )
 
 
 def handle_experiment_mode(
@@ -207,11 +208,12 @@ def handle_experiment_mode(
         tools = call_exp_basic_executor(user_message)
         if isinstance(tools, Error):
             yield from yield_error(tools)
-        else:
-            for tool in tools:
-                result = execute_tool(tool, project_manager)
-                if not result.success:
-                    yield AgentResponse(status=f"ERROR: {result.error}")
+            return
+
+        for tool in tools:
+            result = execute_tool(tool, project_manager)
+            if not result.success:
+                yield AgentResponse(status=f"ERROR: {result.error}")
 
     elif router_response.action == ExpAction.SINGLE_SCAN:
         yield AgentResponse(intermediate_step="Performing single scan")
