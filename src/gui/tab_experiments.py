@@ -131,9 +131,7 @@ def _extract_params_from_row(row: pd.Series) -> Dict[str, str]:
     return params
 
 
-def _create_tool_from_row(
-    row: pd.Series
-) -> ExperimentTool | None:
+def _create_tool_from_row(row: pd.Series) -> ExperimentTool | None:
     tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
     if not tool_name or tool_name == "nan":
         return None
