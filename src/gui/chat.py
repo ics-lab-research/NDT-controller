@@ -75,9 +75,9 @@ def respond_stream(
                 )
                 intermediate_index = len(history) - 1
             else:
-                # Update existing intermediate step message
-                history[intermediate_index]["content"] = (
-                    agent_response.intermediate_step
+                # Append to existing intermediate step message
+                history[intermediate_index]["content"] += (
+                    "\n" + agent_response.intermediate_step
                 )
             yield history, ""
 
