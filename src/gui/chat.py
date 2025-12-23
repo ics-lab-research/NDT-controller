@@ -16,12 +16,14 @@ def respond_stream(
     """Handle chat responses with streaming."""
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history)
-
+    
     # Add user message to history
     history.append({"role": "user", "content": message})
-
+    
     response_added = False
-
+    last_status_index = None
+    last_action_index = None
+    
     for agent_response in get_agent_response(
         message, conversation_history, ctx
     ):
@@ -40,18 +42,22 @@ def respond_stream(
                 # Update existing response message
                 history[-1]["content"] = agent_response.response
                 yield history, ""
-
+    
         if agent_response.status and agent_response.status.strip():
-            # Append status message
-            history.append(
-                {
-                    "role": "assistant",
-                    "content": agent_response.status,
-                    "metadata": {"title": "📊 Status"},
-                },
-            )
+            if last_status_index is not None:
+                history[last_status_index]["content"] = agent_response.status
+            else:
+                # Append status message
+                history.append(
+                    {
+                        "role": "assistant",
+                        "content": agent_response.status,
+                        "metadata": {"title": "📊 Status"},
+                    },
+                )
+                last_status_index = len(history) - 1
             yield history, ""
-
+    
         if (
             agent_response.intermediate_step
             and agent_response.intermediate_step.strip()
@@ -65,16 +71,20 @@ def respond_stream(
                 },
             )
             yield history, ""
-
+    
         if agent_response.action and agent_response.action.strip():
-            # Append action message
-            history.append(
-                {
-                    "role": "assistant",
-                    "content": agent_response.action,
-                    "metadata": {"title": "⚡ Action"},
-                },
-            )
+            if last_action_index is not None:
+                history[last_action_index]["content"] = agent_response.action
+            else:
+                # Append action message
+                history.append(
+                    {
+                        "role": "assistant",
+                        "content": agent_response.action,
+                        "metadata": {"title": "⚡ Action"},
+                    },
+                )
+                last_action_index = len(history) - 1
             yield history, ""
 
 
