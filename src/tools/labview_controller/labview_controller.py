@@ -379,9 +379,7 @@ class LabVIEWController:
     def _try_multiple_aborts(self, methods_tried: list[str]) -> bool:
         """Attempt multiple abort calls if needed."""
         if not self.vi_reference:
-            logger.error(
-                "VI reference is None, cannot perform multiple aborts"
-            )
+            logger.error("VI reference is None, cannot perform multiple aborts")
             return False
         for attempt in range(3):
             try:
