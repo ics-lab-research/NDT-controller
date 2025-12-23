@@ -183,7 +183,6 @@ def execute_single_plan(plan: ExperimentPlan, project_manager: ProjectManager):
     for tool in plan.experiment:
         result = execute_tool(tool, project_manager)
         if not result.success:
-            logger.debug(f"fail or not: {result}")
             plan.status = ExperimentStatus.ERROR
             raise ExperimentExecutionError(
                 filename=plan.filename, error_message=result.error
@@ -211,6 +210,9 @@ def execute_multiple_plans(
                 messages.append(
                     f"Plan {plan.filename} errored: {e.error_message}"
                 )
+
+                logger.debug(f"fail: {messages}")
+
                 # Save error state
                 if isinstance(metadata, ExperimentsMetadata):
                     save_experiment_plans(plans, metadata.plans_path)
