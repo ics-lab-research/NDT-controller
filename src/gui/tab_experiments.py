@@ -153,7 +153,19 @@ def _create_tool_from_row(
 def _convert_table_data_to_tools(
     table_data: pd.DataFrame,
 ) -> List[ExperimentTool]:
-    tools = [_create_tool_from_row(row) for _, row in table_data.iterrows()]
+    tool_map = {
+        "set_numeric_control": SetNumericControlTool,
+        "select_tab": SelectTabTool,
+        "run_open_vi": RunOpenViTool,
+        "connect_to_vi": ConnectToViTool,
+        "handle_save_dialog": HandleSaveDialogTool,
+        "press_button": PressButtonTool,
+        "set_button_state": SetButtonStateTool,
+        "select_combo_box": SelectComboBoxTool,
+    }
+    tools = [
+        _create_tool_from_row(row, tool_map) for _, row in table_data.iterrows()
+    ]
     return [tool for tool in tools if tool is not None]
 
 
