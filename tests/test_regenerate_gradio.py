@@ -6,7 +6,8 @@ def respond(message: str, history: list) -> str:
     return "hello world"
 
 
-demo = gr.ChatInterface(respond, multimodal=True, chatbot=)
+chatbot = gr.Chatbot()
+demo = gr.ChatInterface(respond, multimodal=True, chatbot=chatbot)
 
 if __name__ == "__main__":
     demo.launch(inbrowser=True)
