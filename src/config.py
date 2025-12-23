@@ -25,10 +25,6 @@ def load_config():
 
     # Set experiments section
     experiments = config.get("experiments", {})
-    if "exp_constraint_path" in experiments:
-        os.environ["EXPERIMENTS_EXP_CONSTRAINT_PATH"] = experiments[
-            "exp_constraint_path"
-        ]
     if "data_dir_path" in experiments:
         os.environ["EXPERIMENTS_DATA_DIR_PATH"] = experiments["data_dir_path"]
     if "plans_path" in experiments:
