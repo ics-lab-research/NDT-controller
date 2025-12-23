@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Generator, List, Tuple
+import time
 
 import gradio as gr
 from loguru import logger
@@ -183,6 +184,8 @@ def start_execution2(
         {"role": "assistant", "content": "Dummy execution"}
     ]
 
+    yield update_scan_status(plans_path), current_chatbot
+    time.sleep(1)
     yield update_scan_status(plans_path), current_chatbot
 
 
