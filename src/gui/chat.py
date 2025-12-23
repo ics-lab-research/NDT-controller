@@ -17,10 +17,9 @@ def respond(
     # Handle multimodal message input
     if isinstance(message, dict):
         message = MultimodalMessage(
-            text=message.get('text', ''),
-            files=message.get('files', [])
+            text=message.get("text", ""), files=message.get("files", [])
         )
-    
+
     # Convert history to conversation messages, excluding the new messages
     print(message.text)
     print(message.files)
