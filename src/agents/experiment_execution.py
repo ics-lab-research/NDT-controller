@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import List, Tuple
+from typing import Generator, List, Tuple
 
 from loguru import logger
 
@@ -191,15 +191,14 @@ def execute_single_plan(plan: ExperimentPlan, project_manager: ProjectManager):
 
 def execute_multiple_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
-) -> Tuple[ExperimentExecutionError | None, List[str]]:
+) -> Generator[str, None, ExperimentExecutionError | None]:
     """Execute multiple experiment plans with system reinitialization after each plan."""
-    messages = []
-    messages.append("Starting execution of approved plans")
+    yield "Starting execution of approved plans"
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     for plan in plans:
         # Only execute plans that are pending or previously errored
         if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):
-            messages.append(f"Executing plan: {plan.filename}")
+            yield f"Executing plan: {plan.filename}"
             plan.status = ExperimentStatus.SCANNING
             # Save progress before execution
             if isinstance(metadata, ExperimentsMetadata):
@@ -207,17 +206,14 @@ def execute_multiple_plans(
             try:
                 execute_single_plan(plan, project_manager)
             except ExperimentExecutionError as e:
-                messages.append(
-                    f"Plan {plan.filename} errored: {e.error_message}"
-                )
-
-                logger.debug(f"fail: {messages}")
-
+                error_message = f"Plan {plan.filename} errored: {e.error_message}"
+                yield error_message
+                logger.debug(f"fail: {error_message}")
                 # Save error state
                 if isinstance(metadata, ExperimentsMetadata):
                     save_experiment_plans(plans, metadata.plans_path)
-                return e, messages
-            messages.append(f"Plan {plan.filename} completed")
+                return e
+            yield f"Plan {plan.filename} completed"
             plan.status = ExperimentStatus.COMPLETED
             # Save completion state
             if isinstance(metadata, ExperimentsMetadata):
@@ -227,4 +223,4 @@ def execute_multiple_plans(
     # Final save of all plans
     if isinstance(metadata, ExperimentsMetadata):
         save_experiment_plans(plans, metadata.plans_path)
-    return None, messages
+    return None
