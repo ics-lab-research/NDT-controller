@@ -8,90 +8,65 @@ from ..core.llm import get_agent_response
 from .utils import build_conversation_history
 
 
-def respond_stream(
+def respond(
     message: str,
     history: ChatHistory,
     ctx: ProjectManager,
-) -> Generator[Tuple[ChatHistory, str], None, None]:
-    """Handle chat responses with streaming."""
+) -> Generator[dict, None, None]:
+    """Handle chat responses with streaming, yielding response dictionaries."""
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history)
 
-    # Add user message to history
-    history.append({"role": "user", "content": message})
-
     response_added = False
-    status_index = None
-    intermediate_index = None
-    action_index = None
+    status_yielded = False
+    action_yielded = False
 
     for agent_response in get_agent_response(
         message, conversation_history, ctx
     ):
         if agent_response.response:
             if not response_added:
-                # Append response message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.response,
-                    },
-                )
+                # Yield initial response message
+                yield {
+                    "role": "assistant",
+                    "content": agent_response.response,
+                }
                 response_added = True
-                yield history, ""
             else:
-                # Update existing response message
-                history[-1]["content"] = agent_response.response
-                yield history, ""
+                # Yield updated response message
+                yield {
+                    "role": "assistant",
+                    "content": agent_response.response,
+                }
 
-        # NOTE: show latest status and action
+        # NOTE: yield latest status
         if agent_response.status and agent_response.status.strip():
-            if status_index is None:
-                # Append status message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.status,
-                        "metadata": {"title": "📊 Status"},
-                    },
-                )
-                status_index = len(history) - 1
-            else:
-                # Update existing status message
-                history[status_index]["content"] = agent_response.status
-            yield history, ""
+            yield {
+                "role": "assistant",
+                "content": agent_response.status,
+                "metadata": {"title": "📊 Status"},
+            }
+            status_yielded = True
 
+        # NOTE: yield latest action
         if agent_response.action and agent_response.action.strip():
-            if action_index is None:
-                # Append action message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.action,
-                        "metadata": {"title": "⚡ Action"},
-                    },
-                )
-                action_index = len(history) - 1
-            else:
-                # Update existing action message
-                history[action_index]["content"] = agent_response.action
-            yield history, ""
+            yield {
+                "role": "assistant",
+                "content": agent_response.action,
+                "metadata": {"title": "⚡ Action"},
+            }
+            action_yielded = True
 
-        # NOTE: show all intermediate_step items
+        # NOTE: yield each intermediate_step
         if (
             agent_response.intermediate_step
             and agent_response.intermediate_step.strip()
         ):
-            if intermediate_index is None:
-                # Append intermediate step message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.intermediate_step,
-                        "metadata": {"title": "🔄 Intermediate step"},
-                    },
-                )
-            yield history, ""
+            yield {
+                "role": "assistant",
+                "content": agent_response.intermediate_step,
+                "metadata": {"title": "🔄 Intermediate step"},
+            }
 
 
 def create_chat_interface(

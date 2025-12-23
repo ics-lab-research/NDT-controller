@@ -3,7 +3,7 @@ from .chat import (
     create_chat_interface,
     handle_mode_change,
     clear_chat,
-    respond_stream,
+    respond,
 )
 from .artifacts import create_sidebar, toggle_sidebar
 from ..core.project_manager import init_project_context
@@ -85,31 +85,42 @@ def create_main_interface() -> gr.Blocks:
                         - Type your message and press Enter to send
                         """)
 
-                        (
-                            chatbot,
-                            msg,
-                            mode_dropdown,
-                            clear,
-                        ) = create_chat_interface(project_manager)
+                        # Create ChatInterface with custom chatbot styling
+                        chat_interface = gr.ChatInterface(
+                            respond,
+                            additional_inputs=[current_context],
+                            chatbot=gr.Chatbot(
+                                type="messages",
+                                elem_classes="chatbot-container",
+                                latex_delimiters=[
+                                    {"left": "$", "right": "$", "display": False},
+                                    {"left": "$$", "right": "$$", "display": True},
+                                ],
+                            ),
+                            fill_width=True,
+                            type="messages",
+                        )
+
+                        with gr.Row():
+                            mode_dropdown = gr.Dropdown(
+                                choices=Mode.get_values(),
+                                value=project_manager.current_mode.value,
+                                scale=1,
+                                show_label=False,
+                                interactive=True,
+                                allow_custom_value=True,
+                            )
+                            clear = gr.Button("Clear")
 
                     # Sidebar with tabs (hidden by default)
                     sidebar_column = create_sidebar(
                         project_manager,
-                        chatbot,
+                        chat_interface.chatbot,
                     )
                     sidebar_column.visible = False
 
         # Wire up events (only for Chat tab)
-        msg.submit(
-            respond_stream,
-            inputs=[msg, chatbot, current_context],
-            outputs=[
-                chatbot,
-                msg,
-            ],
-        )
-
-        clear.click(clear_chat, outputs=[chatbot, msg])
+        clear.click(lambda: [], outputs=chat_interface.chatbot)
 
         mode_dropdown.select(
             handle_mode_change,
