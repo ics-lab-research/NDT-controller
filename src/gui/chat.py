@@ -17,27 +17,15 @@ def respond(
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history)
 
-    response_added = False
-    status_yielded = False
-    action_yielded = False
-
     for agent_response in get_agent_response(
         message, conversation_history, ctx
     ):
         if agent_response.response:
-            if not response_added:
-                # Yield initial response message
-                yield {
-                    "role": "assistant",
-                    "content": agent_response.response,
-                }
-                response_added = True
-            else:
-                # Yield updated response message
-                yield {
-                    "role": "assistant",
-                    "content": agent_response.response,
-                }
+            # Yield updated response message
+            yield {
+                "role": "assistant",
+                "content": agent_response.response,
+            }
 
         # NOTE: yield latest status
         if agent_response.status and agent_response.status.strip():
@@ -46,7 +34,6 @@ def respond(
                 "content": agent_response.status,
                 "metadata": {"title": "📊 Status"},
             }
-            status_yielded = True
 
         # NOTE: yield latest action
         if agent_response.action and agent_response.action.strip():
@@ -55,7 +42,6 @@ def respond(
                 "content": agent_response.action,
                 "metadata": {"title": "⚡ Action"},
             }
-            action_yielded = True
 
         # NOTE: yield each intermediate_step
         if (

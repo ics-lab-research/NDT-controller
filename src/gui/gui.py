@@ -1,13 +1,12 @@
 import gradio as gr
+
+from ..core.models import Mode
+from ..core.project_manager import init_project_context
+from .artifacts import create_sidebar, toggle_sidebar
 from .chat import (
-    create_chat_interface,
     handle_mode_change,
-    clear_chat,
     respond,
 )
-from .artifacts import create_sidebar, toggle_sidebar
-from ..core.project_manager import init_project_context
-from ..core.models import Mode
 
 custom_css = """
 .gradio-container {
@@ -88,6 +87,8 @@ def create_main_interface() -> gr.Blocks:
                         # Create ChatInterface with custom chatbot styling
                         chat_interface = gr.ChatInterface(
                             respond,
+                            multimodal=True,
+                            editable=True,
                             additional_inputs=[current_context],
                             chatbot=gr.Chatbot(
                                 type="messages",
