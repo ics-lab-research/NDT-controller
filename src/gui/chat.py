@@ -21,8 +21,6 @@ def respond_stream(
     history.append({"role": "user", "content": message})
 
     response_added = False
-    last_status_index = None
-    last_action_index = None
 
     for agent_response in get_agent_response(
         message, conversation_history, ctx
@@ -44,18 +42,14 @@ def respond_stream(
                 yield history, ""
 
         if agent_response.status and agent_response.status.strip():
-            if last_status_index is not None:
-                history[last_status_index]["content"] = agent_response.status
-            else:
-                # Append status message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.status,
-                        "metadata": {"title": "📊 Status"},
-                    },
-                )
-                last_status_index = len(history) - 1
+            # Append status message
+            history.append(
+                {
+                    "role": "assistant",
+                    "content": agent_response.status,
+                    "metadata": {"title": "📊 Status"},
+                },
+            )
             yield history, ""
 
         if (
@@ -73,18 +67,14 @@ def respond_stream(
             yield history, ""
 
         if agent_response.action and agent_response.action.strip():
-            if last_action_index is not None:
-                history[last_action_index]["content"] = agent_response.action
-            else:
-                # Append action message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.action,
-                        "metadata": {"title": "⚡ Action"},
-                    },
-                )
-                last_action_index = len(history) - 1
+            # Append action message
+            history.append(
+                {
+                    "role": "assistant",
+                    "content": agent_response.action,
+                    "metadata": {"title": "⚡ Action"},
+                },
+            )
             yield history, ""
 
 
