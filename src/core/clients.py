@@ -27,7 +27,7 @@ def get_client_registry(agent: str) -> ClientRegistry:
         base_url = "https://openrouter.ai/api/v1"
         api_key_env = "OPENROUTER_API_KEY"
     elif provider.startswith("google"):
-        actual_provider = provider
+        actual_provider = "google-ai"
         api_key_env = "GOOGLE_API_KEY"
     else:
         raise ValueError(f"Unknown provider {provider} for agent {agent}")

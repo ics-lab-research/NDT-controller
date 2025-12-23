@@ -7,11 +7,16 @@ plans_path = "labview_experiment_plans.json"
 vi_path = "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
 
 [models]
-exp_router = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-exp_orchestrator = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-exp_planner = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-exp_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-exp_basic_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+# exp_router = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+# exp_orchestrator = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+# exp_planner = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+# exp_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+# exp_basic_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+exp_router = "google/gemini-flash-latest"
+exp_orchestrator = "google/gemini-flash-latest"
+exp_planner = "google/gemini-flash-latest"
+exp_executor = "google/gemini-flash-latest"
+exp_basic_executor = "google/gemini-flash-latest"
 
 [logging]
 baml_log = "info"
