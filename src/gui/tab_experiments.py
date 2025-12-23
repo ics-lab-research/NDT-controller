@@ -19,9 +19,7 @@ from ..core.models import (
 )
 from ..core.project_manager import ProjectManager
 from .experiment_table_utils import (
-    _convert_table_data_to_tools,
-    _tool_to_table_row,
-    _update_experiment_details,
+    update_experiment_details,
     convert_plan_to_table_data,
     save_experiment_changes,
 )
@@ -210,7 +208,7 @@ def create_experiments_tab(
                 save_button = gr.Button("Save Changes")
                 reload_button = gr.Button("Reload Plans")
             dropdown.change(
-                lambda filename, current_plans: _update_experiment_details(
+                lambda filename, current_plans: update_experiment_details(
                     current_plans, filename
                 ),
                 inputs=[dropdown, plans_state],
