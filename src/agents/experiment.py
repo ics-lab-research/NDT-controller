@@ -178,9 +178,7 @@ def orchestrate_experiments(
     if action == ExpAction.SINGLE_SCAN:
         yield from handle_single_scan(orchestrator_output, project_manager)
     elif action == ExpAction.MULTIPLE_SCAN:
-        yield from handle_multiple_scan(
-            orchestrator_output, project_manager
-        )
+        yield from handle_multiple_scan(orchestrator_output, project_manager)
 
 
 def handle_experiment_mode(
