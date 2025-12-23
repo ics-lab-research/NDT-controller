@@ -1,4 +1,4 @@
-from typing import Generator, List, Tuple, Union
+from typing import Generator, List, Tuple
 
 import gradio as gr
 
@@ -9,7 +9,7 @@ from .utils import build_conversation_history
 
 
 def respond(
-    message: Union[MultimodalMessage, dict],
+    message: MultimodalMessage | dict,
     history: ChatHistory,
     ctx: ProjectManager,
 ) -> Generator[dict, None, None]:
@@ -22,7 +22,7 @@ def respond(
 
     # Convert history to conversation messages, excluding the new messages
     print(message.text)
-    print(message.files)
+    print(message.files)  ## path
     print(history)
 
     yield {
