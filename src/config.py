@@ -1,6 +1,7 @@
 import os
 import tomllib
 from pathlib import Path
+from typing import Any
 from loguru import logger
 
 
@@ -9,7 +10,7 @@ def get_config_path() -> Path:
     return Path.cwd() / "config.toml"
 
 
-def load_config_dict(config_path: Path) -> dict:
+def load_config_dict(config_path: Path) -> dict[str, Any]:
     """Load and parse the TOML configuration file."""
     if not config_path.exists():
         logger.error(f"Config file not found: {config_path}")
@@ -23,21 +24,21 @@ def load_config_dict(config_path: Path) -> dict:
         raise
 
 
-def set_env_vars_from_section(config: dict, section: str):
+def set_env_vars_from_section(config: dict[str, Any], section: str) -> None:
     """Set environment variables from a specific config section, uppercasing keys."""
     vars_dict = config.get(section, {})
     for key, value in vars_dict.items():
         os.environ[key.upper()] = str(value)
 
 
-def set_paths_env_vars(config: dict):
+def set_paths_env_vars(config: dict[str, Any]) -> None:
     """Set environment variables for the paths section."""
     paths = config.get("paths", {})
     if "experiments" in paths:
         os.environ["EXPERIMENTS_BASE"] = paths["experiments"]
 
 
-def set_experiments_env_vars(config: dict):
+def set_experiments_env_vars(config: dict[str, Any]) -> None:
     """Set environment variables for the experiments section."""
     experiments = config.get("experiments", {})
     if "data_dir_path" in experiments:
