@@ -129,7 +129,8 @@ def start_execution(
     if not plans_path:
         yield (
             gr.Dataframe(value=[]),
-            current_chatbot + [create_status_message("Error: Plans path not configured")],
+            current_chatbot
+            + [create_status_message("Error: Plans path not configured")],
         )
         return
     approved_plans = [p for p in plans if p.status == ExperimentStatus.APPROVED]
@@ -154,7 +155,9 @@ def start_execution(
     try:
         for message in execution_gen:
             if status_index is None:
-                current_chatbot = current_chatbot + [create_status_message(message)]
+                current_chatbot = current_chatbot + [
+                    create_status_message(message)
+                ]
                 status_index = len(current_chatbot) - 1
             else:
                 current_chatbot[status_index]["content"] = message
@@ -163,7 +166,11 @@ def start_execution(
         error = e.value
         if error:
             if status_index is None:
-                current_chatbot = current_chatbot + [create_status_message(f"Execution error: {error.error_message}")]
+                current_chatbot = current_chatbot + [
+                    create_status_message(
+                        f"Execution error: {error.error_message}"
+                    )
+                ]
             else:
                 current_chatbot[status_index]["content"] = (
                     f"Execution error: {error.error_message}"
@@ -239,7 +246,8 @@ def create_experiments_tab(
             approve_button.click(
                 lambda plans, plans_path, current_chatbot: (
                     approve_all_plans(plans, plans_path),
-                    current_chatbot + [create_status_message("All plans approved")],
+                    current_chatbot
+                    + [create_status_message("All plans approved")],
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
                 outputs=[status_df, chatbot],
