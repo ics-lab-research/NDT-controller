@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import Generator, List, Tuple
-import time
 
 import gradio as gr
 from loguru import logger
@@ -20,9 +19,9 @@ from ..core.models import (
 )
 from ..core.project_manager import ProjectManager
 from .experiment_table_utils import (
-    update_experiment_details,
     convert_plan_to_table_data,
     save_experiment_changes,
+    update_experiment_details,
 )
 
 
@@ -126,67 +125,57 @@ def start_execution(
             + [
                 {
                     "role": "assistant",
+                    "metadata": {"title": "📊 Status"},
                     "content": "Error: Plans path not configured",
                 }
             ],
         )
         return
     approved_plans = [p for p in plans if p.status == ExperimentStatus.APPROVED]
-    if not approved_plans:
-        yield (
-            update_scan_status(plans_path),
-            current_chatbot
-            + [{"role": "assistant", "content": "No approved plans to start"}],
-        )
-        return
-    # Set to PENDING
-    for plan in approved_plans:
-        plan.status = ExperimentStatus.PENDING
-    try:
-        save_experiment_plans(plans, plans_path)
-    except Exception as e:
-        error_msg = f"Error saving plans: {e}"
-        logger.error(error_msg)
-        yield (
-            update_scan_status(plans_path),
-            current_chatbot + [{"role": "assistant", "content": error_msg}],
-        )
-        return
+    if approve_all_plans:
+        # Set to PENDING
+        for plan in approved_plans:
+            plan.status = ExperimentStatus.PENDING
+        try:
+            save_experiment_plans(plans, plans_path)
+        except Exception as e:
+            error_msg = f"Error saving plans: {e}"
+            logger.error(error_msg)
+            yield (
+                update_scan_status(plans_path),
+                current_chatbot
+                + [
+                    {
+                        "role": "assistant",
+                        "metadata": {"title": "📊 Status"},
+                        "content": error_msg,
+                    }
+                ],
+            )
+            return
+
     # Execute all plans
     try:
-        for msg in execute_multiple_plans(plans, project_manager):
-            current_chatbot = current_chatbot + [
-                {"role": "assistant", "content": str(msg)}
-            ]
-            yield update_scan_status(plans_path), current_chatbot
+        execute_multiple_plans(plans, project_manager)
+        yield update_scan_status(plans_path), current_chatbot
     except ExperimentExecutionError as e:
         current_chatbot = current_chatbot + [
             {
                 "role": "assistant",
+                "metadata": {"title": "📊 Status"},
                 "content": f"Execution error: {e.error_message}",
             }
         ]
         yield update_scan_status(plans_path), current_chatbot
     except Exception as e:
         current_chatbot = current_chatbot + [
-            {"role": "assistant", "content": f"Error during execution: {e}"}
+            {
+                "role": "assistant",
+                "metadata": {"title": "📊 Status"},
+                "content": f"Error during execution: {e}",
+            }
         ]
         yield update_scan_status(plans_path), current_chatbot
-
-
-def start_execution2(
-    plans: List[ExperimentPlan],
-    plans_path: Path | None,
-    current_chatbot: ChatHistory,
-    project_manager: ProjectManager,
-) -> Generator[Tuple[gr.Dataframe, ChatHistory], None, None]:
-    current_chatbot = current_chatbot + [
-        {"role": "assistant", "content": "Dummy execution"}
-    ]
-
-    yield update_scan_status(plans_path), current_chatbot
-    time.sleep(1)
-    yield update_scan_status(plans_path), current_chatbot
 
 
 def create_experiments_tab(
@@ -258,14 +247,20 @@ def create_experiments_tab(
                 lambda plans, plans_path, current_chatbot: (
                     approve_all_plans(plans, plans_path),
                     current_chatbot
-                    + [{"role": "assistant", "content": "All plans approved"}],
+                    + [
+                        {
+                            "role": "assistant",
+                            "metadata": {"title": "📊 Status"},
+                            "content": "All plans approved",
+                        }
+                    ],
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
                 outputs=[status_df, chatbot],
             )
 
             start_button.click(
-                start_execution2,
+                start_execution,
                 inputs=[
                     plans_state,
                     plans_path_state,
