@@ -198,9 +198,11 @@ def execute_multiple_plans(
     messages.append("Starting execution of approved plans")
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     for plan in plans:
+        # Only execute plans that are pending or previously errored
         if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):
             messages.append(f"Executing plan: {plan.filename}")
             plan.status = ExperimentStatus.SCANNING
+            # Save progress before execution
             if isinstance(metadata, ExperimentsMetadata):
                 save_experiment_plans(plans, metadata.plans_path)
             try:
@@ -209,14 +211,18 @@ def execute_multiple_plans(
                 messages.append(
                     f"Plan {plan.filename} errored: {e.error_message}"
                 )
+                # Save error state
                 if isinstance(metadata, ExperimentsMetadata):
                     save_experiment_plans(plans, metadata.plans_path)
                 return e, messages
             messages.append(f"Plan {plan.filename} completed")
             plan.status = ExperimentStatus.COMPLETED
+            # Save completion state
             if isinstance(metadata, ExperimentsMetadata):
                 save_experiment_plans(plans, metadata.plans_path)
+            # Allow hardware to settle before next plan
             time.sleep(HARDWARE_SETTLE_DELAY)
+    # Final save of all plans
     if isinstance(metadata, ExperimentsMetadata):
         save_experiment_plans(plans, metadata.plans_path)
     return None, messages
