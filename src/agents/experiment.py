@@ -109,7 +109,7 @@ def handle_single_scan(
 
     # NOTE: each scan will return home position
     if isinstance(result, ExperimentPlan):
-        new_position = RelativeOffset(x=0, y=0, z=1)
+        new_position = project_manager.experiment_state.home_position
         project_manager.update_experiment_state(new_position)
         yield from save_plans([result], project_manager)
 
@@ -149,7 +149,7 @@ def handle_multiple_scan(
             continue
 
         # NOTE: each scan will return home position
-        new_position = RelativeOffset(x=0, y=0, z=1)
+        new_position = project_manager.experiment_state.home_position
         project_manager.update_experiment_state(new_position)
 
         plans_to_save.append(
