@@ -2,7 +2,17 @@
 experiments = "EXPERIMENTS"
 
 [experiments]
-exp_constraint_path = "LABVIEW.md"
 data_dir_path = "data"
 plans_path = "labview_experiment_plans.json"
 vi_path = "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
+
+[models]
+exp_router = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+exp_orchestrator = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+exp_planner = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+exp_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+exp_basic_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
+
+[logging]
+baml_log = "info"
+log_level = "debug"

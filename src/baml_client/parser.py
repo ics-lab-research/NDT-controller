@@ -92,4 +92,4 @@ class LlmStreamParser:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="stream")
         return typing.cast(stream_types.ExpRouterOutput, __result__)
 
-    
+    

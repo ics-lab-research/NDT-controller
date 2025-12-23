@@ -162,14 +162,10 @@ Output:
 "#
 }
 
-test TestError {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "fsdf afsdfda fasdf"
-  }
-}
+// ============================================================================
+// BASIC SINGLE EXPERIMENT TESTS
+// ============================================================================
 
-// Basic single experiment tests
 test TestBasicSingleExperiment {
   functions [ExpOrchestrator]
   args {
@@ -177,137 +173,23 @@ test TestBasicSingleExperiment {
   }
 }
 
+test TestSingleExperimentWithAmplitude {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 20x20 sine at 5kHz amplitude 2.5V"
+  }
+}
+
 test TestSingleExperimentWithMultipleParams {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 20x20 sine at 5kHz amplitude 3V attenuation 15dB"
+    reformatted_message "scan 15x15 square at 3kHz amplitude 1.5V attenuation 10dB pulse width 100us"
   }
 }
 
-// Multiple experiments without spatial offset
-test TestMultipleExperimentsBasic {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "scan 10x10 gaussian at 1kHz amplitude 2V and 20x20 at 2kHz"
-  }
-}
-
-test TestMultipleExperimentsAllAtOrigin {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "gaussian 20x20 at 1kHz and sine 20x20 at 2kHz and square 30x30 at 3kHz"
-  }
-}
-
-test TestMultipleExperimentsAllAtOrigin2 {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "gaussian 20x20 from 1000Hz to 1200Hz"
-  }
-}
-
-// X-axis spacing tests
-test TestXAxisSpacingCentimeters {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "do 2 experiments 2cm apart on X axis: sine 50x50 at 5kHz and gaussian 30x30 at 3kHz"
-  }
-}
-
-test TestXAxisSpacingMillimeters {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "3 scans 30mm apart on X axis: gaussian 15x15 at 2kHz"
-  }
-}
-
-test TestXAxisSpacingAlternativeSyntax {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "2 experiments with X axis spacing 25mm: sine 10x10 at 1kHz and square 10x10 at 1.5kHz"
-  }
-}
-
-// Y-axis spacing tests
-test TestYAxisSpacingMillimeters {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "3 scans 15mm spacing on Y axis: sine 10x10 at 1kHz"
-  }
-}
-
-test TestYAxisSpacingCentimeters {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "2 experiments 3cm apart on Y axis: gaussian 20x20 at 4kHz and sine 20x20 at 5kHz"
-  }
-}
-
-// Liftoff tests
-test TestLiftoffSingleValue {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "scan 20x20 gaussian at 2kHz with liftoff 5mm"
-  }
-}
-
-test TestLiftoffMultipleExperiments {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "experiment 1 and liftoff 2 is 3mm: gaussian 20x20 1kHz and sine 20x20 2kHz"
-  }
-}
-
-test TestLiftoffWithSpacing {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "3 scans 15mm spacing on Y axis, liftoffs 1mm, 2mm, 3mm: sine 10x10 at 1kHz"
-  }
-}
-
-test TestIndividualLiftoffs {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "first scan liftoff 2mm, second liftoff 5mm: gaussian 15x15 at 3kHz and square 15x15 at 3kHz"
-  }
-}
-
-// Explicit position tests
-test TestExplicitPosition {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "scan at position (10, 20, 2): gaussian 20x20 at 2kHz"
-  }
-}
-
-test TestMultipleExplicitPositions {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "scan at (0,0,1) gaussian 10x10 1kHz, at (15,0,2) sine 10x10 2kHz, at (30,0,3) square 10x10 3kHz"
-  }
-}
-
-test TestExplicitOffsetSyntax {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "gaussian 20x20 at 2kHz with offset (5, 10, 1.5)"
-  }
-}
-
-// Range expansion tests
-test TestFrequencyRange {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "scan 10x10 gaussian at 1000-1200Hz"
-  }
-}
-
-test TestSimpleRange {
-  functions [ExpOrchestrator]
-  args {
-    reformatted_message "scan 15x15 sine at frequencies 1 to 3 kHz"
-  }
-}
+// ============================================================================
+// RANGE EXPANSION TESTS
+// ============================================================================
 
 test TestAmplitudeRange {
   functions [ExpOrchestrator]
@@ -316,187 +198,427 @@ test TestAmplitudeRange {
   }
 }
 
-// Cartesian product tests
-test TestCartesianProductTwoRanges {
+test TestFrequencyRange {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 10x10 gaussian at 1-2kHz amplitude 1-2V"
+    reformatted_message "scan 10x10 sine frequency 1kHz to 3kHz amplitude 2V"
   }
 }
 
-test TestCartesianProductThreeRanges {
+test TestGridSizeRange {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 10x10 sine frequency 1-2kHz amplitude 1-2V attenuation 5-10dB"
+    reformatted_message "scan 10x10 to 30x30 gaussian at 2kHz"
   }
 }
 
-// Signal parameter variety tests
-test TestPulseWidthParameter {
+test TestCustomStepRange {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 15x15 square at 10kHz pulse width 100us"
+    reformatted_message "scan 20x20 sine at 2kHz amplitude 1V to 3V by 0.5V"
   }
 }
 
-test TestDutyCycleParameter {
+test TestNumericRangeWithDash {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 20x20 square at 5kHz duty cycle 25%"
+    reformatted_message "scan 10x10 sine at 1000-3000Hz amplitude 2V"
   }
 }
 
-test TestPhaseParameter {
+// ============================================================================
+// CARTESIAN PRODUCT TESTS
+// ============================================================================
+
+test TestMultipleGridSizesAndFrequencies {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 10x10 sine at 1kHz phase 90 degrees"
+    reformatted_message "scan 10x10 and 20x20 at 1kHz and 2kHz"
   }
 }
 
-test TestMultipleSignalParams {
+test TestThreeParameterCombinations {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 20x20 gaussian at 3kHz amplitude 2.5V attenuation 12dB pulse width 50us duty cycle 50%"
+    reformatted_message "scan 10x10 and 20x20 gaussian at 1kHz and 2kHz amplitude 1V and 2V"
   }
 }
 
-// Error case tests
-test TestSpacingWithoutAxisError {
+test TestMultipleWaveforms {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "2 scans 10mm apart: gaussian 15x15 at 2kHz"
+    reformatted_message "scan 15x15 gaussian and sine at 2kHz amplitude 2.5V"
   }
 }
 
-test TestSpacingWithoutAxisError2 {
+// ============================================================================
+// SPATIAL OFFSET TESTS
+// ============================================================================
+
+test TestDefaultOffset {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "3 experiments with 5cm spacing: sine 10x10 at 1kHz"
+    reformatted_message "scan 10x10 gaussian at 1kHz"
   }
 }
 
-// Complex combination tests
-test TestComplexXSpacingWithRanges {
+test TestAbsolutePosition {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "2 scans 20mm apart on X axis: gaussian 10x10 at 1-2kHz"
+    reformatted_message "scan 10x10 gaussian at 1kHz at position (10,20,2)"
   }
 }
 
-test TestComplexYSpacingWithMultipleParams {
+test TestXAxisSpacing {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "3 experiments 10mm spacing on Y axis: sine 20x20 at 2kHz amplitude 3V attenuation 10dB"
+    reformatted_message "scan 10x10 and 20x20 and 30x30 gaussian at 1kHz 15mm apart on X axis"
   }
 }
 
-test TestComplexMixedSpacingAndLiftoff {
+test TestYAxisSpacing {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "2 scans 15mm apart on X axis, first liftoff 1mm second liftoff 3mm: gaussian 25x25 at 4kHz amplitude 2V"
+    reformatted_message "scan 10x10 and 20x20 gaussian at 1kHz 25mm apart on Y axis"
   }
 }
 
-// Persistence tests
-test TestParameterPersistence {
+test TestZHeightLiftoff {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 10x10 gaussian at 1kHz amplitude 2V, then 20x20 at 2kHz, then 30x30"
+    reformatted_message "scan 20x20 gaussian at 2kHz liftoff 5mm"
   }
 }
 
-test TestGridPersistence {
+test TestZHeightSpecification {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 15x15 gaussian at 1kHz, then sine at 2kHz, then square at 3kHz"
+    reformatted_message "scan 15x15 sine at 3kHz Z height 3mm"
   }
 }
 
-// Waveform variety tests
-test TestSquareWaveform {
+test TestSpacingWithoutAxis_ShouldError {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 20x20 square at 10kHz"
+    reformatted_message "scan 10x10 and 20x20 gaussian at 1kHz 10mm apart"
   }
 }
 
-test TestMixedWaveforms {
+// ============================================================================
+// SEQUENTIAL EXPERIMENT TESTS
+// ============================================================================
+
+test TestSequentialExperiments {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "gaussian 10x10 at 1kHz, sine 10x10 at 2kHz, square 10x10 at 3kHz"
+    reformatted_message "scan 10x10 gaussian at 1kHz, then scan 20x20 sine at 2kHz"
   }
 }
 
-// Natural language variations
-test TestNaturalLanguageVariation1 {
+test TestSequentialWithParameterPersistence {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "do a scan with 20x20 grid using gaussian waveform at frequency 2000Hz"
+    reformatted_message "scan 10x10 gaussian at 1kHz amplitude 2V, then 20x20 at 2kHz"
   }
 }
 
-test TestNaturalLanguageVariation2 {
+// ============================================================================
+// UNIT NORMALIZATION TESTS
+// ============================================================================
+
+test TestFrequencyInHz {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "run experiment: sine wave, 15 by 15 grid, 3.5 kHz, 2.8 volts"
+    reformatted_message "scan 10x10 gaussian at 500Hz"
   }
 }
 
-test TestNaturalLanguageVariation3 {
+test TestFrequencyInKHz {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "I need to scan a 10x10 area with sine at 1kHz then move 2cm right on X axis and scan 10x10 with gaussian at 1kHz"
+    reformatted_message "scan 10x10 gaussian at 2.5kHz"
   }
 }
 
-// Edge cases
-test TestSinglePointGrid {
+test TestMixedUnits {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 1x1 gaussian at 5kHz"
+    reformatted_message "scan 10x10 gaussian at 1kHz amplitude 2.5V attenuation 15dB pulse width 200us"
   }
 }
 
-test TestLargeGrid {
+test TestDurationInMilliseconds {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 100x100 sine at 10kHz"
+    reformatted_message "scan 10x10 gaussian at 1kHz duration 50ms"
+  }
+}
+
+test TestDurationInSeconds {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 sine at 2kHz duration 2s"
+  }
+}
+
+// ============================================================================
+// FILENAME GENERATION TESTS
+// ============================================================================
+
+test TestUniqueFilenames {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 gaussian at 1kHz amplitude 1V and 2V and 3V"
+  }
+}
+
+test TestFilenameDuplicatePrevention {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 gaussian at 1kHz, then scan 10x10 gaussian at 1kHz"
+  }
+}
+
+test TestLongParameterFilename {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 25x25 square at 5kHz amplitude 3.7V attenuation 20dB pulse width 150us"
+  }
+}
+
+// ============================================================================
+// ERROR HANDLING TESTS
+// ============================================================================
+
+test TestAmbiguousRequest_ShouldError {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "do some experiments with ultrasound"
+  }
+}
+
+test TestMissingGridSize_ShouldError {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan gaussian at 1kHz"
+  }
+}
+
+test TestMissingWaveform_ShouldError {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 at 1kHz"
+  }
+}
+
+test TestInvalidGridFormat_ShouldError {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10 by 10 gaussian at 1kHz"
+  }
+}
+
+// ============================================================================
+// COMPLEX REALISTIC SCENARIOS
+// ============================================================================
+
+test TestComplexParameterSweep {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 to 30x30 gaussian at 1kHz to 3kHz amplitude 1V to 3V 20mm apart on X axis"
+  }
+}
+
+test TestMultipleExperimentsWithDifferentOffsets {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 gaussian at 1kHz at position (0,0,1), then 20x20 sine at 2kHz at position (50,0,1)"
+  }
+}
+
+test TestMixedWaveformsAndParameters {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 15x15 gaussian and sine and square at 2kHz and 3kHz amplitude 2V"
+  }
+}
+
+test TestCompleteParameterSpecification {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 20x20 gaussian at 2.5kHz amplitude 2.5V attenuation 12dB pulse width 100us liftoff 3mm"
+  }
+}
+
+// ============================================================================
+// EDGE CASES
+// ============================================================================
+
+test TestSingleValueInRange {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 gaussian at 1kHz amplitude 2V to 2V"
+  }
+}
+
+test TestLargeGridSize {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 100x100 gaussian at 1kHz"
+  }
+}
+
+test TestVerySmallAmplitude {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 sine at 1kHz amplitude 0.1V"
   }
 }
 
 test TestHighFrequency {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 20x20 gaussian at 100kHz"
+    reformatted_message "scan 10x10 gaussian at 10000Hz"
   }
 }
 
-test TestLowFrequency {
+test TestDecimalGridSize {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 20x20 sine at 100Hz"
+    reformatted_message "scan 10.5x10.5 gaussian at 1kHz"
   }
 }
 
-test TestZeroLiftoff {
+// ============================================================================
+// NATURAL LANGUAGE VARIATIONS
+// ============================================================================
+
+test TestNaturalLanguageAndDelimiter {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 10x10 gaussian at 1kHz liftoff 0mm"
+    reformatted_message "scan 10x10 gaussian at 1kHz and then scan 20x20 sine at 2kHz"
   }
 }
 
-// Duration/time-based parameters
-test TestDurationParameter {
+test TestNaturalLanguageNext {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 15x15 gaussian at 2kHz duration 5ms"
+    reformatted_message "scan 10x10 gaussian at 1kHz next scan 20x20 sine at 2kHz"
   }
 }
 
-test TestMultipleTimeParams {
+test TestNaturalLanguageAfter {
   functions [ExpOrchestrator]
   args {
-    reformatted_message "scan 20x20 square at 5kHz pulse width 200us duration 10ms"
+    reformatted_message "scan 10x10 gaussian at 1kHz after that scan 20x20 sine at 2kHz"
+  }
+}
+
+test TestVerboseDescription {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "please run a 10x10 grid scan using a gaussian waveform at a frequency of 1kHz with an amplitude of 2V"
+  }
+}
+
+// ============================================================================
+// RELATIVE POSITIONING TESTS
+// ============================================================================
+
+test TestRelativeMoveRight {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 gaussian at 1kHz, then move 20mm right and scan 10x10 sine at 2kHz"
+  }
+}
+
+test TestRelativeMoveUp {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 gaussian at 1kHz, then shift 15mm up and scan 10x10 sine at 2kHz"
+  }
+}
+
+// ============================================================================
+// MULTIPLE OFFSET SPECIFICATIONS
+// ============================================================================
+
+test TestMultipleExperimentsXAxisSpacing {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 and 20x20 and 30x30 and 40x40 gaussian at 1kHz 10mm apart on X axis"
+  }
+}
+
+test TestCombinedSpacingAndZHeight {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 and 20x20 gaussian at 1kHz 15mm apart on Y axis liftoff 5mm"
+  }
+}
+
+// ====================================================== ERROR HANDLING TEST CASES ===============================================
+// Test 1: Ambiguous spacing without axis specification
+test TestErrorSpacingWithoutAxis {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 at 1kHz, 10mm apart"
+  }
+}
+
+// Test 2: Unclear experiment description
+test TestErrorUnclearRequest {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "do something with signals"
+  }
+}
+
+// Test 3: Missing critical parameters
+test TestErrorMissingParameters {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan at some frequency"
+  }
+}
+
+// Test 4: Ambiguous range specification
+test TestErrorAmbiguousRange {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 at frequencies between low and high"
+  }
+}
+
+// Test 5: Conflicting spatial instructions
+test TestErrorConflictingSpatial {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 at position (5,5,1) and also 10mm apart"
+  }
+}
+
+// Test 6: Unparseable units
+test TestErrorInvalidUnits {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 at 1kHz with amplitude 5 whatnots"
+  }
+}
+
+// Test 7: Incomplete range specification
+test TestErrorIncompleteRange {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan from 1V to"
+  }
+}
+
+// Test 8: Vague waveform specification
+test TestErrorVagueWaveform {
+  functions [ExpOrchestrator]
+  args {
+    reformatted_message "scan 10x10 with some kind of wave at 1kHz"
   }
 }
 

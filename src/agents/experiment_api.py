@@ -10,7 +10,7 @@ from ..baml_client.types import (
     State,
 )
 from ..core.clients import get_client_registry
-from ..core.models import ExperimentTool
+from ..core.models import ExperimentTool, BasicExperimentTool
 
 
 def call_exp_router(
@@ -28,7 +28,10 @@ def call_exp_router(
 
     return response
 
-def call_exp_basic_executor(user_message: str) -> str | Error:
+
+def call_exp_basic_executor(
+    user_message: str,
+) -> List[BasicExperimentTool] | Error:
     """Call the basic experiment executor with a user message."""
     cr = get_client_registry("exp-basic-executor")
 
@@ -37,6 +40,7 @@ def call_exp_basic_executor(user_message: str) -> str | Error:
         baml_options={"client_registry": cr},
     )
     return response
+
 
 def call_exp_orchestrator(
     reformatted_message: str,

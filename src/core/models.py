@@ -5,6 +5,8 @@ from typing import Dict, List, Union
 
 from ..baml_client.types import (
     ConnectToViTool,
+    GetNumericIndicatorTool,
+    GetViStatusTool,
     HandleSaveDialogTool,
     PressButtonTool,
     RunOpenViTool,
@@ -44,6 +46,20 @@ ExperimentTool = Union[
     SetNumericControlTool,
     StopViTool,
     WaitForOperationCompleteTool,
+]
+
+BasicExperimentTool = Union[
+    ConnectToViTool,
+    GetViStatusTool,
+    GetNumericIndicatorTool,
+    HandleSaveDialogTool,
+    PressButtonTool,
+    RunOpenViTool,
+    SelectComboBoxTool,
+    SelectTabTool,
+    SetButtonStateTool,
+    SetNumericControlTool,
+    StopViTool,
 ]
 
 
