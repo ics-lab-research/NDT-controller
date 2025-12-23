@@ -182,6 +182,7 @@ def start_execution2(
     current_chatbot = current_chatbot + [
         {"role": "assistant", "content": "Dummy execution"}
     ]
+
     yield update_scan_status(plans_path), current_chatbot
 
 
