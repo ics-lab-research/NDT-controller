@@ -89,8 +89,6 @@ def start_all_approved_plans(
     return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
 
 
-
-
 def reload_plans(
     plans_path: Path | None,
 ) -> Tuple[gr.Dropdown, gr.Dataframe, List[ExperimentPlan]]:
