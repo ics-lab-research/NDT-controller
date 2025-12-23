@@ -16,6 +16,7 @@ def respond(
     """Handle chat responses with streaming, yielding response dictionaries."""
     # Convert history to conversation messages, excluding the new messages
     print(message.text)
+    print(message.files)
     print(history)
 
     yield {
