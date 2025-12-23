@@ -26,16 +26,18 @@ Here are some features:
 - `Code snippets` for technical details
 
 Enjoy your interaction!"""
-    content_parts = full_content.split('\n\n')  # Split into paragraphs for streaming
+    content_parts = full_content.split(
+        "\n\n"
+    )  # Split into paragraphs for streaming
     accumulated_content = ""
     for part in content_parts:
-        accumulated_content += part + '\n\n'
+        accumulated_content += part + "\n\n"
         yield {
             "role": "assistant",
             "content": accumulated_content.strip(),
         }
         time.sleep(1)  # Simulate streaming delay
-    
+
     # Final yield with metadata
     yield {
         "role": "assistant",
