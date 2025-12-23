@@ -117,7 +117,7 @@ class LabVIEWController:
                 logger.debug("Reopened front panel for existing connection")
             return True
         except Exception as validation_error:
-            logger.error(f"Existing connection is invalid: {validation_error}")
+            logger.warning(f"Existing connection is invalid: {validation_error}")
             self.labview_app = None
             self.vi_reference = None
             self.vi_path = None
@@ -127,7 +127,7 @@ class LabVIEWController:
         """Create a new LabVIEW connection."""
         logger.debug("Creating new LabVIEW connection...")
         if win32com is None:
-            logger.error(
+            logger.warning(
                 "win32com is not available (likely on non-Windows platform)"
             )
             return False
@@ -176,7 +176,7 @@ class LabVIEWController:
     def connect_to_existing_vi(self, vi_path: Path | None = None) -> bool:
         """Connect to an already opened LabVIEW VI."""
         if win32com is None:
-            logger.error(
+            logger.warning(
                 "win32com is not available (likely on non-Windows platform)"
             )
             return False
@@ -343,7 +343,7 @@ class LabVIEWController:
         """Attempt to abort the VI."""
         try:
             if not self.vi_reference:
-                logger.error("VI reference is None, cannot abort")
+                logger.warning("VI reference is None, cannot abort")
                 return False
             self.vi_reference.Abort()
             methods_tried.append("Abort()")
@@ -354,14 +354,14 @@ class LabVIEWController:
                 )
                 return True
         except Exception as e:
-            logger.error(f"Abort() method failed: {e}")
+            logger.warning(f"Abort() method failed: {e}")
         return False
 
     def _try_stop(self, methods_tried: list[str]) -> bool:
         """Attempt to stop the VI using Stop method."""
         try:
             if not self.vi_reference:
-                logger.error("VI reference is None, cannot stop")
+                logger.warning("VI reference is None, cannot stop")
                 return False
             if hasattr(self.vi_reference, "Stop"):
                 self.vi_reference.Stop()
@@ -373,7 +373,7 @@ class LabVIEWController:
                     )
                     return True
         except Exception as e:
-            logger.error(f"Stop() method failed: {e}")
+            logger.warning(f"Stop() method failed: {e}")
         return False
 
     def _try_multiple_aborts(self, methods_tried: list[str]) -> bool:
@@ -407,13 +407,13 @@ class LabVIEWController:
                     self.vi_reference.FPWinOpen = False
                     time.sleep(0.2)
             except Exception as e:
-                logger.error(f"Could not close VI front panel: {e}")
+                logger.warning(f"Could not close VI front panel: {e}")
             try:
                 if self.labview_app:
                     self.labview_app.Quit()
                     time.sleep(0.5)
             except Exception as e:
-                logger.error(f"Could not quit LabVIEW application: {e}")
+                logger.warning(f"Could not quit LabVIEW application: {e}")
             self.vi_reference, self.labview_app, self.vi_path = None, None, None
             logger.debug("LabVIEW application closed successfully")
             return True
