@@ -165,59 +165,10 @@ def start_execution2(
     current_chatbot: ChatHistory,
     project_manager: ProjectManager,
 ) -> Generator[Tuple[gr.Dataframe, ChatHistory], None, None]:
-    if not plans_path:
-        yield (
-            gr.Dataframe(value=[]),
-            current_chatbot
-            + [
-                {
-                    "role": "assistant",
-                    "content": "Error: Plans path not configured",
-                }
-            ],
-        )
-        return
-    approved_plans = [p for p in plans if p.status == ExperimentStatus.APPROVED]
-    if not approved_plans:
-        yield (
-            update_scan_status(plans_path),
-            current_chatbot
-            + [{"role": "assistant", "content": "No approved plans to start"}],
-        )
-        return
-    # Set to PENDING
-    for plan in approved_plans:
-        plan.status = ExperimentStatus.PENDING
-    try:
-        save_experiment_plans(plans, plans_path)
-    except Exception as e:
-        error_msg = f"Error saving plans: {e}"
-        logger.error(error_msg)
-        yield (
-            update_scan_status(plans_path),
-            current_chatbot + [{"role": "assistant", "content": error_msg}],
-        )
-        return
-    # Execute all plans
-    try:
-        for msg in execute_multiple_plans(plans, project_manager):
-            current_chatbot = current_chatbot + [
-                {"role": "assistant", "content": str(msg)}
-            ]
-            yield update_scan_status(plans_path), current_chatbot
-    except ExperimentExecutionError as e:
-        current_chatbot = current_chatbot + [
-            {
-                "role": "assistant",
-                "content": f"Execution error: {e.error_message}",
-            }
-        ]
-        yield update_scan_status(plans_path), current_chatbot
-    except Exception as e:
-        current_chatbot = current_chatbot + [
-            {"role": "assistant", "content": f"Error during execution: {e}"}
-        ]
-        yield update_scan_status(plans_path), current_chatbot
+    current_chatbot = current_chatbot + [
+        {"role": "assistant", "content": "Dummy execution"}
+    ]
+    yield update_scan_status(plans_path), current_chatbot
 
 
 def create_experiments_tab(
