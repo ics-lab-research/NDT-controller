@@ -13,15 +13,10 @@ def test_stream() -> Generator[str, None, None]:
     yield "3"
 
 
-def respond(message: str, history: list) -> dict:
-    """Respond to user message with a longer markdown-formatted response."""
+def respond(message: str, history: list) -> Generator[dict, None, None]:
+    """Respond to user message with a longer markdown-formatted response, streamed."""
     time.sleep(5)
-    for chunk in test_stream():
-        yield chunk
-
-    return {
-        "role": "assistant",
-        "content": """# Hello World
+    full_content = """# Hello World
 
 This is a **longer response** in markdown format.
 
@@ -30,7 +25,21 @@ Here are some features:
 - *Italic text* for style
 - `Code snippets` for technical details
 
-Enjoy your interaction!""",
+Enjoy your interaction!"""
+    content_parts = full_content.split('\n\n')  # Split into paragraphs for streaming
+    accumulated_content = ""
+    for part in content_parts:
+        accumulated_content += part + '\n\n'
+        yield {
+            "role": "assistant",
+            "content": accumulated_content.strip(),
+        }
+        time.sleep(1)  # Simulate streaming delay
+    
+    # Final yield with metadata
+    yield {
+        "role": "assistant",
+        "content": full_content,
         "metadata": {"title": "📊 Status"},
     }
 
