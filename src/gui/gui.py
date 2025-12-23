@@ -5,6 +5,7 @@ from .chat import (
     clear_chat,
     respond_stream,
 )
+from .artifacts import create_sidebar, toggle_sidebar
 from ..core.project_manager import init_project_context
 from ..core.models import Mode
 
