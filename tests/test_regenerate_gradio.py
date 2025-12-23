@@ -3,10 +3,19 @@ import time
 
 
 def respond(message: str, history: list) -> str:
-    """Respond to user message with 'hello world'."""
+    """Respond to user message with a longer markdown-formatted response."""
     time.sleep(5)
 
-    return "hello world"
+    return """# Hello World
+
+This is a **longer response** in markdown format.
+
+Here are some features:
+- **Bold text** for emphasis
+- *Italic text* for style
+- `Code snippets` for technical details
+
+Enjoy your interaction!"""
 
 
 example_message = ["aaaaaa", "bbbbbbb", "cccccc"]
