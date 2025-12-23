@@ -15,44 +15,52 @@ def respond(
 ) -> Generator[dict, None, None]:
     """Handle chat responses with streaming, yielding response dictionaries."""
     # Convert history to conversation messages, excluding the new messages
-    conversation_history = build_conversation_history(history)
+    print(message)
+    print(history)
 
-    for agent_response in get_agent_response(
-        message, conversation_history, ctx
-    ):
-        if agent_response.response:
-            # Yield updated response message
-            yield {
-                "role": "assistant",
-                "content": agent_response.response,
-            }
+    yield {
+        "role": "assistant",
+        "content": "test",
+    }
 
-        # NOTE: yield latest status
-        if agent_response.status and agent_response.status.strip():
-            yield {
-                "role": "assistant",
-                "content": agent_response.status,
-                "metadata": {"title": "📊 Status"},
-            }
+    # conversation_history = build_conversation_history(history)
 
-        # NOTE: yield latest action
-        if agent_response.action and agent_response.action.strip():
-            yield {
-                "role": "assistant",
-                "content": agent_response.action,
-                "metadata": {"title": "⚡ Action"},
-            }
+    # for agent_response in get_agent_response(
+    #     message, conversation_history, ctx
+    # ):
+    #     if agent_response.response:
+    #         # Yield updated response message
+    #         yield {
+    #             "role": "assistant",
+    #             "content": agent_response.response,
+    #         }
 
-        # NOTE: yield each intermediate_step
-        if (
-            agent_response.intermediate_step
-            and agent_response.intermediate_step.strip()
-        ):
-            yield {
-                "role": "assistant",
-                "content": agent_response.intermediate_step,
-                "metadata": {"title": "🔄 Intermediate step"},
-            }
+    #     # NOTE: yield latest status
+    #     if agent_response.status and agent_response.status.strip():
+    #         yield {
+    #             "role": "assistant",
+    #             "content": agent_response.status,
+    #             "metadata": {"title": "📊 Status"},
+    #         }
+
+    #     # NOTE: yield latest action
+    #     if agent_response.action and agent_response.action.strip():
+    #         yield {
+    #             "role": "assistant",
+    #             "content": agent_response.action,
+    #             "metadata": {"title": "⚡ Action"},
+    #         }
+
+    #     # NOTE: yield each intermediate_step
+    #     if (
+    #         agent_response.intermediate_step
+    #         and agent_response.intermediate_step.strip()
+    #     ):
+    #         yield {
+    #             "role": "assistant",
+    #             "content": agent_response.intermediate_step,
+    #             "metadata": {"title": "🔄 Intermediate step"},
+    #         }
 
 
 def create_chat_interface(
