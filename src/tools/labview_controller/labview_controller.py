@@ -343,7 +343,7 @@ class LabVIEWController:
         """Attempt to abort the VI."""
         try:
             if not self.vi_reference:
-                logger.warning("VI reference is None, cannot abort")
+                logger.error("VI reference is None, cannot abort")
                 return False
             self.vi_reference.Abort()
             methods_tried.append("Abort()")
@@ -373,13 +373,13 @@ class LabVIEWController:
                     )
                     return True
         except Exception as e:
-            logger.warning(f"Stop() method failed: {e}")
+            logger.error(f"Stop() method failed: {e}")
         return False
 
     def _try_multiple_aborts(self, methods_tried: list[str]) -> bool:
         """Attempt multiple abort calls if needed."""
         if not self.vi_reference:
-            logger.warning(
+            logger.error(
                 "VI reference is None, cannot perform multiple aborts"
             )
             return False
@@ -397,7 +397,7 @@ class LabVIEWController:
                     )
                     return True
             except Exception as e:
-                logger.warning(f"Abort attempt {attempt + 1} failed: {e}")
+                logger.error(f"Abort attempt {attempt + 1} failed: {e}")
         return False
 
     def _close_labview(self) -> bool:
@@ -409,13 +409,13 @@ class LabVIEWController:
                     self.vi_reference.FPWinOpen = False
                     time.sleep(0.2)
             except Exception as e:
-                logger.warning(f"Could not close VI front panel: {e}")
+                logger.error(f"Could not close VI front panel: {e}")
             try:
                 if self.labview_app:
                     self.labview_app.Quit()
                     time.sleep(0.5)
             except Exception as e:
-                logger.warning(f"Could not quit LabVIEW application: {e}")
+                logger.error(f"Could not quit LabVIEW application: {e}")
             self.vi_reference, self.labview_app, self.vi_path = None, None, None
             logger.debug("LabVIEW application closed successfully")
             return True
@@ -450,7 +450,7 @@ class LabVIEWController:
                 logger.debug("VI was not running initially - no action needed")
                 vi_stopped = True
             else:
-                logger.warning(
+                logger.error(
                     "VI appears to still be running after all stop attempts"
                 )
             if close_labview and self.labview_app:
