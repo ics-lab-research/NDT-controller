@@ -131,14 +131,12 @@ def _extract_params_from_row(row: pd.Series) -> Dict[str, str]:
     return params
 
 
-def _create_tool_from_row(
-    row: pd.Series
-) -> ExperimentTool | None:
+def _create_tool_from_row(row: pd.Series) -> ExperimentTool | None:
     tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
     if not tool_name or tool_name == "nan":
         return None
     params = _extract_params_from_row(row)
-    tool_class_name = tool_name.title().replace('_', '') + 'Tool'
+    tool_class_name = tool_name.title().replace("_", "") + "Tool"
     tool_class = getattr(types_module, tool_class_name, None)
     if tool_class:
         try:
@@ -153,9 +151,7 @@ def _create_tool_from_row(
 def _convert_table_data_to_tools(
     table_data: pd.DataFrame,
 ) -> List[ExperimentTool]:
-    tools = [
-        _create_tool_from_row(row) for _, row in table_data.iterrows()
-    ]
+    tools = [_create_tool_from_row(row) for _, row in table_data.iterrows()]
     return [tool for tool in tools if tool is not None]
 
 
