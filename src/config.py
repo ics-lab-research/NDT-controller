@@ -2,28 +2,43 @@ import os
 import tomllib
 from pathlib import Path
 from loguru import logger
-
-
-def load_config():
-    """Load configuration from config.toml and set environment variables."""
-    config_path = Path.cwd() / "config.toml"
+  
+  
+def get_config_path() -> Path:
+    """Get the path to the configuration file."""
+    return Path.cwd() / "config.toml"
+  
+  
+def load_config_dict(config_path: Path) -> dict:
+    """Load and parse the TOML configuration file."""
     if not config_path.exists():
         logger.error(f"Config file not found: {config_path}")
         raise FileNotFoundError(f"Config file not found: {config_path}")
-
+  
     try:
         with open(config_path, "rb") as f:
-            config = tomllib.load(f)
+            return tomllib.load(f)
     except Exception as e:
         logger.error(f"Error parsing TOML config: {e}")
         raise
-
-    # Set paths section
+  
+  
+def set_env_vars_from_section(config: dict, section: str) -> None:
+    """Set environment variables from a specific config section, uppercasing keys."""
+    vars_dict = config.get(section, {})
+    for key, value in vars_dict.items():
+        os.environ[key.upper()] = str(value)
+  
+  
+def set_paths_env_vars(config: dict) -> None:
+    """Set environment variables for the paths section."""
     paths = config.get("paths", {})
     if "experiments" in paths:
         os.environ["EXPERIMENTS_BASE"] = paths["experiments"]
-
-    # Set experiments section
+  
+  
+def set_experiments_env_vars(config: dict) -> None:
+    """Set environment variables for the experiments section."""
     experiments = config.get("experiments", {})
     if "data_dir_path" in experiments:
         os.environ["EXPERIMENTS_DATA_DIR_PATH"] = experiments["data_dir_path"]
@@ -31,15 +46,14 @@ def load_config():
         os.environ["EXPERIMENTS_PLANS_PATH"] = experiments["plans_path"]
     if "vi_path" in experiments:
         os.environ["EXPERIMENTS_VI_PATH"] = experiments["vi_path"]
-
-    # Set models section
-    models = config.get("models", {})
-    for key, value in models.items():
-        os.environ[key.upper()] = str(value)
-
-    # Set logging section
-    logging = config.get("logging", {})
-    for key, value in logging.items():
-        os.environ[key.upper()] = str(value)
-
+  
+  
+def load_config() -> None:
+    """Load configuration and set environment variables."""
+    config_path = get_config_path()
+    config = load_config_dict(config_path)
+    set_paths_env_vars(config)
+    set_experiments_env_vars(config)
+    set_env_vars_from_section(config, "models")
+    set_env_vars_from_section(config, "logging")
     logger.info("Configuration loaded and environment variables set.")
