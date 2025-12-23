@@ -2,20 +2,20 @@ from typing import Generator, List, Tuple
 
 import gradio as gr
 
-from ..core.models import ChatHistory, Mode
+from ..core.models import ChatHistory, Mode, MultimodalMessage
 from ..core.project_manager import ProjectManager
 from ..core.llm import get_agent_response
 from .utils import build_conversation_history
 
 
 def respond(
-    message: str,
+    message: MultimodalMessage,
     history: ChatHistory,
     ctx: ProjectManager,
 ) -> Generator[dict, None, None]:
     """Handle chat responses with streaming, yielding response dictionaries."""
     # Convert history to conversation messages, excluding the new messages
-    print(message)
+    print(message.text)
     print(history)
 
     yield {
