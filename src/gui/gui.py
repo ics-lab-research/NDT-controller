@@ -93,9 +93,11 @@ def create_main_interface() -> gr.Blocks:
                         ) = create_chat_interface(project_manager)
 
                     # Sidebar with tabs (hidden by default)
-                    sidebar = gr.Sidebar(label="Sidebar", open=False)
-                    with sidebar:
-                        gr.Markdown("Dummy text for important information")
+                    sidebar_column = create_sidebar(
+                        project_manager,
+                        chatbot,
+                    )
+                    sidebar_column.visible = False
 
         # Wire up events (only for Chat tab)
         msg.submit(
@@ -116,9 +118,9 @@ def create_main_interface() -> gr.Blocks:
         )
 
         show_sidebar.change(
-            lambda x: gr.update(open=x),
+            toggle_sidebar,
             inputs=[show_sidebar],
-            outputs=[sidebar],
+            outputs=[sidebar_column],
         )
 
     return iface
