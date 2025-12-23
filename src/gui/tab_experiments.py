@@ -151,24 +151,10 @@ def start_execution(
             current_chatbot + [{"role": "assistant", "content": error_msg}],
         )
         return
-    # Execute all plans
-    try:
-        for msg in execute_multiple_plans(plans, project_manager):
-            current_chatbot = current_chatbot + [
-                {"role": "assistant", "content": str(msg)}
-            ]
-            yield update_scan_status(plans_path), current_chatbot
-    except ExperimentExecutionError as e:
+    # Execute all plans (dummy)
+    for i in range(5):
         current_chatbot = current_chatbot + [
-            {
-                "role": "assistant",
-                "content": f"Execution error: {e.error_message}",
-            }
-        ]
-        yield update_scan_status(plans_path), current_chatbot
-    except Exception as e:
-        current_chatbot = current_chatbot + [
-            {"role": "assistant", "content": f"Error during execution: {e}"}
+            {"role": "assistant", "content": f"Dummy message {i}"}
         ]
         yield update_scan_status(plans_path), current_chatbot
 
