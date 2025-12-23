@@ -193,12 +193,11 @@ def execute_multiple_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
 ) -> Generator[str, None, ExperimentExecutionError | None]:
     """Execute multiple experiment plans with system reinitialization after each plan."""
-    yield "Starting execution of approved plans"
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     for plan in plans:
         # Only execute plans that are pending or previously errored
         if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):
-            yield f"Executing plan: {plan.filename}"
+            yield f"Executing plan: `{plan.filename}`"
             plan.status = ExperimentStatus.SCANNING
             # Save progress before execution
             if isinstance(metadata, ExperimentsMetadata):
@@ -210,12 +209,11 @@ def execute_multiple_plans(
                     f"Plan {plan.filename} errored: {e.error_message}"
                 )
                 yield error_message
-                logger.debug(f"fail: {error_message}")
                 # Save error state
                 if isinstance(metadata, ExperimentsMetadata):
                     save_experiment_plans(plans, metadata.plans_path)
                 return e
-            yield f"Plan {plan.filename} completed"
+            yield f"Plan `{plan.filename}` completed"
             plan.status = ExperimentStatus.COMPLETED
             # Save completion state
             if isinstance(metadata, ExperimentsMetadata):
@@ -225,4 +223,3 @@ def execute_multiple_plans(
     # Final save of all plans
     if isinstance(metadata, ExperimentsMetadata):
         save_experiment_plans(plans, metadata.plans_path)
-    return None

@@ -44,6 +44,7 @@ def respond_stream(
                 history[-1]["content"] = agent_response.response
                 yield history, ""
 
+        # NOTE: show latest status and action
         if agent_response.status and agent_response.status.strip():
             if status_index is None:
                 # Append status message
@@ -60,27 +61,6 @@ def respond_stream(
                 history[status_index]["content"] = agent_response.status
             yield history, ""
 
-        if (
-            agent_response.intermediate_step
-            and agent_response.intermediate_step.strip()
-        ):
-            if intermediate_index is None:
-                # Append intermediate step message
-                history.append(
-                    {
-                        "role": "assistant",
-                        "content": agent_response.intermediate_step,
-                        "metadata": {"title": "🔄 Intermediate step"},
-                    },
-                )
-                intermediate_index = len(history) - 1
-            else:
-                # Append to existing intermediate step message
-                history[intermediate_index]["content"] += (
-                    "\n" + agent_response.intermediate_step
-                )
-            yield history, ""
-
         if agent_response.action and agent_response.action.strip():
             if action_index is None:
                 # Append action message
@@ -95,6 +75,22 @@ def respond_stream(
             else:
                 # Update existing action message
                 history[action_index]["content"] = agent_response.action
+            yield history, ""
+
+        # NOTE: show all intermediate_step items
+        if (
+            agent_response.intermediate_step
+            and agent_response.intermediate_step.strip()
+        ):
+            if intermediate_index is None:
+                # Append intermediate step message
+                history.append(
+                    {
+                        "role": "assistant",
+                        "content": agent_response.intermediate_step,
+                        "metadata": {"title": "🔄 Intermediate step"},
+                    },
+                )
             yield history, ""
 
 

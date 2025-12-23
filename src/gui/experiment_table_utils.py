@@ -6,6 +6,9 @@ import gradio as gr
 import pandas as pd
 from loguru import logger
 
+from ..agents.experiment_planning import (
+    save_experiment_plans,
+)
 from ..baml_client.types import (
     ConnectToViTool,
     HandleSaveDialogTool,
@@ -102,7 +105,7 @@ def _convert_table_data_to_tools(
     return [tool for tool in tools if tool is not None]
 
 
-def _update_experiment_details(
+def update_experiment_details(
     plans: List[ExperimentPlan], selected_filename: str
 ) -> List[List[str]]:
     if not selected_filename:
@@ -119,7 +122,7 @@ def save_experiment_changes(
     plans_path: Path | None,
     selected_filename: str,
     table_data: pd.DataFrame,
-) -> None:
+):
     if not selected_filename:
         gr.Info("Error: No experiment selected")
         return

@@ -45,7 +45,7 @@ def load_experiment_plans(
         logger.info(f"Loading experiment plans from {filepath}")
     if not filepath.exists():
         if log:
-            logger.warning(f"Experiment plans file {filepath} does not exist")
+            logger.error(f"Experiment plans file {filepath} does not exist")
         return []
     try:
         with filepath.open("r") as f:
@@ -66,7 +66,7 @@ def load_experiment_plans(
                         tools.append(tool)
                     except Exception as e:
                         if log:
-                            logger.warning(
+                            logger.error(
                                 f"Failed to instantiate {type_name}: {e}"
                             )
                         tools.append("unknown")

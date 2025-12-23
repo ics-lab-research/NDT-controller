@@ -144,9 +144,8 @@ class AgentResponse:
 
 # Type alias for chat history using OpenAI-style message format
 ChatMessage = Dict[
-    str, Union[str, Dict[str, str]]
+    str, str | Dict[str, str]
 ]  # Contains 'role' (str), 'content' (str), and optional 'metadata' (dict) keys
-ChatMessageWithMetadata = Dict[str, Union[str, Dict[str, str]]]
 ChatHistory = List[ChatMessage]
 
 
