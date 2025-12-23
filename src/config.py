@@ -32,4 +32,14 @@ def load_config():
     if "vi_path" in experiments:
         os.environ["EXPERIMENTS_VI_PATH"] = experiments["vi_path"]
 
+    # Set models section
+    models = config.get("models", {})
+    for key, value in models.items():
+        os.environ[key.upper()] = str(value)
+
+    # Set logging section
+    logging = config.get("logging", {})
+    for key, value in logging.items():
+        os.environ[key.upper()] = str(value)
+
     logger.info("Configuration loaded and environment variables set.")
