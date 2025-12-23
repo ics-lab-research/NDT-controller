@@ -205,6 +205,16 @@ def handle_experiment_mode(
         yield AgentResponse(intermediate_step="Performing basic control")
 
         tools = call_exp_basic_executor(user_message)
+        if isinstance(tools, Error):
+            yield from yield_error(tools)
+            return
+
+        for tool in tools:
+            result = execute_tool(tool, project_manager)
+            if not result.success:
+                yield AgentResponse(status=f"ERROR: {result.error}")
+                return
+        yield AgentResponse(action="Basic control completed successfully")
 
     elif router_response.action == ExpAction.SINGLE_SCAN:
         yield AgentResponse(intermediate_step="Performing single scan")
