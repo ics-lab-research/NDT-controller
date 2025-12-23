@@ -76,9 +76,9 @@ def respond_stream(
                 intermediate_index = len(history) - 1
             else:
                 # Update existing intermediate step message
-                history[intermediate_index][
-                    "content"
-                ] = agent_response.intermediate_step
+                history[intermediate_index]["content"] = (
+                    agent_response.intermediate_step
+                )
             yield history, ""
 
         if agent_response.action and agent_response.action.strip():
