@@ -2,11 +2,13 @@ import gradio as gr
 import time
 
 
-def respond(message: str, history: list) -> str:
+def respond(message: str, history: list) -> dict:
     """Respond to user message with a longer markdown-formatted response."""
     time.sleep(5)
 
-    return """# Hello World
+    return {
+        "role": "assistant",
+        "content": """# Hello World
 
 This is a **longer response** in markdown format.
 
@@ -15,7 +17,9 @@ Here are some features:
 - *Italic text* for style
 - `Code snippets` for technical details
 
-Enjoy your interaction!"""
+Enjoy your interaction!""",
+        "metadata": {"title": "📊 Status"},
+    }
 
 
 example_message = ["aaaaaa", "bbbbbbb", "cccccc"]
