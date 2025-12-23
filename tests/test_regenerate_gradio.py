@@ -4,13 +4,20 @@ from typing import Generator
 
 
 def test_stream() -> Generator[str, None, None]:
-    yield "1"
+    full_content = """# Hello World
 
-    time.sleep(1)
-    yield "2"
+This is a **longer response** in markdown format.
 
-    time.sleep(2)
-    yield "3"
+Here are some features:
+- **Bold text** for emphasis
+- *Italic text* for style
+- `Code snippets` for technical details
+
+Enjoy your interaction!"""
+    content_parts = full_content.split('\n\n')  # Split into paragraphs
+    for part in content_parts:
+        yield part + '\n\n'
+        time.sleep(1)  # Simulate delay between chunks
 
 
 def respond(message: str, history: list) -> Generator[dict, None, None]:
