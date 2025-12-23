@@ -20,8 +20,8 @@ Step 2: Categorize the request into ONE of these actions:
 
 2. SINGLE_SCAN
    - Use when: User requests one scan with parameters
-   - Required info: Grid size (NxN format) AND waveform type (gaussian/raster/spiral/sine/square/chirp)
-   - Optional info: Frequency (can be inferred or omitted for certain waveforms like chirp)
+   - Required info: Grid size (NxN format) AND any waveform type mentioned by user
+   - Optional info: Frequency (some waveforms may not need it)
    - Output: Standardized scan request
 
 3. MULTIPLE_SCAN
@@ -30,6 +30,7 @@ Step 2: Categorize the request into ONE of these actions:
    - Optional info: 
      * Spacing distance (value + unit) and axis (defaults to X if not specified)
      * Multiple liftoff heights
+     * Frequency (depending on waveform type)
      * If spacing not mentioned, omit it from output
    - Output: Structured experiment description
 
@@ -42,15 +43,15 @@ Step 3: Apply smart defaults and inference:
 - Units: If no unit specified, assume kHz for frequencies above 100, Hz for frequencies below 100
 - Axis: If spacing mentioned without axis, default to X axis
 - Spacing: If not mentioned, don't include it in the output (scans will be done at the same location)
-- Frequency: For chirp waveforms, frequency is optional (uses f1 and f2 parameters directly)
-- Waveform variants: Accept variations like "chirp", "sine wave", "gaussian pulse", etc.
+- Frequency: Optional for waveforms that have their own parameters (like chirp with f1/f2, sweep with start/end, etc.)
+- Waveform types: Accept ANY waveform name user provides (gaussian, sine, square, triangle, sawtooth, chirp, raster, spiral, sweep, pulse, etc.)
 
 Step 4: Reformat the message:
 - Normalize units: centimeters→cm, millimeters→mm, kilohertz→kHz, hertz→Hz
 - Standardize format: "20 by 20"→20x20, "two"→2, "three"→3
 - Make spatial terms explicit: horizontally/left-right→"on X axis", vertically/up-down→"on Y axis"
 - Convert written numbers to digits: "one thousand"→1000, "fifteen"→15
-- For chirp: preserve f1 and f2 parameters as specified
+- Preserve waveform-specific parameters as specified (f1/f2 for chirp, start/end for sweep, etc.)
 - For multiple scans WITHOUT spacing: format as "N scans: [scan parameters]" (omit spacing info)
 - For multiple scans WITH spacing: format as "N scans [distance] apart on [axis]: [scan parameters]"
 
@@ -64,8 +65,14 @@ Step 5: Only ask for clarification if ABSOLUTELY necessary:
 Input: "scan 20 by 20 with a gaussian wave at one kilohertz"
 Output: {"action": "SINGLE_SCAN", "response": null, "reformatted_message": "scan 20x20 gaussian at 1kHz"}
 
+Input: "scan 25x25 sawtooth at 800"
+Output: {"action": "SINGLE_SCAN", "response": null, "reformatted_message": "scan 25x25 sawtooth at 800Hz"}
+
 Input: "scan for me 30x30 with chirp with f1 = 100, f2 = 500"
 Output: {"action": "SINGLE_SCAN", "response": null, "reformatted_message": "scan 30x30 chirp f1=100Hz f2=500Hz"}
+
+Input: "do 18x18 triangle wave"
+Output: {"action": "SINGLE_SCAN", "response": null, "reformatted_message": "scan 18x18 triangle"}
 
 Input: "do two experiments, first one is 10x10 sine at 2k, second is 15x15 gaussian at 3k, put them 2 centimeters apart horizontally"
 Output: {"action": "MULTIPLE_SCAN", "response": null, "reformatted_message": "2 experiments 2cm apart on X axis: sine 10x10 at 2kHz and gaussian 15x15 at 3kHz"}
@@ -94,10 +101,11 @@ Output: {"action": "ASK_CLARIFICATION", "response": "Please specify the scan par
 
 <critical_reminders>
 - Be PERMISSIVE: Assume reasonable defaults rather than asking for clarification
+- Accept ANY waveform type the user mentions - don't limit to a predefined list
 - ONLY ask for clarification when critical info is COMPLETELY missing (no grid size AND no waveform)
 - Spacing distance is OPTIONAL for MULTIPLE_SCAN - if not mentioned, omit it from the output
-- Chirp waveforms don't require standard frequency - they use f1 and f2 parameters
-- If frequency unit is missing, infer from magnitude: >100 = Hz, <=100 = kHz (unless clearly stated otherwise)
+- Frequency is OPTIONAL - some waveforms have their own parameter sets or don't require frequency
+- If frequency unit is missing, infer from magnitude: >100 = Hz, ≤100 = kHz (unless clearly stated otherwise)
 - If axis is missing for spacing, default to X axis
 - Accept natural language variations: "scan for me", "please scan", "do a scan", etc.
 - Think step-by-step but err on the side of processing the request
