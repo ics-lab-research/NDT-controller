@@ -14,9 +14,9 @@ Here are some features:
 - `Code snippets` for technical details
 
 Enjoy your interaction!"""
-    content_parts = full_content.split('\n\n')  # Split into paragraphs
+    content_parts = full_content.split("\n\n")  # Split into paragraphs
     for part in content_parts:
-        yield part + '\n\n'
+        yield part + "\n\n"
         time.sleep(1)  # Simulate delay between chunks
 
 
