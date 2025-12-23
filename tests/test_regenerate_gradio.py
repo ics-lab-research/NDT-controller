@@ -12,4 +12,4 @@ with gr.Blocks() as demo:
     msg.submit(respond, inputs=[msg, chatbot], outputs=[chatbot])
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(inbrowser=True)
