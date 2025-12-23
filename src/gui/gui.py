@@ -123,7 +123,7 @@ def create_main_interface() -> gr.Blocks:
             outputs=[sidebar_column],
         )
 
-        with gr.Sidebar():
-            gr.Markdown("Dummy text")
+        # with gr.Sidebar():
+        #     gr.Markdown("Dummy text")
 
     return iface
