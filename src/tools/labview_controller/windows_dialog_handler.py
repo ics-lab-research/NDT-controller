@@ -86,7 +86,7 @@ def _navigate_directory_uia(dlg: Any, save_directory: str) -> None:
         send_keys("{ENTER}")
         time.sleep(0.8)
     except Exception as nav_error:
-        logger.error(f"Directory navigation failed: {nav_error}")
+        logger.warning(f"Directory navigation failed: {nav_error}")
 
 
 def _set_filename_uia(dlg: Any, filename: str) -> None:
@@ -120,7 +120,7 @@ def _set_filename_uia(dlg: Any, filename: str) -> None:
                 filename, with_spaces=True, set_foreground=True
             )
         except Exception as e:
-            logger.error(f"Failed to set filename in edit control: {e}")
+            logger.warning(f"Failed to set filename in edit control: {e}")
             send_keys("%n^a{DELETE}" + filename)
     else:
         send_keys("%n^a{DELETE}" + filename)
@@ -198,7 +198,7 @@ def _navigate_directory_win32(target_hwnd: int, save_directory: str) -> None:
         win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)  # type: ignore
         time.sleep(0.8)
     except Exception as nav_error:
-        logger.error(f"Directory navigation failed: {nav_error}")
+        logger.warning(f"Directory navigation failed: {nav_error}")
 
 
 def _set_filename_win32(target_hwnd: int, filename: str) -> None:
@@ -227,7 +227,7 @@ def _set_filename_win32(target_hwnd: int, filename: str) -> None:
         )  # type: ignore
         logger.info("Used Alt+N method to set filename")
     except Exception as alt_error:
-        logger.error(f"Alt+N method failed: {alt_error}")
+        logger.warning(f"Alt+N method failed: {alt_error}")
 
     time.sleep(0.2)
 
@@ -339,7 +339,7 @@ def handle_save_file_dialog(
                     settle_delay_seconds,
                 )
             except Exception as uia_error:
-                logger.error(
+                logger.warning(
                     f"UIA path failed: {uia_error}; falling back to win32"
                 )
 
