@@ -29,9 +29,7 @@ demo = gr.ChatInterface(
     examples=example_message,
     example_labels=example_label,
     title="Test",
-    show_progress="full",
     fill_width=True,
-    save_history=True,
     type="messages",
 )
 
