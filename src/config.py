@@ -23,21 +23,21 @@ def load_config_dict(config_path: Path) -> dict:
         raise
 
 
-def set_env_vars_from_section(config: dict, section: str) -> None:
+def set_env_vars_from_section(config: dict, section: str):
     """Set environment variables from a specific config section, uppercasing keys."""
     vars_dict = config.get(section, {})
     for key, value in vars_dict.items():
         os.environ[key.upper()] = str(value)
 
 
-def set_paths_env_vars(config: dict) -> None:
+def set_paths_env_vars(config: dict):
     """Set environment variables for the paths section."""
     paths = config.get("paths", {})
     if "experiments" in paths:
         os.environ["EXPERIMENTS_BASE"] = paths["experiments"]
 
 
-def set_experiments_env_vars(config: dict) -> None:
+def set_experiments_env_vars(config: dict):
     """Set environment variables for the experiments section."""
     experiments = config.get("experiments", {})
     if "data_dir_path" in experiments:
@@ -48,7 +48,7 @@ def set_experiments_env_vars(config: dict) -> None:
         os.environ["EXPERIMENTS_VI_PATH"] = experiments["vi_path"]
 
 
-def load_config() -> None:
+def load_config():
     """Load configuration and set environment variables."""
     config_path = get_config_path()
     config = load_config_dict(config_path)
