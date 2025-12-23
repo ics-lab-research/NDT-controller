@@ -11,7 +11,6 @@ from ..agents.experiment_planning import (
 )
 from ..core.models import (
     ChatHistory,
-    ExperimentExecutionError,
     ExperimentPlan,
     ExperimentsMetadata,
     ExperimentStatus,
