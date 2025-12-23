@@ -76,20 +76,20 @@ def process_single_experiment(
     if isinstance(plan, Error):
         yield from yield_error(plan)
         return plan
+    else:
+        yield AgentResponse(
+            intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
+        )
+        logger.debug(
+            f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
+        )
 
-    yield AgentResponse(
-        intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
-    )
-    logger.debug(
-        f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
-    )
+        tools = call_exp_executor(plan, experiment.filename)
+        if isinstance(tools, Error):
+            yield from yield_error(tools)
+            return tools
 
-    tools = call_exp_executor(plan, experiment.filename)
-    if isinstance(tools, Error):
-        yield from yield_error(tools)
-        return tools
-
-    return ExperimentPlan(filename=experiment.filename, experiment=tools)
+        return ExperimentPlan(filename=experiment.filename, experiment=tools)
 
 
 def handle_single_scan(
@@ -99,18 +99,17 @@ def handle_single_scan(
     """Handle single scan experiment workflow."""
     if orchestrator_output.number_of_scans != 1:
         yield AgentResponse(status="ERROR: Number of scan is not 1")
-        return
+    else:
+        experiment = orchestrator_output.experiments[0]
+        result = yield from process_single_experiment(
+            experiment,
+            project_manager,
+        )
 
-    experiment = orchestrator_output.experiments[0]
-    result = yield from process_single_experiment(
-        experiment,
-        project_manager,
-    )
-
-    # NOTE: each scan will return home position
-    if isinstance(result, ExperimentPlan):
-        project_manager.update_experiment_state(State.home_position)
-        yield from save_plans([result], project_manager)
+        # NOTE: each scan will return home position
+        if isinstance(result, ExperimentPlan):
+            project_manager.update_experiment_state(State.home_position)
+            yield from save_plans([result], project_manager)
 
 
 def handle_multiple_scan(
@@ -174,12 +173,13 @@ def orchestrate_experiments(
     orchestrator_output = call_exp_orchestrator(reformatted_message)
     if isinstance(orchestrator_output, Error):
         yield from yield_error(orchestrator_output)
-        return
-
-    if action == ExpAction.SINGLE_SCAN:
-        yield from handle_single_scan(orchestrator_output, project_manager)
-    elif action == ExpAction.MULTIPLE_SCAN:
-        yield from handle_multiple_scan(orchestrator_output, project_manager)
+    else:
+        if action == ExpAction.SINGLE_SCAN:
+            yield from handle_single_scan(orchestrator_output, project_manager)
+        elif action == ExpAction.MULTIPLE_SCAN:
+            yield from handle_multiple_scan(
+                orchestrator_output, project_manager
+            )
 
 
 def handle_experiment_mode(
@@ -207,14 +207,11 @@ def handle_experiment_mode(
         tools = call_exp_basic_executor(user_message)
         if isinstance(tools, Error):
             yield from yield_error(tools)
-            return
-
-        for tool in tools:
-            result = execute_tool(tool, project_manager)
-            if not result.success:
-                yield AgentResponse(status=f"ERROR: {result.error}")
-                return
-        yield AgentResponse(action="Basic control completed successfully")
+        else:
+            for tool in tools:
+                result = execute_tool(tool, project_manager)
+                if not result.success:
+                    yield AgentResponse(status=f"ERROR: {result.error}")
 
     elif router_response.action == ExpAction.SINGLE_SCAN:
         yield AgentResponse(intermediate_step="Performing single scan")
