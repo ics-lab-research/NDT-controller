@@ -93,8 +93,16 @@ def create_main_interface() -> gr.Blocks:
                                 type="messages",
                                 elem_classes="chatbot-container",
                                 latex_delimiters=[
-                                    {"left": "$", "right": "$", "display": False},
-                                    {"left": "$$", "right": "$$", "display": True},
+                                    {
+                                        "left": "$",
+                                        "right": "$",
+                                        "display": False,
+                                    },
+                                    {
+                                        "left": "$$",
+                                        "right": "$$",
+                                        "display": True,
+                                    },
                                 ],
                             ),
                             fill_width=True,
