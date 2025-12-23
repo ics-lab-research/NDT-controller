@@ -156,26 +156,36 @@ def start_execution(
 
     # Execute all plans
     execution_gen = execute_multiple_plans(plans, project_manager)
+    status_index = None
     try:
         for message in execution_gen:
-            current_chatbot = current_chatbot + [
-                {
-                    "role": "assistant",
-                    "metadata": {"title": "📊 Status"},
-                    "content": message,
-                }
-            ]
+            if status_index is None:
+                current_chatbot = current_chatbot + [
+                    {
+                        "role": "assistant",
+                        "metadata": {"title": "📊 Status"},
+                        "content": message,
+                    }
+                ]
+                status_index = len(current_chatbot) - 1
+            else:
+                current_chatbot[status_index]["content"] = message
             yield update_scan_status(plans_path), current_chatbot
     except StopIteration as e:
         error = e.value
         if error:
-            current_chatbot = current_chatbot + [
-                {
-                    "role": "assistant",
-                    "metadata": {"title": "📊 Status"},
-                    "content": f"Execution error: {error.error_message}",
-                }
-            ]
+            if status_index is None:
+                current_chatbot = current_chatbot + [
+                    {
+                        "role": "assistant",
+                        "metadata": {"title": "📊 Status"},
+                        "content": f"Execution error: {error.error_message}",
+                    }
+                ]
+            else:
+                current_chatbot[status_index]["content"] = (
+                    f"Execution error: {error.error_message}"
+                )
             yield update_scan_status(plans_path), current_chatbot
 
 
