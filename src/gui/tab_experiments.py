@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -99,7 +100,7 @@ def start_all_approved_plans(
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
     tool_name = str(tool.tool_name)
     params = {k: v for k, v in vars(tool).items() if k != "tool_name"}
-    param_list = [f"{k}={v}" for k, v in params.items()]
+    param_list = [f"{k}={v.value if isinstance(v, Enum) else str(v)}" for k, v in params.items()]
     param1 = param_list[0] if param_list else ""
     param2 = param_list[1] if len(param_list) > 1 else ""
     return [tool_name, param1, param2]
