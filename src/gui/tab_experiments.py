@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import Generator, List, Tuple
 
 import gradio as gr
 from loguru import logger
@@ -117,7 +117,7 @@ def start_execution(
     plans_path: Path | None,
     current_chatbot: ChatHistory,
     project_manager: ProjectManager,
-):
+) -> Generator[Tuple[gr.Dataframe, ChatHistory], None, None]:
     if not plans_path:
         yield (
             gr.Dataframe(value=[]),
