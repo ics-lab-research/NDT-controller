@@ -206,7 +206,9 @@ def execute_multiple_plans(
             try:
                 execute_single_plan(plan, project_manager)
             except ExperimentExecutionError as e:
-                error_message = f"Plan {plan.filename} errored: {e.error_message}"
+                error_message = (
+                    f"Plan {plan.filename} errored: {e.error_message}"
+                )
                 yield error_message
                 logger.debug(f"fail: {error_message}")
                 # Save error state
