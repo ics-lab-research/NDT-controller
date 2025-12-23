@@ -13,11 +13,13 @@ from ..baml_client.types import (
 from ..core.models import AgentResponse, ExperimentPlan, ExperimentsMetadata
 from ..core.project_manager import ProjectManager
 from .experiment_api import (
+    call_exp_basic_executor,
     call_exp_executor,
     call_exp_orchestrator,
     call_exp_planner,
     call_exp_router,
 )
+from .experiment_execution import execute_tool
 from .experiment_planning import save_experiment_plans
 
 
@@ -187,9 +189,7 @@ def handle_experiment_mode(
 ) -> Generator[AgentResponse, None, None]:
     """Handle EXPERIMENTS mode: orchestrate experiments based on user message."""
     logger.info("Handling experiment mode")
-    logger.debug(
-        f"Calling ExpRouter with user_message: '{user_message}', conversation_history length: {len(conversation_history)}"
-    )
+    logger.debug(f"Calling ExpRouter with user_message: '{user_message}'")
 
     router_response = call_exp_router(user_message, conversation_history)
     if not router_response:
@@ -200,17 +200,17 @@ def handle_experiment_mode(
     # Determine next steps based on router action
     if router_response.action == ExpAction.ASK_CLARIFICATION:
         return
+
     elif router_response.action == ExpAction.BASIC_CONTROL:
-        # yield AgentResponse(
-        #     intermediate_step="Switching to BASIC CONTROL mode for further instructions."
-        # )
-        # project_manager.set_mode("BASIC CONTROL")
-        return
-    
+        yield AgentResponse(intermediate_step="Performing basic control")
+
+        tools = call_exp_basic_executor(user_message)
+
     elif router_response.action == ExpAction.SINGLE_SCAN:
-        yield AgentResponse(intermediate_step="Performing single scan.")
+        yield AgentResponse(intermediate_step="Performing single scan")
+
     elif router_response.action == ExpAction.MULTIPLE_SCAN:
-        yield AgentResponse(intermediate_step="Performing multiple scan.")
+        yield AgentResponse(intermediate_step="Performing multiple scan")
 
     if router_response.reformatted_message:
         yield from orchestrate_experiments(
