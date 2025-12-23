@@ -132,7 +132,7 @@ def start_execution(
         )
         return
     approved_plans = [p for p in plans if p.status == ExperimentStatus.APPROVED]
-    if approve_all_plans:
+    if approved_plans:
         # Set to PENDING
         for plan in approved_plans:
             plan.status = ExperimentStatus.PENDING
@@ -155,27 +155,28 @@ def start_execution(
             return
 
     # Execute all plans
+    execution_gen = execute_multiple_plans(plans, project_manager)
     try:
-        execute_multiple_plans(plans, project_manager)
-        yield update_scan_status(plans_path), current_chatbot
-    except ExperimentExecutionError as e:
-        current_chatbot = current_chatbot + [
-            {
-                "role": "assistant",
-                "metadata": {"title": "📊 Status"},
-                "content": f"Execution error: {e.error_message}",
-            }
-        ]
-        yield update_scan_status(plans_path), current_chatbot
-    except Exception as e:
-        current_chatbot = current_chatbot + [
-            {
-                "role": "assistant",
-                "metadata": {"title": "📊 Status"},
-                "content": f"Error during execution: {e}",
-            }
-        ]
-        yield update_scan_status(plans_path), current_chatbot
+        for message in execution_gen:
+            current_chatbot = current_chatbot + [
+                {
+                    "role": "assistant",
+                    "metadata": {"title": "📊 Status"},
+                    "content": message,
+                }
+            ]
+            yield update_scan_status(plans_path), current_chatbot
+    except StopIteration as e:
+        error = e.value
+        if error:
+            current_chatbot = current_chatbot + [
+                {
+                    "role": "assistant",
+                    "metadata": {"title": "📊 Status"},
+                    "content": f"Execution error: {error.error_message}",
+                }
+            ]
+            yield update_scan_status(plans_path), current_chatbot
 
 
 def create_experiments_tab(
