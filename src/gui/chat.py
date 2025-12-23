@@ -1,4 +1,4 @@
-from typing import Generator, List, Tuple
+from typing import Generator, List, Tuple, Union
 
 import gradio as gr
 
@@ -9,11 +9,18 @@ from .utils import build_conversation_history
 
 
 def respond(
-    message: MultimodalMessage,
+    message: Union[MultimodalMessage, dict],
     history: ChatHistory,
     ctx: ProjectManager,
 ) -> Generator[dict, None, None]:
     """Handle chat responses with streaming, yielding response dictionaries."""
+    # Handle multimodal message input
+    if isinstance(message, dict):
+        message = MultimodalMessage(
+            text=message.get('text', ''),
+            files=message.get('files', [])
+        )
+    
     # Convert history to conversation messages, excluding the new messages
     print(message.text)
     print(message.files)
