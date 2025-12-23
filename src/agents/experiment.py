@@ -99,17 +99,17 @@ def handle_single_scan(
     """Handle single scan experiment workflow."""
     if orchestrator_output.number_of_scans != 1:
         yield AgentResponse(status="ERROR: Number of scan is not 1")
-    else:
-        experiment = orchestrator_output.experiments[0]
-        result = yield from process_single_experiment(
-            experiment,
-            project_manager,
-        )
 
-        # NOTE: each scan will return home position
-        if isinstance(result, ExperimentPlan):
-            project_manager.update_experiment_state(State.home_position)
-            yield from save_plans([result], project_manager)
+    experiment = orchestrator_output.experiments[0]
+    result = yield from process_single_experiment(
+        experiment,
+        project_manager,
+    )
+
+    # NOTE: each scan will return home position
+    if isinstance(result, ExperimentPlan):
+        project_manager.update_experiment_state(State.home_position)
+        yield from save_plans([result], project_manager)
 
 
 def handle_multiple_scan(

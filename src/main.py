@@ -5,8 +5,12 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from src.gui import create_main_interface
+from src.config import load_config
 
 load_dotenv()
+
+# load config from toml file
+load_config()
 
 # setup level of logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "ERROR").upper()

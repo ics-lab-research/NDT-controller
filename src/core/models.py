@@ -48,7 +48,7 @@ ExperimentTool = Union[
     WaitForOperationCompleteTool,
 ]
 
-BasicExperimentTool = Union[
+BasicExpTool = Union[
     ConnectToViTool,
     GetViStatusTool,
     GetNumericIndicatorTool,

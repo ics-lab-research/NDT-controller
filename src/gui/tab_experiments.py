@@ -10,7 +10,6 @@ from ..agents.experiment_planning import (
     load_experiment_plans,
     save_experiment_plans,
 )
-from ..baml_client import types as types_module
 from ..baml_client.types import (
     ConnectToViTool,
     HandleSaveDialogTool,
@@ -20,6 +19,8 @@ from ..baml_client.types import (
     SelectTabTool,
     SetButtonStateTool,
     SetNumericControlTool,
+    StopViTool,
+    WaitForOperationCompleteTool,
 )
 from ..core.models import (
     ChatHistory,
@@ -131,13 +132,14 @@ def _extract_params_from_row(row: pd.Series) -> Dict[str, str]:
     return params
 
 
-def _create_tool_from_row(row: pd.Series) -> ExperimentTool | None:
+def _create_tool_from_row(
+    row: pd.Series, tool_map: Dict[str, Any]
+) -> ExperimentTool | None:
     tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
     if not tool_name or tool_name == "nan":
         return None
     params = _extract_params_from_row(row)
-    tool_class_name = tool_name.title().replace("_", "") + "Tool"
-    tool_class = getattr(types_module, tool_class_name, None)
+    tool_class = tool_map.get(tool_name)
     if tool_class:
         try:
             return tool_class(tool_name=tool_name, **params)
@@ -152,14 +154,16 @@ def _convert_table_data_to_tools(
     table_data: pd.DataFrame,
 ) -> List[ExperimentTool]:
     tool_map = {
-        "set_numeric_control": SetNumericControlTool,
-        "select_tab": SelectTabTool,
-        "run_open_vi": RunOpenViTool,
         "connect_to_vi": ConnectToViTool,
         "handle_save_dialog": HandleSaveDialogTool,
         "press_button": PressButtonTool,
-        "set_button_state": SetButtonStateTool,
+        "run_open_vi": RunOpenViTool,
         "select_combo_box": SelectComboBoxTool,
+        "select_tab": SelectTabTool,
+        "set_button_state": SetButtonStateTool,
+        "set_numeric_control": SetNumericControlTool,
+        "stop_vi": StopViTool,
+        "wait_for_operation_complete": WaitForOperationCompleteTool,
     }
     tools = [
         _create_tool_from_row(row, tool_map) for _, row in table_data.iterrows()

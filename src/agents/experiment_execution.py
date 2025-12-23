@@ -8,6 +8,8 @@ from ..agents.experiment_planning import save_experiment_plans
 from ..baml_client.types import (
     ConnectToViTool,
     ExpType,
+    GetNumericIndicatorTool,
+    GetViStatusTool,
     HandleSaveDialogTool,
     PressButtonTool,
     RunOpenViTool,
@@ -25,12 +27,14 @@ from ..core.models import (
     ExperimentsMetadata,
     ExperimentStatus,
     ExperimentTool,
+    BasicExpTool,
     Mode,
 )
 from ..core.project_manager import ProjectManager
 from ..tools.labview_controller import (
     tool_connect_to_vi,
     tool_get_numeric_indicator,
+    tool_get_vi_status,
     tool_handle_save_dialog,
     tool_press_button,
     tool_run_open_vi,
@@ -106,31 +110,14 @@ def tool_wait_for_operation_complete(
 
 
 def execute_tool(
-    tool: ExperimentTool, project_manager: ProjectManager
+    tool: BasicExpTool | ExperimentTool, project_manager: ProjectManager
 ) -> ToolResult:
     """Execute a single experiment tool."""
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     if not isinstance(metadata, ExperimentsMetadata):
         raise ValueError("Not in experiments mode")
 
-    if isinstance(tool, SetNumericControlTool):
-        return tool_set_numeric_control(
-            control_name=tool.control_name, value=tool.value
-        )
-    elif isinstance(tool, SelectTabTool):
-        return tool_select_tab(
-            tab_control_name=tool.tab_control_name, tab=tool.index
-        )
-    elif isinstance(tool, RunOpenViTool):
-        return tool_run_open_vi(run_vi=tool.run_vi)
-    elif isinstance(tool, PressButtonTool):
-        return tool_press_button(button_name=tool.button_name)
-    elif isinstance(tool, SetButtonStateTool):
-        time.sleep(BUTTON_STATE_DELAY)
-        return tool_set_button_state(
-            button_name=tool.button_name, state=tool.state
-        )
-    elif isinstance(tool, ConnectToViTool):
+    if isinstance(tool, ConnectToViTool):
         vi_path = metadata.vi_path
         if vi_path and vi_path.exists():
             return tool_connect_to_vi(vi_path)
@@ -142,21 +129,53 @@ def execute_tool(
                 output=None,
                 error=f"VI path {vi_path} does not exist or is None",
             )
+
+    elif isinstance(tool, GetViStatusTool):
+        return tool_get_vi_status()
+
+    elif isinstance(tool, GetNumericIndicatorTool):
+        return tool_get_numeric_indicator(indicator_name=tool.indicator_name)
+
     elif isinstance(tool, HandleSaveDialogTool):
         save_directory = metadata.data_dir_path
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{tool.file_name}_{timestamp}"
         return tool_handle_save_dialog(save_directory, filename=filename)
+
+    elif isinstance(tool, PressButtonTool):
+        return tool_press_button(button_name=tool.button_name)
+
+    elif isinstance(tool, RunOpenViTool):
+        return tool_run_open_vi(run_vi=tool.run_vi)
+
     elif isinstance(tool, SelectComboBoxTool):
         return tool_select_combo_box(
             combo_box_name=tool.combo_box_name, index=tool.index
         )
+
+    elif isinstance(tool, SelectTabTool):
+        return tool_select_tab(
+            tab_control_name=tool.tab_control_name, tab=tool.index
+        )
+
+    elif isinstance(tool, SetButtonStateTool):
+        time.sleep(BUTTON_STATE_DELAY)
+        return tool_set_button_state(
+            button_name=tool.button_name, state=tool.state
+        )
+
+    elif isinstance(tool, SetNumericControlTool):
+        return tool_set_numeric_control(
+            control_name=tool.control_name, value=tool.value
+        )
+
+    elif isinstance(tool, StopViTool):
+        return tool_stop_vi(close_labview=tool.close_labview)
+
     elif isinstance(tool, WaitForOperationCompleteTool):
         return tool_wait_for_operation_complete(
             exp_type=tool.exp_type, project_manager=project_manager
         )
-    elif isinstance(tool, StopViTool):
-        return tool_stop_vi(close_labview=tool.close_labview)
 
 
 def execute_single_plan(
