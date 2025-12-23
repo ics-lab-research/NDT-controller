@@ -117,9 +117,7 @@ class LabVIEWController:
                 logger.debug("Reopened front panel for existing connection")
             return True
         except Exception as validation_error:
-            logger.warning(
-                f"Existing connection is invalid: {validation_error}"
-            )
+            logger.error(f"Existing connection is invalid: {validation_error}")
             self.labview_app = None
             self.vi_reference = None
             self.vi_path = None
@@ -159,7 +157,7 @@ class LabVIEWController:
                 self.vi_reference.FPWinOpen = True
                 logger.debug(f"Front panel opened for VI: {vi_path}")
             except Exception as fp_error:
-                logger.warning(f"Could not open front panel: {fp_error}")
+                logger.error(f"Could not open front panel: {fp_error}")
             try:
                 exec_state = self.vi_reference.ExecState
                 logger.debug(
@@ -171,9 +169,7 @@ class LabVIEWController:
                 )
                 return False
         else:
-            logger.warning(
-                "No VI path provided - connected to LabVIEW app only"
-            )
+            logger.error("No VI path provided - connected to LabVIEW app only")
         logger.debug("Successfully connected to LabVIEW application")
         return True
 
@@ -248,15 +244,15 @@ class LabVIEWController:
             logger.error(f"Failed to set button state '{button_name}': {e}")
             return False
 
-    def select_combo_box(
-        self, combo_box_name: str, index: int
-    ) -> bool:
+    def select_combo_box(self, combo_box_name: str, index: int) -> bool:
         """Select an item in a combo box control by index (int) or string value."""
         try:
             if not self.vi_reference:
                 return False
             self.vi_reference.SetControlValue(combo_box_name, index)
-            logger.debug(f"Selected combo box '{combo_box_name}' to index: {index}")
+            logger.debug(
+                f"Selected combo box '{combo_box_name}' to index: {index}"
+            )
             return True
         except Exception as e:
             logger.error(f"Failed to select combo box '{combo_box_name}': {e}")
@@ -358,14 +354,14 @@ class LabVIEWController:
                 )
                 return True
         except Exception as e:
-            logger.warning(f"Abort() method failed: {e}")
+            logger.error(f"Abort() method failed: {e}")
         return False
 
     def _try_stop(self, methods_tried: list[str]) -> bool:
         """Attempt to stop the VI using Stop method."""
         try:
             if not self.vi_reference:
-                logger.warning("VI reference is None, cannot stop")
+                logger.error("VI reference is None, cannot stop")
                 return False
             if hasattr(self.vi_reference, "Stop"):
                 self.vi_reference.Stop()
