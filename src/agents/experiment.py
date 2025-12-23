@@ -8,6 +8,7 @@ from ..baml_client.types import (
     ExpAction,
     Experiment,
     ExpOrchestratorOutput,
+    RelativeOffset,
     State,
 )
 from ..core.models import AgentResponse, ExperimentPlan, ExperimentsMetadata
@@ -108,7 +109,8 @@ def handle_single_scan(
 
     # NOTE: each scan will return home position
     if isinstance(result, ExperimentPlan):
-        project_manager.update_experiment_state(State.home_position)
+        new_position = RelativeOffset(x=0, y=0, z=1)
+        project_manager.update_experiment_state(new_position)
         yield from save_plans([result], project_manager)
 
 
@@ -147,7 +149,8 @@ def handle_multiple_scan(
             continue
 
         # NOTE: each scan will return home position
-        project_manager.update_experiment_state(State.home_position)
+        new_position = RelativeOffset(x=0, y=0, z=1)
+        project_manager.update_experiment_state(new_position)
 
         plans_to_save.append(
             ExperimentPlan(filename=experiment.filename, experiment=tools)
