@@ -117,7 +117,9 @@ class LabVIEWController:
                 logger.debug("Reopened front panel for existing connection")
             return True
         except Exception as validation_error:
-            logger.warning(f"Existing connection is invalid: {validation_error}")
+            logger.warning(
+                f"Existing connection is invalid: {validation_error}"
+            )
             self.labview_app = None
             self.vi_reference = None
             self.vi_path = None
