@@ -1,10 +1,23 @@
 import gradio as gr
 import time
+from typing import Generator
+
+
+def test_stream() -> Generator[str, None, None]:
+    yield "1"
+
+    time.sleep(1)
+    yield "2"
+
+    time.sleep(2)
+    yield "3"
 
 
 def respond(message: str, history: list) -> dict:
     """Respond to user message with a longer markdown-formatted response."""
     time.sleep(5)
+    for chunk in test_stream():
+        yield chunk
 
     return {
         "role": "assistant",
