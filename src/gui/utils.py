@@ -33,6 +33,7 @@ from ..core.models import (
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
+    """Converts an experiment tool into a list of strings for table display."""
     tool_name = str(tool.tool_name)
     params = {k: v for k, v in vars(tool).items() if k != "tool_name"}
     param_list = [
@@ -45,6 +46,7 @@ def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
 
 
 def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
+    """Converts an experiment plan into a list of table data rows."""
     return [
         row
         for tool in plan.experiment
@@ -54,6 +56,7 @@ def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
 
 
 def _parse_param(param_str: str) -> Tuple[str, str]:
+    """Parses a parameter string into key and value."""
     if not param_str or "=" not in param_str:
         return "", ""
     key, value = param_str.split("=", 1)
@@ -61,6 +64,7 @@ def _parse_param(param_str: str) -> Tuple[str, str]:
 
 
 def _extract_params_from_row(row: pd.Series) -> Dict[str, str]:
+    """Extracts parameters from a pandas Series row."""
     params = {}
     for i in range(1, len(row)):
         param_str = str(row.iloc[i]) if pd.notna(row.iloc[i]) else ""
@@ -74,6 +78,7 @@ def _extract_params_from_row(row: pd.Series) -> Dict[str, str]:
 def _create_tool_from_row(
     row: pd.Series, tool_map: Dict[str, Any]
 ) -> ExperimentTool | None:
+    """Creates an experiment tool from a pandas Series row using a tool map."""
     tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
     if not tool_name or tool_name == "nan":
         return None
@@ -92,6 +97,7 @@ def _create_tool_from_row(
 def _convert_table_data_to_tools(
     table_data: pd.DataFrame,
 ) -> List[ExperimentTool]:
+    """Converts table data into a list of experiment tools."""
     tool_map = {
         "connect_to_vi": ConnectToViTool,
         "handle_save_dialog": HandleSaveDialogTool,
@@ -113,6 +119,7 @@ def _convert_table_data_to_tools(
 def update_experiment_details(
     plans: List[ExperimentPlan], selected_filename: str
 ) -> List[List[str]]:
+    """Updates and returns table data for the selected experiment plan."""
     if not selected_filename:
         return []
     plan = next((p for p in plans if p.filename == selected_filename), None)
@@ -128,6 +135,7 @@ def save_experiment_changes(
     selected_filename: str,
     table_data: pd.DataFrame,
 ):
+    """Saves changes to the selected experiment plan from table data."""
     if not selected_filename:
         gr.Info("Error: No experiment selected")
         return
@@ -151,7 +159,7 @@ def save_experiment_changes(
 def build_conversation_history(
     history: ChatHistory,
 ) -> List[ConversationMessage]:
-    """Convert chat history to baml conversation messages models"""
+    """Builds a list of conversation messages from chat history."""
     conversation = []
     for msg in history:
         role = msg["role"]
@@ -168,7 +176,7 @@ def build_conversation_history(
 def create_message(
     content: str, message_type: MessageType = MessageType.NORMAL
 ) -> ChatMessage:
-    """Create a message dictionary with optional type-based metadata."""
+    """Creates a chat message with optional type-based metadata."""
     metadata = None
     if message_type == MessageType.ACTION:
         metadata = {"title": "⚡ Action"}
