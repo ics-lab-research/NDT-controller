@@ -135,7 +135,7 @@ def create_main_interface() -> gr.Blocks:
             return current_context
 
         with gr.Sidebar():
-            pwd_picker = gr.File(
+            pwd_picker = gr.FileExplorer(
                 label="PWD Path",
                 directory=True,
                 file_count="single",
