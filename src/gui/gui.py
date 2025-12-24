@@ -135,7 +135,9 @@ def create_main_interface() -> gr.Blocks:
             """Select a folder using tkinter, set it in context, and return the path."""
             root = tk.Tk()
             root.withdraw()  # Hide the main window
-            folder_path = filedialog.askdirectory(title="Select Data Dir Folder")
+            folder_path = filedialog.askdirectory(
+                title="Select Data Dir Folder"
+            )
             root.destroy()
             if folder_path:
                 current_context.set_data_dir_path(Path(folder_path))
