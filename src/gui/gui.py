@@ -4,7 +4,7 @@ from pathlib import Path
 from tkinter import filedialog
 
 from ..core.models import Mode
-from ..core.project_manager import init_project_context
+from ..core.project_manager import init_project_context, ProjectManager
 from .artifacts import create_sidebar, toggle_sidebar
 from .chat import (
     handle_mode_change,
@@ -131,7 +131,7 @@ def create_main_interface() -> gr.Blocks:
             outputs=[sidebar_column],
         )
 
-        def select_and_set_data_dir(current_context):
+        def select_and_set_data_dir(current_context: ProjectManager) -> tuple[str, ProjectManager]:
             """Select a folder using tkinter, set it in context, and return the path."""
             root = tk.Tk()
             root.withdraw()  # Hide the main window
