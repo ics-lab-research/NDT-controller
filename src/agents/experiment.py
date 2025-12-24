@@ -126,6 +126,7 @@ def handle_multiple_scan(
 
     plans_to_save = []
 
+    # because each experiment not relate with other, so we can use concurrency to better AI!
     for experiment in orchestrator_output.experiments:
         logger.debug(f"Processing experiment: {experiment.filename}")
 
