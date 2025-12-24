@@ -169,3 +169,21 @@ def create_status_message(content: str) -> dict:
         "metadata": {"title": "📊 Status"},
         "content": content,
     }
+
+
+def create_action_message(content: str) -> dict:
+    """Create a standardized action message dictionary."""
+    return {
+        "role": "assistant",
+        "metadata": {"title": "⚡ Action"},
+        "content": content,
+    }
+
+
+def create_intermediate_step_message(content: str) -> dict:
+    """Create a standardized intermediate step message dictionary."""
+    return {
+        "role": "assistant",
+        "metadata": {"title": "🔄 Intermediate step"},
+        "content": content,
+    }

@@ -6,7 +6,12 @@ import gradio as gr
 from ..core.models import ChatHistory, Mode, MultimodalMessage
 from ..core.project_manager import ProjectManager
 from ..core.llm import get_agent_response
-from .utils import build_conversation_history
+from .utils import (
+    build_conversation_history,
+    create_action_message,
+    create_intermediate_step_message,
+    create_status_message,
+)
 
 
 def respond(
@@ -43,30 +48,18 @@ def respond(
 
         # NOTE: yield latest status
         if agent_response.status and agent_response.status.strip():
-            yield {
-                "role": "assistant",
-                "content": agent_response.status,
-                "metadata": {"title": "📊 Status"},
-            }
+            yield create_status_message(agent_response.status)
 
         # NOTE: yield latest action
         if agent_response.action and agent_response.action.strip():
-            yield {
-                "role": "assistant",
-                "content": agent_response.action,
-                "metadata": {"title": "⚡ Action"},
-            }
+            yield create_action_message(agent_response.action)
 
         # NOTE: yield each intermediate_step
         if (
             agent_response.intermediate_step
             and agent_response.intermediate_step.strip()
         ):
-            yield {
-                "role": "assistant",
-                "content": agent_response.intermediate_step,
-                "metadata": {"title": "🔄 Intermediate step"},
-            }
+            yield create_intermediate_step_message(agent_response.intermediate_step)
 
     progress(1.0, desc="Complete")
 
