@@ -26,8 +26,11 @@ def respond(
     if isinstance(message, dict):
         text = message.get("text", "")
         text = text if isinstance(text, str) else ""
+        files = message.get("files", [])
+        if isinstance(files, str):
+            files = [files]
         multimodal_message = MultimodalMessage(
-            text=text, files=message.get("files", [])
+            text=text, files=files
         )
     elif isinstance(message, str):
         multimodal_message = MultimodalMessage(text=message, files=[])
