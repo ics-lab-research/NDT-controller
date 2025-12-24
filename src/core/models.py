@@ -178,7 +178,7 @@ class MultimodalMessage:
     """Model for multimodal chat input containing text and files."""
 
     text: str
-    files: List[str]
+    files: List[Path]
 
 
 class Mode(Enum):
