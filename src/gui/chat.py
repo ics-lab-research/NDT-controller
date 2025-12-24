@@ -11,7 +11,7 @@ from .utils import build_conversation_history
 def respond(
     message: MultimodalMessage | dict,
     history: ChatHistory,
-    ctx: ProjectManager,
+    project_manager: ProjectManager,
 ) -> Generator[dict, None, None]:
     """Handle chat responses with streaming, yielding response dictionaries."""
     # Handle multimodal message input
