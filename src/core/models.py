@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, TypedDict, Union
 
 from ..baml_client.types import (
     ConnectToViTool,
@@ -19,6 +19,7 @@ from ..baml_client.types import (
 )
 
 
+# ============================== Experiment models ===========================
 @dataclass
 class ExperimentExecutionError(Exception):
     filename: str
@@ -70,9 +71,19 @@ class ExperimentPlan:
     status: ExperimentStatus = ExperimentStatus.NOT_APPROVED
 
 
+@dataclass
+class ExperimentsMetadata:
+    """Metadata for experiments mode."""
+
+    data_dir_path: Path
+    plans_path: Path
+    vi_path: Path
+
+
 # TODO: metadata should have description of file
 
 
+# ============================== Orchestrator models ==========================
 @dataclass
 class OrchestratorMetadata:
     """Metadata for orchestrator mode."""
@@ -80,6 +91,7 @@ class OrchestratorMetadata:
     pass
 
 
+# ============================== Idea models ==================================
 @dataclass
 class IdeaMetadata:
     """Metadata for idea mode."""
@@ -90,15 +102,7 @@ class IdeaMetadata:
     data_science_plan_path: Path
 
 
-@dataclass
-class ExperimentsMetadata:
-    """Metadata for experiments mode."""
-
-    data_dir_path: Path
-    plans_path: Path
-    vi_path: Path
-
-
+# ============================== Data science models ==========================
 @dataclass
 class DataScienceMetadata:
     """Metadata for data science mode."""
@@ -106,6 +110,7 @@ class DataScienceMetadata:
     temp_dir_path: Path
 
 
+# ============================== Reporting models =============================
 @dataclass
 class ReportingMetadata:
     """Metadata for reporting mode."""
@@ -132,6 +137,12 @@ ModeMetadata = Union[
 ]
 
 
+class Message(TypedDict):
+    role: str
+    metadata: Dict[str, str]
+    content: str
+
+
 @dataclass
 class AgentResponse:
     """Unified response structure for all agents."""
@@ -150,7 +161,7 @@ ChatHistory = List[ChatMessage]
 
 
 @dataclass
-class MultimodalMessage:
+class MultimodalMessage(TypedDict):
     """Model for multimodal chat input containing text and files."""
 
     text: str
