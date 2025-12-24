@@ -28,16 +28,16 @@ Enjoy your interaction!"""
     }
 
 
-example_message = ["aaaaaa", "bbbbbbb", "cccccc"]
-example_label = ["A", "B", "C"]
+# example_message = ["aaaaaa", "bbbbbbb", "cccccc"]
+# example_label = ["A", "B", "C"]
 chatbot = gr.Chatbot(type="messages")
 demo = gr.ChatInterface(
     respond,
     multimodal=True,
     chatbot=chatbot,
     editable=True,
-    examples=example_message,
-    example_labels=example_label,
+    # examples=example_message,
+    # example_labels=example_label,
     title="Test",
     fill_width=True,
     type="messages",
