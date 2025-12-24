@@ -154,8 +154,8 @@ def build_conversation_history(
     """Convert chat history to baml conversation messages models"""
     conversation = []
     for msg in history:
-        role = msg.role
-        content = msg.content
+        role = msg["role"]
+        content = msg["content"]
         if (
             (role == "user" or role == "assistant")
             and isinstance(role, str)
