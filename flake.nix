@@ -51,7 +51,7 @@
                 # https://devenv.sh/reference/options/
                 languages.python = {
                   enable = true;
-                  version = "3.11";
+                  version = "3.13";
                   uv = {
                     enable = true;
                     sync.enable = true;
