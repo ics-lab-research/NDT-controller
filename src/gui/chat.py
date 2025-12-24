@@ -3,11 +3,10 @@ from typing import Generator, List, Tuple
 
 import gradio as gr
 
-from ..core.models import ChatHistory, Mode, MultimodalMessage
+from ..core.models import ChatHistory, Mode, MultimodalMessage, ChatMessage, MessageType
 from ..core.project_manager import ProjectManager
 from ..core.llm import get_agent_response
 from .utils import build_conversation_history, create_message
-from ..core.models import MessageType
 
 
 def respond(
@@ -15,8 +14,8 @@ def respond(
     history: ChatHistory,
     project_manager: ProjectManager,
     progress=gr.Progress(),
-) -> Generator[dict, None, None]:
-    """Handle chat responses with streaming, yielding response dictionaries."""
+) -> Generator[ChatMessage, None, None]:
+    """Handle chat responses with streaming, yielding ChatMessage instances."""
     progress(0.0, desc="Starting agent...")
     # Handle multimodal message input
     if isinstance(message, dict):
@@ -37,26 +36,23 @@ def respond(
     ):
         if agent_response.response:
             # Yield updated response message
-            yield {
-                "role": "assistant",
-                "content": agent_response.response,
-            }
+            yield create_message(agent_response.response)
 
         # NOTE: yield latest status
         if agent_response.status and agent_response.status.strip():
-            yield create_status_message(agent_response.status)
+            yield create_message(agent_response.status, MessageType.STATUS)
 
         # NOTE: yield latest action
         if agent_response.action and agent_response.action.strip():
-            yield create_action_message(agent_response.action)
+            yield create_message(agent_response.action, MessageType.ACTION)
 
         # NOTE: yield each intermediate_step
         if (
             agent_response.intermediate_step
             and agent_response.intermediate_step.strip()
         ):
-            yield create_intermediate_step_message(
-                agent_response.intermediate_step
+            yield create_message(
+                agent_response.intermediate_step, MessageType.INTERMEDIATE_STEP
             )
 
     progress(1.0, desc="Complete")
