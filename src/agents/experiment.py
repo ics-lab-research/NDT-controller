@@ -126,19 +126,19 @@ def handle_multiple_scan(
         f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_output.experiments]}"
     )
 
-    plans_to_save = []
-
-    # because each experiment not relate with other, so we can use concurrency to better AI!
-    for experiment in orchestrator_output.experiments:
+    def process_experiment(experiment):
+        messages = []
         logger.debug(f"Processing experiment: {experiment.filename}")
 
         plan = call_exp_planner(experiment, project_manager.experiment_state)
         if isinstance(plan, Error):
-            yield from yield_error(plan)
-            continue
+            messages.extend(list(yield_error(plan)))
+            return None, messages
 
-        yield AgentResponse(
-            intermediate_step=f"Calling ExpExecutor with filename: {experiment.filename} and abstract plan:\n {plan}"
+        messages.append(
+            AgentResponse(
+                intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
+            )
         )
         logger.debug(
             f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
@@ -146,16 +146,24 @@ def handle_multiple_scan(
 
         tools = call_exp_executor(plan, experiment.filename)
         if isinstance(tools, Error):
-            yield from yield_error(tools)
-            continue
+            messages.extend(list(yield_error(tools)))
+            return None, messages
 
         # NOTE: each scan will return home position
         new_position = project_manager.experiment_state.home_position
         project_manager.update_experiment_state(new_position)
 
-        plans_to_save.append(
-            ExperimentPlan(filename=experiment.filename, experiment=tools)
-        )
+        exp_plan = ExperimentPlan(filename=experiment.filename, experiment=tools)
+        return exp_plan, messages
+
+    plans_to_save = []
+    with ThreadPoolExecutor() as executor:
+        results = executor.map(process_experiment, orchestrator_output.experiments)
+        for plan, msgs in results:
+            for msg in msgs:
+                yield msg
+            if plan:
+                plans_to_save.append(plan)
 
     if plans_to_save:
         yield from save_plans(plans_to_save, project_manager)
