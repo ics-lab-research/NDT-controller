@@ -113,6 +113,35 @@ def reload_plans(
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
 
 
+def delete_experiment(
+    plans: List[ExperimentPlan],
+    plans_path: Path | None,
+    selected_filename: str,
+) -> Tuple[gr.Dropdown, gr.Dataframe, List[ExperimentPlan]]:
+    if not plans_path:
+        gr.Info("Error: Plans path not configured")
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
+    try:
+        # Find and remove the plan
+        plans = [p for p in plans if p.filename != selected_filename]
+        save_experiment_plans(plans, plans_path)
+        filenames = [plan.filename for plan in plans]
+        initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+        gr.Info("Experiment deleted successfully")
+        return (
+            gr.Dropdown(
+                choices=filenames, value=filenames[0] if filenames else None
+            ),
+            gr.Dataframe(value=initial_data),
+            plans,
+        )
+    except Exception as e:
+        error_msg = f"Error deleting experiment: {str(e)}"
+        logger.error(error_msg)
+        gr.Info(error_msg)
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
+
+
 def start_execution(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
@@ -291,6 +320,12 @@ def create_experiments_tab(
             reload_button.click(
                 lambda: reload_plans(plans_path),
                 inputs=[],
+                outputs=[dropdown, details_df, plans_state],
+            )
+
+            delete_button.click(
+                delete_experiment,
+                inputs=[plans_state, plans_path_state, dropdown],
                 outputs=[dropdown, details_df, plans_state],
             )
 
