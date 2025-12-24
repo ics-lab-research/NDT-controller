@@ -1,4 +1,5 @@
 import gradio as gr
+from pathlib import Path
 
 from ..core.models import Mode
 from ..core.project_manager import init_project_context
@@ -128,7 +129,20 @@ def create_main_interface() -> gr.Blocks:
             outputs=[sidebar_column],
         )
 
+        def set_pwd(new_pwd: str, current_context):
+            current_context._pwd_path = Path(new_pwd)
+            return current_context
+
         with gr.Sidebar():
-            gr.Markdown("Dummy text")
+            pwd_textbox = gr.Textbox(
+                label="PWD Path",
+                value=str(project_manager.pwd_path),
+            )
+            set_pwd_button = gr.Button("Set PWD")
+            set_pwd_button.click(
+                set_pwd,
+                inputs=[pwd_textbox, current_context],
+                outputs=[current_context],
+            )
 
     return iface
