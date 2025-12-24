@@ -26,6 +26,14 @@ from .utils import (
 )
 
 
+def get_experiment_status(
+    plans: List[ExperimentPlan], selected_filename: str
+) -> str:
+    """Gets the status value for the selected experiment."""
+    plan = next((p for p in plans if p.filename == selected_filename), None)
+    return plan.status.value if plan else ""
+
+
 def update_scan_status(
     plans_path: Path | None, log: bool = False
 ) -> gr.Dataframe:
@@ -90,56 +98,60 @@ def start_all_approved_plans(
 
 def reload_plans(
     plans_path: Path | None,
-) -> Tuple[gr.Dropdown, gr.Dataframe, List[ExperimentPlan]]:
+) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
     if not plans_path:
         gr.Info("Error: Plans path not configured")
-        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
     try:
         plans = load_experiment_plans(plans_path, log=True)
         filenames = [plan.filename for plan in plans]
         initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+        initial_status = plans[0].status.value if plans else ""
         gr.Info("Successfully reloaded experiment plans")
         return (
             gr.Dropdown(
                 choices=filenames, value=filenames[0] if filenames else None
             ),
             gr.Dataframe(value=initial_data),
+            initial_status,
             plans,
         )
     except Exception as e:
         error_msg = f"Error reloading plans: {str(e)}"
         logger.error(error_msg)
         gr.Info(error_msg)
-        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
 
 
 def delete_experiment(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
     selected_filename: str,
-) -> Tuple[gr.Dropdown, gr.Dataframe, List[ExperimentPlan]]:
+) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
     if not plans_path:
         gr.Info("Error: Plans path not configured")
-        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
     try:
         # Find and remove the plan
         plans = [p for p in plans if p.filename != selected_filename]
         save_experiment_plans(plans, plans_path)
         filenames = [plan.filename for plan in plans]
         initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+        initial_status = plans[0].status.value if plans else ""
         gr.Info("Experiment deleted successfully")
         return (
             gr.Dropdown(
                 choices=filenames, value=filenames[0] if filenames else None
             ),
             gr.Dataframe(value=initial_data),
+            initial_status,
             plans,
         )
     except Exception as e:
         error_msg = f"Error deleting experiment: {str(e)}"
         logger.error(error_msg)
         gr.Info(error_msg)
-        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
 
 
 def update_experiment_status(
@@ -250,6 +262,7 @@ def create_experiments_tab(
             plans = load_experiment_plans(plans_path, log=True)
     filenames = [plan.filename for plan in plans]
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+    initial_status = plans[0].status.value if plans else ""
     plans_state = gr.State(plans)
     statuses = _get_experiment_statuses(plans)
     plans_path_state = gr.State(plans_path)
@@ -315,6 +328,7 @@ def create_experiments_tab(
                 status_dropdown = gr.Dropdown(
                     choices=[status.value for status in ExperimentStatus],
                     label="Change Status",
+                    value=initial_status,
                 )
 
             delete_button = gr.Button("🗑️ Delete Experiment")
@@ -328,11 +342,12 @@ def create_experiments_tab(
                 save_button = gr.Button("💾 Save Changes")
                 reload_button = gr.Button("🔄 Reload Plans")
             exp_dropdown.change(
-                lambda filename, current_plans: update_experiment_details(
-                    current_plans, filename
+                lambda filename, current_plans: (
+                    update_experiment_details(current_plans, filename),
+                    get_experiment_status(current_plans, filename),
                 ),
                 inputs=[exp_dropdown, plans_state],
-                outputs=details_df,
+                outputs=[details_df, status_dropdown],
             )
             save_button.click(
                 lambda filename, data, current_plans: save_experiment_changes(
@@ -344,13 +359,13 @@ def create_experiments_tab(
             reload_button.click(
                 lambda: reload_plans(plans_path),
                 inputs=[],
-                outputs=[exp_dropdown, details_df, plans_state],
+                outputs=[exp_dropdown, details_df, status_dropdown, plans_state],
             )
 
             delete_button.click(
                 delete_experiment,
                 inputs=[plans_state, plans_path_state, exp_dropdown],
-                outputs=[exp_dropdown, details_df, plans_state],
+                outputs=[exp_dropdown, details_df, status_dropdown, plans_state],
             )
 
             status_dropdown.change(
