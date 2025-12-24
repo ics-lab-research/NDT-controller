@@ -117,6 +117,20 @@ def create_chat_interface(
     with gr.Row():
         clear = gr.Button("Clear")
 
+    # Add spinner for loading animation during response
+    with gr.Spinner():
+        msg.submit(
+            fn=respond,
+            inputs=[msg, chatbot, project_manager],
+            outputs=[chatbot],
+        )
+
+    mode_dropdown.change(
+        fn=handle_mode_change,
+        inputs=[mode_dropdown, project_manager],
+        outputs=[project_manager],
+    )
+
     clear.click(
         fn=clear_chat,
         inputs=None,
