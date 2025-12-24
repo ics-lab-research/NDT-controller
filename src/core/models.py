@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, TypedDict
 
 from ..baml_client.types import (
     ConnectToViTool,
@@ -138,11 +138,10 @@ ModeMetadata = Union[
 
 
 # ============================== Other models =================================
-@dataclass
-class ChatMessage:
+class ChatMessage(TypedDict, total=False):
     role: str
     content: str
-    metadata: Dict[str, str] | None = None
+    metadata: Dict[str, str]
 
 
 # Type alias for chat history using OpenAI-style message format
