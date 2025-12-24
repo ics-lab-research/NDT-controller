@@ -143,6 +143,12 @@ class Message(TypedDict):
     content: str
 
 
+class ChatMessage(TypedDict, total=False):
+    role: str
+    content: str
+    metadata: Dict[str, str]
+
+
 @dataclass
 class AgentResponse:
     """Unified response structure for all agents."""
@@ -154,9 +160,6 @@ class AgentResponse:
 
 
 # Type alias for chat history using OpenAI-style message format
-ChatMessage = Dict[
-    str, str | Dict[str, str]
-]  # Contains 'role' (str), 'content' (str), and optional 'metadata' (dict) keys
 ChatHistory = List[ChatMessage]
 
 
