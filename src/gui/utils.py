@@ -154,8 +154,8 @@ def build_conversation_history(
     """Convert chat history to baml conversation messages models"""
     conversation = []
     for msg in history:
-        role = msg.get("role")
-        content = msg.get("content")
+        role = msg.role
+        content = msg.content
         if (
             (role == "user" or role == "assistant")
             and isinstance(role, str)
@@ -169,15 +169,12 @@ def create_message(
     content: str, message_type: MessageType = MessageType.NORMAL
 ) -> ChatMessage:
     """Create a message dictionary with optional type-based metadata."""
-    msg: ChatMessage = {
-        "role": "assistant",
-        "content": content,
-    }
+    metadata = None
     if message_type == MessageType.ACTION:
-        msg["metadata"] = {"title": "⚡ Action"}
+        metadata = {"title": "⚡ Action"}
     elif message_type == MessageType.STATUS:
-        msg["metadata"] = {"title": "📊 Status"}
+        metadata = {"title": "📊 Status"}
     elif message_type == MessageType.INTERMEDIATE_STEP:
-        msg["metadata"] = {"title": "🔄 Intermediate step"}
+        metadata = {"title": "🔄 Intermediate step"}
     # For NORMAL, no metadata
-    return msg
+    return ChatMessage(role="assistant", content=content, metadata=metadata)
