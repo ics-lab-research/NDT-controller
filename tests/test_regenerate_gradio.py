@@ -3,7 +3,9 @@ import time
 from typing import Generator
 
 
-def respond(message: str, history: list, progress=gr.Progress()) -> Generator[dict, None, None]:
+def respond(
+    message: str, history: list, progress=gr.Progress()
+) -> Generator[dict, None, None]:
     """Respond to user message with multiple yields simulating agent behavior."""
     progress(0.0, desc="Starting agent...")
     yield {"role": "assistant", "content": "Starting agent..."}
