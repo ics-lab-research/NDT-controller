@@ -17,7 +17,7 @@ from ..core.models import (
     Mode,
 )
 from ..core.project_manager import ProjectManager
-from .experiment_table_utils import (
+from .utils import (
     convert_plan_to_table_data,
     save_experiment_changes,
     update_experiment_details,

@@ -9,13 +9,13 @@ def respond(
     """Respond to user message with multiple yields simulating agent behavior."""
     progress(0.0, desc="Starting agent...")
     yield {"role": "assistant", "content": "Starting agent..."}
-    time.sleep(0.5)
+    time.sleep(5)
     progress(0.25, desc="Thinking...")
     yield {"role": "assistant", "content": "Thinking..."}
-    time.sleep(0.5)
+    time.sleep(5)
     progress(0.5, desc="Planning...")
     yield {"role": "assistant", "content": "Planning..."}
-    time.sleep(0.5)
+    time.sleep(5)
     progress(0.75, desc="Generating response...")
     full_content = """# Hello World
 

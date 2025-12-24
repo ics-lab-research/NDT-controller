@@ -25,7 +25,7 @@ class ProjectManager:
         """Initialize project context."""
         self._current_mode = current_mode
         self._pwd_path = pwd_path
-        self._experiment_state = self.create_initial_experiment_state()
+        self._experiment_state = self.create_init_experiment_state()
         self._multimodal_uploads: List[Path] = []
 
     @property
@@ -53,7 +53,7 @@ class ProjectManager:
         logger.info(f"Added multimodal upload: {file_path}")
         self._multimodal_uploads.append(file_path)
 
-    def create_initial_experiment_state(self) -> State:
+    def create_init_experiment_state(self) -> State:
         """Create the initial experiment state for experiments."""
         position = RelativeOffset(x=0, y=0, z=1)
         return State(current_position=position, home_position=position)

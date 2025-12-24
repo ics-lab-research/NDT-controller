@@ -125,7 +125,7 @@ def handle_multiple_scan(
     )
 
     def process_experiment(
-        experiment,
+        experiment: Experiment,
     ) -> Generator[AgentResponse, None, ExperimentPlan | None]:
         logger.debug(f"Processing experiment: {experiment.filename}")
 
