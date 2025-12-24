@@ -44,8 +44,8 @@
                   pyright # python lsp
                   ruff # fast linter
 
-                  # to build pdf
-                  texliveFull
+                  # for pick file support
+                  python313Packages.tkinter
                 ];
 
                 # https://devenv.sh/reference/options/
