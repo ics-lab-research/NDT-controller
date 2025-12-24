@@ -163,28 +163,12 @@ def build_conversation_history(
     return conversation
 
 
-def create_status_message(content: str) -> ChatMessage:
-    """Create a standardized status message dictionary."""
-    return {
+def create_message(content: str, title: str = None) -> ChatMessage:
+    """Create a message dictionary, optionally with a title in metadata."""
+    msg = {
         "role": "assistant",
-        "metadata": {"title": "📊 Status"},
         "content": content,
     }
-
-
-def create_action_message(content: str) -> ChatMessage:
-    """Create a standardized action message dictionary."""
-    return {
-        "role": "assistant",
-        "metadata": {"title": "⚡ Action"},
-        "content": content,
-    }
-
-
-def create_intermediate_step_message(content: str) -> ChatMessage:
-    """Create a standardized intermediate step message dictionary."""
-    return {
-        "role": "assistant",
-        "metadata": {"title": "🔄 Intermediate step"},
-        "content": content,
-    }
+    if title:
+        msg["metadata"] = {"title": title}
+    return msg
