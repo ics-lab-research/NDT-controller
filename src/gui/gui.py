@@ -131,30 +131,28 @@ def create_main_interface() -> gr.Blocks:
             outputs=[sidebar_column],
         )
 
-        def select_and_set_pwd(current_context):
+        def select_and_set_data_dir(current_context):
             """Select a folder using tkinter, set it in context, and return the path."""
             root = tk.Tk()
             root.withdraw()  # Hide the main window
-            folder_path = filedialog.askdirectory(title="Select PWD Folder")
+            folder_path = filedialog.askdirectory(title="Select Data Dir Folder")
             root.destroy()
             if folder_path:
-                current_context._pwd_path = Path(folder_path)
+                current_context.set_data_dir_path(Path(folder_path))
                 return folder_path, current_context
             return "No folder selected", current_context
 
         with gr.Sidebar():
-            pwd_textbox = gr.Textbox(
-                label="PWD Path",
-                value=str(project_manager._pwd_path)
-                if hasattr(project_manager, "_pwd_path")
-                else "",
+            data_dir_textbox = gr.Textbox(
+                label="Data Dir Path",
+                value=str(project_manager.data_dir_path),
                 interactive=False,
             )
-            select_pwd_button = gr.Button("Select PWD Folder")
-            select_pwd_button.click(
-                select_and_set_pwd,
+            select_data_dir_button = gr.Button("Select Data Dir Folder")
+            select_data_dir_button.click(
+                select_and_set_data_dir,
                 inputs=[current_context],
-                outputs=[pwd_textbox, current_context],
+                outputs=[data_dir_textbox, current_context],
             )
 
     return iface

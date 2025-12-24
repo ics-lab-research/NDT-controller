@@ -25,6 +25,7 @@ class ProjectManager:
         """Initialize project context."""
         self._current_mode = current_mode
         self._pwd_path = pwd_path
+        self._data_dir_path: Path | None = None
         self._experiment_state = self.create_init_experiment_state()
         self._multimodal_uploads: List[Path] = []
 
@@ -37,6 +38,15 @@ class ProjectManager:
     def pwd_path(self) -> Path:
         """Get the present working directory path."""
         return self._pwd_path
+
+    @property
+    def data_dir_path(self) -> Path:
+        """Get the data directory path."""
+        if self._data_dir_path is not None:
+            return self._data_dir_path
+        experiments_base = os.environ.get("EXPERIMENTS_BASE", "EXPERIMENTS")
+        data_dir_rel = os.environ.get("EXPERIMENTS_DATA_DIR_PATH", "data")
+        return self._pwd_path / experiments_base / data_dir_rel
 
     @property
     def experiment_state(self) -> State:
@@ -73,7 +83,6 @@ class ProjectManager:
 
     def _get_experiments_metadata(self) -> ExperimentsMetadata:
         experiments_base = os.environ.get("EXPERIMENTS_BASE", "EXPERIMENTS")
-        data_dir_path = os.environ.get("EXPERIMENTS_DATA_DIR_PATH", "data")
         plans_path = os.environ.get(
             "EXPERIMENTS_PLANS_PATH", "labview_experiment_plans.json"
         )
@@ -82,7 +91,7 @@ class ProjectManager:
             "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi",
         )
         return ExperimentsMetadata(
-            data_dir_path=self._pwd_path / experiments_base / data_dir_path,
+            data_dir_path=self.data_dir_path,
             plans_path=self._pwd_path / experiments_base / plans_path,
             vi_path=Path(vi_path_str),
         )
@@ -105,6 +114,11 @@ class ProjectManager:
         """Set the mode for the current context."""
         logger.info(f"Setting mode to {mode}")
         self._current_mode = mode
+
+    def set_data_dir_path(self, path: Path):
+        """Set the data directory path."""
+        logger.info(f"Setting data dir path to {path}")
+        self._data_dir_path = path
 
     def _ensure_file_exists(self, file_path: Path):
         """Ensure a file exists, copying from template if available."""
