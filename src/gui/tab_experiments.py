@@ -252,11 +252,15 @@ def create_experiments_tab(
 
         # ================ Plan Viewer tab =============================
         with gr.TabItem("Plan Viewer"):
-            dropdown = gr.Dropdown(
-                choices=filenames,
-                label="Select Experiment",
-                value=filenames[0] if filenames else None,
-            )
+            with gr.Row():
+                dropdown = gr.Dropdown(
+                    choices=filenames,
+                    label="Select Experiment",
+                    value=filenames[0] if filenames else None,
+                )
+
+                delete_button = gr.Button("Delete Experiment")
+
             details_df = gr.Dataframe(
                 headers=["Tool Name", "Parameter 1", "Parameter 2"],
                 value=initial_data,
@@ -265,7 +269,6 @@ def create_experiments_tab(
             with gr.Row():
                 save_button = gr.Button("Save Changes")
                 reload_button = gr.Button("Reload Plans")
-                delete_button = gr.Button("Delete Experiment")
             dropdown.change(
                 lambda filename, current_plans: update_experiment_details(
                     current_plans, filename
