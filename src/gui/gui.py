@@ -114,12 +114,12 @@ def create_main_interface() -> gr.Blocks:
                             mode_dropdown = gr.Dropdown(
                                 choices=Mode.get_values(),
                                 value=project_manager.current_mode.value,
-                                scale=0.5,
+                                scale=1,
                                 show_label=False,
                                 interactive=True,
                                 allow_custom_value=True,
                             )
-                            clear = gr.Button("Clear", scale=1.5)
+                            clear = gr.Button("Clear", scale=4)
 
                     # Sidebar with tabs (hidden by default)
                     sidebar_column = create_sidebar(
