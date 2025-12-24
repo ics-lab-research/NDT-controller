@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from ..baml_client.types import (
     ConnectToViTool,
@@ -23,7 +23,7 @@ from ..baml_client.types import (
 @dataclass
 class ExperimentExecutionError(Exception):
     filename: str
-    error_message: str | None
+    error_message: str
 
 
 class ExperimentStatus(Enum):
@@ -140,9 +140,9 @@ ModeMetadata = Union[
 # ============================== Other models =================================
 @dataclass
 class ChatMessage:
-    role: Optional[str] = None
-    content: Optional[str] = None
-    metadata: Optional[Dict[str, str]] = None
+    role: str
+    content: str
+    metadata: Dict[str, str] | None = None
 
 
 # Type alias for chat history using OpenAI-style message format
