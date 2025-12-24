@@ -44,9 +44,14 @@ def respond(
     conversation_history = build_conversation_history(history)
 
     progress(0.25, desc="Processing request...")
+    response_count = 0
     for agent_response in get_agent_response(
         multimodal_message.text, conversation_history, project_manager
     ):
+        response_count += 1
+        current_progress = min(0.25 + (response_count * 0.05), 0.95)
+        progress(current_progress, desc=f"Processing step {response_count}...")
+
         if agent_response.response:
             # Yield updated response message
             yield create_message(agent_response.response)
