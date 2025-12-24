@@ -4,16 +4,16 @@ from typing import Dict, Generator, List, Tuple
 import gradio as gr
 from loguru import logger
 
+from ..core.llm import get_agent_response
 from ..core.models import (
+    AgentResponse,
     ChatHistory,
+    ChatMessage,
+    MessageType,
     Mode,
     MultimodalMessage,
-    MessageType,
-    ChatMessage,
-    AgentResponse,
 )
 from ..core.project_manager import ProjectManager
-from ..core.llm import get_agent_response
 from .utils import build_conversation_history, create_message
 
 
@@ -62,13 +62,20 @@ def yield_agent_response_messages(
         )
 
 
+def calculate_progress(response_count: int) -> float:
+    """Calculate progress value based on response count."""
+    return min(0.25 + (response_count * 0.05), 0.95)
+
+
 def respond(
     message: Dict[str, str | List[str]] | str,
     history: ChatHistory,
     project_manager: ProjectManager,
+    progress=gr.Progress(),
 ) -> Generator[ChatMessage, None, None]:
     """Handle chat responses with streaming."""
     logger.info("Starting chat response processing")
+    progress(0.0, desc="Starting agent...")
 
     multimodal_message = parse_multimodal_message(message)
     register_uploaded_files(multimodal_message, project_manager)
@@ -77,13 +84,20 @@ def respond(
     logger.debug(
         f"Processing message with {len(multimodal_message.files)} files"
     )
+    progress(0.25, desc="Processing request...")
 
+    response_count = 0
     for agent_response in get_agent_response(
         multimodal_message.text, conversation_history, project_manager
     ):
+        response_count += 1
+        current_progress = calculate_progress(response_count)
+        progress(current_progress, desc=f"Processing step {response_count}...")
+
         yield from yield_agent_response_messages(agent_response)
 
-    logger.info("Chat response complete")
+    logger.info(f"Chat response complete after {response_count} steps")
+    progress(1.0, desc="Complete")
 
 
 def create_chat_interface(
@@ -116,20 +130,6 @@ def create_chat_interface(
 
     with gr.Row():
         clear = gr.Button("Clear")
-
-    # Add spinner for loading animation during response
-    with gr.Spinner():
-        msg.submit(
-            fn=respond,
-            inputs=[msg, chatbot, project_manager],
-            outputs=[chatbot],
-        )
-
-    mode_dropdown.change(
-        fn=handle_mode_change,
-        inputs=[mode_dropdown, project_manager],
-        outputs=[project_manager],
-    )
 
     clear.click(
         fn=clear_chat,

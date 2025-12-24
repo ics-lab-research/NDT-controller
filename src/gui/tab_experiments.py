@@ -14,23 +14,16 @@ from ..core.models import (
     ExperimentPlan,
     ExperimentsMetadata,
     ExperimentStatus,
+    MessageType,
     Mode,
 )
 from ..core.project_manager import ProjectManager
 from .utils import (
     convert_plan_to_table_data,
+    create_message,
     save_experiment_changes,
     update_experiment_details,
 )
-
-
-def create_status_message(content: str) -> dict:
-    """Create a standardized status message dictionary."""
-    return {
-        "role": "assistant",
-        "metadata": {"title": "📊 Status"},
-        "content": content,
-    }
 
 
 def update_scan_status(
@@ -130,7 +123,12 @@ def start_execution(
         yield (
             gr.Dataframe(value=[]),
             current_chatbot
-            + [create_status_message("Error: Plans path not configured")],
+            + [
+                create_message(
+                    content="Error: Plans path not configured",
+                    message_type=MessageType.STATUS,
+                )
+            ],
         )
         return
     approved_plans = [p for p in plans if p.status == ExperimentStatus.APPROVED]
@@ -145,7 +143,12 @@ def start_execution(
             logger.error(error_msg)
             yield (
                 update_scan_status(plans_path),
-                current_chatbot + [create_status_message(error_msg)],
+                current_chatbot
+                + [
+                    create_message(
+                        content=error_msg, message_type=MessageType.STATUS
+                    )
+                ],
             )
             return
 
@@ -156,7 +159,9 @@ def start_execution(
         for message in execution_gen:
             if status_index is None:
                 current_chatbot = current_chatbot + [
-                    create_status_message(message)
+                    create_message(
+                        content=message, message_type=MessageType.STATUS
+                    )
                 ]
                 status_index = len(current_chatbot) - 1
             else:
@@ -167,8 +172,9 @@ def start_execution(
         if error:
             if status_index is None:
                 current_chatbot = current_chatbot + [
-                    create_status_message(
-                        f"Execution error: {error.error_message}"
+                    create_message(
+                        content=f"Execution error: {error.error_message}",
+                        message_type=MessageType.STATUS,
                     )
                 ]
             else:
@@ -247,7 +253,12 @@ def create_experiments_tab(
                 lambda plans, plans_path, current_chatbot: (
                     approve_all_plans(plans, plans_path),
                     current_chatbot
-                    + [create_status_message("All plans approved")],
+                    + [
+                        create_message(
+                            content="All plans approved",
+                            message_type=MessageType.STATUS,
+                        )
+                    ],
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
                 outputs=[status_df, chatbot],
