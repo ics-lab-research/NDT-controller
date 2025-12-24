@@ -37,6 +37,21 @@ def save_experiment_plans(
         return {"success": False, "error": str(e)}
 
 
+def append_experiment_plans(
+    plans: List[ExperimentPlan],
+    filepath: Path,
+) -> Dict[str, Union[bool, str]]:
+    """Append experiment plans to an existing JSON file."""
+    logger.info(f"Appending experiment plans to {filepath}")
+    try:
+        existing_plans = load_experiment_plans(filepath, log=True)
+        combined_plans = existing_plans + plans
+        return save_experiment_plans(combined_plans, filepath)
+    except Exception as e:
+        logger.error(f"Failed to append experiment plans to {filepath}: {e}")
+        return {"success": False, "error": str(e)}
+
+
 def load_experiment_plans(
     filepath: Path, log: bool = False
 ) -> List[ExperimentPlan]:
