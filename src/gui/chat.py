@@ -46,11 +46,15 @@ def respond(
 
         # NOTE: yield latest status
         if agent_response.status and agent_response.status.strip():
-            yield create_message(agent_response.status, MessageType.STATUS).to_dict()
+            yield create_message(
+                agent_response.status, MessageType.STATUS
+            ).to_dict()
 
         # NOTE: yield latest action
         if agent_response.action and agent_response.action.strip():
-            yield create_message(agent_response.action, MessageType.ACTION).to_dict()
+            yield create_message(
+                agent_response.action, MessageType.ACTION
+            ).to_dict()
 
         # NOTE: yield each intermediate_step
         if (
