@@ -15,7 +15,7 @@ from .utils import build_conversation_history, create_message
 
 
 def respond(
-    message: MultimodalMessage | dict,
+    message: MultimodalMessage | dict[str, str | list[str]] | str,
     history: ChatHistory,
     project_manager: ProjectManager,
     progress=gr.Progress(),
@@ -27,6 +27,8 @@ def respond(
         message = MultimodalMessage(
             text=message.get("text", ""), files=message.get("files", [])
         )
+    elif isinstance(message, str):
+        message = MultimodalMessage(text=message, files=[])
 
     # Add uploaded files to project manager
     for file_path_str in message.files:
