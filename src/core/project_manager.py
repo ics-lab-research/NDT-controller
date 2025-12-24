@@ -2,7 +2,7 @@ import dataclasses
 import os
 import shutil
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 from loguru import logger
 
@@ -26,6 +26,7 @@ class ProjectManager:
         self._current_mode = current_mode
         self._pwd_path = pwd_path
         self._experiment_state = self.create_initial_experiment_state()
+        self._multimodal_uploads: List[Path] = []
 
     @property
     def current_mode(self) -> Mode:
@@ -41,6 +42,11 @@ class ProjectManager:
     def experiment_state(self) -> State:
         """Get the current experiment state."""
         return self._experiment_state
+
+    @property
+    def multimodal_uploads(self) -> List[Path]:
+        """Get the list of multimodal uploads."""
+        return self._multimodal_uploads
 
     def create_initial_experiment_state(self) -> State:
         """Create the initial experiment state for experiments."""
