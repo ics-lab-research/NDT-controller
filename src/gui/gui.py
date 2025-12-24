@@ -129,19 +129,21 @@ def create_main_interface() -> gr.Blocks:
             outputs=[sidebar_column],
         )
 
-        def set_pwd(new_pwd: str, current_context):
-            current_context._pwd_path = Path(new_pwd)
+        def set_pwd(selected_path, current_context):
+            if selected_path:
+                current_context._pwd_path = Path(selected_path)
             return current_context
 
         with gr.Sidebar():
-            pwd_textbox = gr.Textbox(
+            pwd_picker = gr.File(
                 label="PWD Path",
-                value=str(project_manager.pwd_path),
+                directory=True,
+                file_count="single",
             )
             set_pwd_button = gr.Button("Set PWD")
             set_pwd_button.click(
                 set_pwd,
-                inputs=[pwd_textbox, current_context],
+                inputs=[pwd_picker, current_context],
                 outputs=[current_context],
             )
 
