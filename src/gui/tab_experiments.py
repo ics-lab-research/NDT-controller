@@ -265,6 +265,7 @@ def create_experiments_tab(
             with gr.Row():
                 save_button = gr.Button("Save Changes")
                 reload_button = gr.Button("Reload Plans")
+                delete_button = gr.Button("Delete Experiment")
             dropdown.change(
                 lambda filename, current_plans: update_experiment_details(
                     current_plans, filename
