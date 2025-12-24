@@ -13,8 +13,10 @@ def respond(
     message: MultimodalMessage | dict,
     history: ChatHistory,
     project_manager: ProjectManager,
+    progress=gr.Progress(),
 ) -> Generator[dict, None, None]:
     """Handle chat responses with streaming, yielding response dictionaries."""
+    progress(0.0, desc="Starting agent...")
     # Handle multimodal message input
     if isinstance(message, dict):
         message = MultimodalMessage(
@@ -28,6 +30,7 @@ def respond(
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history)
 
+    progress(0.25, desc="Processing request...")
     for agent_response in get_agent_response(
         message.text, conversation_history, project_manager
     ):
@@ -64,6 +67,8 @@ def respond(
                 "content": agent_response.intermediate_step,
                 "metadata": {"title": "🔄 Intermediate step"},
             }
+
+    progress(1.0, desc="Complete")
 
 
 def create_chat_interface(
