@@ -259,7 +259,10 @@ def create_experiments_tab(
                     value=filenames[0] if filenames else None,
                 )
 
-                delete_button = gr.Button("🗑️ Delete Experiment")
+                with gr.Column():
+                    delete_button = gr.Button("🗑️ Delete Experiment")
+
+                    # create dropdown here contain value of ExperimentStatus AI!
 
             details_df = gr.Dataframe(
                 headers=["Tool Name", "Parameter 1", "Parameter 2"],
