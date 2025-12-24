@@ -28,14 +28,8 @@ from ..core.models import (
     ExperimentPlan,
     ExperimentTool,
     ChatMessage,
+    MessageType,
 )
-
-
-class MessageType(Enum):
-    NORMAL = "normal"
-    ACTION = "action"
-    STATUS = "status"
-    INTERMEDIATE_STEP = "intermediate_step"
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
