@@ -20,6 +20,10 @@ def respond(
             text=message.get("text", ""), files=message.get("files", [])
         )
 
+    # Add uploaded files to project manager
+    for file_path_str in message.files:
+        project_manager.add_multimodal_upload(Path(file_path_str))
+
     # Convert history to conversation messages, excluding the new messages
     print(message.text)
     print(message.files)  ## path
