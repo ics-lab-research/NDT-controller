@@ -19,6 +19,11 @@ custom_css = """
     border-radius: 8px;
     padding: 4px;
 }
+
+/* --- Align dropdown and button heights --- */
+.small-dropdown {
+    height: 40px !important;
+}
 """
 
 
