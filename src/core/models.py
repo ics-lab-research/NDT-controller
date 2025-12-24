@@ -167,7 +167,7 @@ class AgentResponse:
 
 
 @dataclass
-class MultimodalMessage(TypedDict):
+class MultimodalMessage:
     """Model for multimodal chat input containing text and files."""
 
     text: str
