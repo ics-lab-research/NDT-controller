@@ -35,7 +35,7 @@ def respond(
 
     # Add uploaded files to project manager
     for file_path_str in multimodal_message.files:
-        project_manager.add_multimodal_upload(Path(file_path_str))
+        project_manager.add_multimodal_upload((file_path_str))
 
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history)
