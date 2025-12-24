@@ -6,6 +6,13 @@ import gradio as gr
 import pandas as pd
 from loguru import logger
 
+
+class MessageType(Enum):
+    NORMAL = "normal"
+    ACTION = "action"
+    STATUS = "status"
+    INTERMEDIATE_STEP = "intermediate_step"
+
 from ..agents.experiment_planning import (
     save_experiment_plans,
 )
@@ -163,12 +170,17 @@ def build_conversation_history(
     return conversation
 
 
-def create_message(content: str, title: str = None) -> ChatMessage:
-    """Create a message dictionary, optionally with a title in metadata."""
+def create_message(content: str, message_type: MessageType = MessageType.NORMAL) -> ChatMessage:
+    """Create a message dictionary with optional type-based metadata."""
     msg = {
         "role": "assistant",
         "content": content,
     }
-    if title:
-        msg["metadata"] = {"title": title}
+    if message_type == MessageType.ACTION:
+        msg["metadata"] = {"title": "⚡ Action"}
+    elif message_type == MessageType.STATUS:
+        msg["metadata"] = {"title": "📊 Status"}
+    elif message_type == MessageType.INTERMEDIATE_STEP:
+        msg["metadata"] = {"title": "🔄 Intermediate step"}
+    # For NORMAL, no metadata
     return msg
