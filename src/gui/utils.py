@@ -160,3 +160,12 @@ def build_conversation_history(
         ):
             conversation.append(ConversationMessage(role=role, content=content))
     return conversation
+
+
+def create_status_message(content: str) -> dict:
+    """Create a standardized status message dictionary."""
+    return {
+        "role": "assistant",
+        "metadata": {"title": "📊 Status"},
+        "content": content,
+    }
