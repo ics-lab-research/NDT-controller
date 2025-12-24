@@ -1,6 +1,6 @@
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, TypedDict
 
 import gradio as gr
 import pandas as pd
@@ -27,6 +27,12 @@ from ..core.models import (
     ExperimentPlan,
     ExperimentTool,
 )
+
+
+class Message(TypedDict):
+    role: str
+    metadata: Dict[str, str]
+    content: str
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
@@ -162,7 +168,7 @@ def build_conversation_history(
     return conversation
 
 
-def create_status_message(content: str) -> dict:
+def create_status_message(content: str) -> Message:
     """Create a standardized status message dictionary."""
     return {
         "role": "assistant",
@@ -171,7 +177,7 @@ def create_status_message(content: str) -> dict:
     }
 
 
-def create_action_message(content: str) -> dict:
+def create_action_message(content: str) -> Message:
     """Create a standardized action message dictionary."""
     return {
         "role": "assistant",
@@ -180,7 +186,7 @@ def create_action_message(content: str) -> dict:
     }
 
 
-def create_intermediate_step_message(content: str) -> dict:
+def create_intermediate_step_message(content: str) -> Message:
     """Create a standardized intermediate step message dictionary."""
     return {
         "role": "assistant",
