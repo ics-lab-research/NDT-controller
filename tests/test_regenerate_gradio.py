@@ -23,7 +23,11 @@ Here are some features:
 Enjoy your interaction!"""
         prog(1, desc="Complete")
         history = history + [
-            {"role": "assistant", "content": full_content, "metadata": {"title": "📊 Status"}}
+            {
+                "role": "assistant",
+                "content": full_content,
+                "metadata": {"title": "📊 Status"},
+            }
         ]
     return history
 
@@ -34,7 +38,7 @@ with gr.Blocks(title="Test", fill_width=True) as demo:
     chatbot = gr.Chatbot(type="messages")
     textbox = gr.Textbox()
     submit_btn = gr.Button("Submit")
-    
+
     submit_btn.click(respond, [textbox, chatbot], chatbot)
 
 if __name__ == "__main__":
