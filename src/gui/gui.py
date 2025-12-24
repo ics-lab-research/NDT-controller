@@ -145,7 +145,9 @@ def create_main_interface() -> gr.Blocks:
         with gr.Sidebar():
             pwd_textbox = gr.Textbox(
                 label="PWD Path",
-                value=str(project_manager._pwd_path) if hasattr(project_manager, '_pwd_path') else "",
+                value=str(project_manager._pwd_path)
+                if hasattr(project_manager, "_pwd_path")
+                else "",
                 interactive=False,
             )
             select_pwd_button = gr.Button("Select PWD Folder")
