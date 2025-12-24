@@ -9,13 +9,6 @@ from .chat import (
 )
 
 custom_css = """
-.gradio-container {
-    height: 100vh !important;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-}
-  
 /* --- Chat area --- */
 .chatbot-container {
     flex: 1 1 auto;
@@ -25,30 +18,6 @@ custom_css = """
     border: 1px solid #333;
     border-radius: 8px;
     padding: 4px;
-}
-    
-/* --- PDF viewer area --- */
-.scrollable-pdf {
-    overflow-y: auto !important;
-    height: 75vh !important;       /* PDF scrolls internally */
-    max-height: 75vh !important;
-    border: 1px solid #444;
-    border-radius: 8px;
-    background-color: #1e1e1e;
-    padding: 4px;
-}
-  
-.scrollable-pdf iframe {
-    width: 100%;
-    height: 100%;
-    display: block;
-    border: none;
-}
-
-/* --- Small dropdown --- */
-.small-dropdown select {
-    height: 30px !important;
-    line-height: 30px !important;
 }
 """
 
@@ -126,7 +95,7 @@ def create_main_interface() -> gr.Blocks:
                                 allow_custom_value=True,
                                 elem_classes="small-dropdown",
                             )
-                            clear = gr.Button("Clear", scale=4)
+                            clear_button = gr.Button("Clear", scale=4)
 
                     # Sidebar with tabs (hidden by default)
                     sidebar_column = create_sidebar(
@@ -136,7 +105,7 @@ def create_main_interface() -> gr.Blocks:
                     sidebar_column.visible = False
 
         # Wire up events (only for Chat tab)
-        clear.click(lambda: [], outputs=chat_interface.chatbot)
+        clear_button.click(lambda: [], outputs=chat_interface.chatbot)
 
         mode_dropdown.select(
             handle_mode_change,
