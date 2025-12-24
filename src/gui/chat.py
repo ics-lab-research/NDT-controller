@@ -3,7 +3,13 @@ from typing import Generator, List, Tuple
 
 import gradio as gr
 
-from ..core.models import ChatHistory, Mode, MultimodalMessage, ChatMessage, MessageType
+from ..core.models import (
+    ChatHistory,
+    Mode,
+    MultimodalMessage,
+    ChatMessage,
+    MessageType,
+)
 from ..core.project_manager import ProjectManager
 from ..core.llm import get_agent_response
 from .utils import build_conversation_history, create_message
