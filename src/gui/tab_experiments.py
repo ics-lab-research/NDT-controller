@@ -259,13 +259,12 @@ def create_experiments_tab(
                     value=filenames[0] if filenames else None,
                 )
 
-                with gr.Column():
-                    delete_button = gr.Button("🗑️ Delete Experiment")
+                status_dropdown = gr.Dropdown(
+                    choices=[status.value for status in ExperimentStatus],
+                    label="Change Status",
+                )
 
-                    status_dropdown = gr.Dropdown(
-                        choices=[status.value for status in ExperimentStatus],
-                        label="Change Status",
-                    )
+            delete_button = gr.Button("🗑️ Delete Experiment")
 
             details_df = gr.Dataframe(
                 headers=["Tool Name", "Parameter 1", "Parameter 2"],
