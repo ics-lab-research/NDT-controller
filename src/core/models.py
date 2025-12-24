@@ -144,6 +144,13 @@ class ChatMessage:
     content: str
     metadata: Dict[str, str] | None = None
 
+    def to_dict(self) -> Dict[str, str | Dict[str, str] | None]:
+        return {
+            "role": self.role,
+            "content": self.content,
+            "metadata": self.metadata,
+        }
+
 
 # Type alias for chat history using OpenAI-style message format
 ChatHistory = List[ChatMessage]
