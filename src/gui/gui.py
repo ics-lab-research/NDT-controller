@@ -129,14 +129,15 @@ def create_main_interface() -> gr.Blocks:
             outputs=[sidebar_column],
         )
 
-        def set_pwd(selected_path, current_context):
-            if selected_path:
-                current_context._pwd_path = Path(selected_path)
+        def set_pwd(selected_paths, current_context):
+            if selected_paths and len(selected_paths) > 0:
+                current_context._pwd_path = Path(selected_paths[0])
             return current_context
 
         with gr.Sidebar():
             pwd_picker = gr.FileExplorer(
                 label="PWD Path",
+                root=str(project_manager.pwd_path),
                 directory=True,
                 file_count="single",
             )
