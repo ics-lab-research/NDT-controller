@@ -24,8 +24,10 @@ def respond(
     progress(0.0, desc="Starting agent...")
     # Handle multimodal message input
     if isinstance(message, dict):
+        text = message.get("text", "")
+        text = text if isinstance(text, str) else ""
         multimodal_message = MultimodalMessage(
-            text=message.get("text", ""), files=message.get("files", [])
+            text=text, files=message.get("files", [])
         )
     elif isinstance(message, str):
         multimodal_message = MultimodalMessage(text=message, files=[])
