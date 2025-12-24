@@ -44,6 +44,12 @@ custom_css = """
     display: block;
     border: none;
 }
+
+/* --- Small dropdown --- */
+.small-dropdown select {
+    height: 30px !important;
+    line-height: 30px !important;
+}
 """
 
 
@@ -118,6 +124,7 @@ def create_main_interface() -> gr.Blocks:
                                 show_label=False,
                                 interactive=True,
                                 allow_custom_value=True,
+                                elem_classes="small-dropdown",
                             )
                             clear = gr.Button("Clear", scale=4)
 
