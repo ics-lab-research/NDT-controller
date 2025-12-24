@@ -1,7 +1,5 @@
 from typing import Generator, List
 
-from concurrent.futures import ThreadPoolExecutor
-
 from loguru import logger
 
 from ..baml_client.types import (
@@ -126,19 +124,18 @@ def handle_multiple_scan(
         f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_output.experiments]}"
     )
 
-    def process_experiment(experiment):
-        messages = []
+    def process_experiment(
+        experiment,
+    ) -> Generator[AgentResponse, None, ExperimentPlan | None]:
         logger.debug(f"Processing experiment: {experiment.filename}")
 
         plan = call_exp_planner(experiment, project_manager.experiment_state)
         if isinstance(plan, Error):
-            messages.extend(list(yield_error(plan)))
-            return None, messages
+            yield from yield_error(plan)
+            return None
 
-        messages.append(
-            AgentResponse(
-                intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
-            )
+        yield AgentResponse(
+            intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
         )
         logger.debug(
             f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
@@ -146,8 +143,8 @@ def handle_multiple_scan(
 
         tools = call_exp_executor(plan, experiment.filename)
         if isinstance(tools, Error):
-            messages.extend(list(yield_error(tools)))
-            return None, messages
+            yield from yield_error(tools)
+            return None
 
         # NOTE: each scan will return home position
         new_position = project_manager.experiment_state.home_position
@@ -156,16 +153,17 @@ def handle_multiple_scan(
         exp_plan = ExperimentPlan(
             filename=experiment.filename, experiment=tools
         )
-        return exp_plan, messages
+        return exp_plan
 
     plans_to_save = []
-    with ThreadPoolExecutor() as executor:
-        results = executor.map(
-            process_experiment, orchestrator_output.experiments
-        )
-        for plan, msgs in results:
-            for msg in msgs:
+    for experiment in orchestrator_output.experiments:
+        gen = process_experiment(experiment)
+        try:
+            while True:
+                msg = next(gen)
                 yield msg
+        except StopIteration as e:
+            plan = e.value
             if plan:
                 plans_to_save.append(plan)
 
