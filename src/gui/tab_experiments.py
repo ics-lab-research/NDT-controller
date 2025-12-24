@@ -142,6 +142,30 @@ def delete_experiment(
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), []
 
 
+def update_experiment_status(
+    plans: List[ExperimentPlan],
+    plans_path: Path | None,
+    selected_filename: str,
+    new_status: str,
+) -> List[ExperimentPlan]:
+    if not plans_path:
+        gr.Info("Error: Plans path not configured")
+        return plans
+    try:
+        for plan in plans:
+            if plan.filename == selected_filename:
+                plan.status = ExperimentStatus(new_status)
+                break
+        save_experiment_plans(plans, plans_path)
+        gr.Info("Experiment status updated successfully")
+        return plans
+    except Exception as e:
+        error_msg = f"Error updating experiment status: {str(e)}"
+        logger.error(error_msg)
+        gr.Info(error_msg)
+        return plans
+
+
 def start_execution(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
@@ -327,6 +351,12 @@ def create_experiments_tab(
                 delete_experiment,
                 inputs=[plans_state, plans_path_state, dropdown],
                 outputs=[dropdown, details_df, plans_state],
+            )
+
+            status_dropdown.change(
+                update_experiment_status,
+                inputs=[plans_state, plans_path_state, dropdown, status_dropdown],
+                outputs=[plans_state],
             )
 
     return interface
