@@ -26,53 +26,44 @@ def respond(
         project_manager.add_multimodal_upload(Path(file_path_str))
 
     # Convert history to conversation messages, excluding the new messages
-    print(message.text)
-    print(message.files)  ## path
-    print(history)
+    conversation_history = build_conversation_history(history)
 
-    yield {
-        "role": "assistant",
-        "content": "test",
-    }
+    for agent_response in get_agent_response(
+        message.text, conversation_history, project_manager
+    ):
+        if agent_response.response:
+            # Yield updated response message
+            yield {
+                "role": "assistant",
+                "content": agent_response.response,
+            }
 
-    # conversation_history = build_conversation_history(history)
+        # NOTE: yield latest status
+        if agent_response.status and agent_response.status.strip():
+            yield {
+                "role": "assistant",
+                "content": agent_response.status,
+                "metadata": {"title": "📊 Status"},
+            }
 
-    # for agent_response in get_agent_response(
-    #     message, conversation_history, ctx
-    # ):
-    #     if agent_response.response:
-    #         # Yield updated response message
-    #         yield {
-    #             "role": "assistant",
-    #             "content": agent_response.response,
-    #         }
+        # NOTE: yield latest action
+        if agent_response.action and agent_response.action.strip():
+            yield {
+                "role": "assistant",
+                "content": agent_response.action,
+                "metadata": {"title": "⚡ Action"},
+            }
 
-    #     # NOTE: yield latest status
-    #     if agent_response.status and agent_response.status.strip():
-    #         yield {
-    #             "role": "assistant",
-    #             "content": agent_response.status,
-    #             "metadata": {"title": "📊 Status"},
-    #         }
-
-    #     # NOTE: yield latest action
-    #     if agent_response.action and agent_response.action.strip():
-    #         yield {
-    #             "role": "assistant",
-    #             "content": agent_response.action,
-    #             "metadata": {"title": "⚡ Action"},
-    #         }
-
-    #     # NOTE: yield each intermediate_step
-    #     if (
-    #         agent_response.intermediate_step
-    #         and agent_response.intermediate_step.strip()
-    #     ):
-    #         yield {
-    #             "role": "assistant",
-    #             "content": agent_response.intermediate_step,
-    #             "metadata": {"title": "🔄 Intermediate step"},
-    #         }
+        # NOTE: yield each intermediate_step
+        if (
+            agent_response.intermediate_step
+            and agent_response.intermediate_step.strip()
+        ):
+            yield {
+                "role": "assistant",
+                "content": agent_response.intermediate_step,
+                "metadata": {"title": "🔄 Intermediate step"},
+            }
 
 
 def create_chat_interface(
