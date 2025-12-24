@@ -62,20 +62,15 @@ def yield_agent_response_messages(
         )
 
 
-def calculate_progress(response_count: int) -> float:
-    """Calculate progress value based on response count."""
-    return min(0.25 + (response_count * 0.05), 0.95)
 
 
 def respond(
     message: Dict[str, str | List[str]] | str,
     history: ChatHistory,
     project_manager: ProjectManager,
-    progress=gr.Progress(),
 ) -> Generator[ChatMessage, None, None]:
     """Handle chat responses with streaming."""
     logger.info("Starting chat response processing")
-    progress(0.0, desc="Starting agent...")
 
     multimodal_message = parse_multimodal_message(message)
     register_uploaded_files(multimodal_message, project_manager)
@@ -84,20 +79,13 @@ def respond(
     logger.debug(
         f"Processing message with {len(multimodal_message.files)} files"
     )
-    progress(0.25, desc="Processing request...")
 
-    response_count = 0
     for agent_response in get_agent_response(
         multimodal_message.text, conversation_history, project_manager
     ):
-        response_count += 1
-        current_progress = calculate_progress(response_count)
-        progress(current_progress, desc=f"Processing step {response_count}...")
-
         yield from yield_agent_response_messages(agent_response)
 
-    logger.info(f"Chat response complete after {response_count} steps")
-    progress(1.0, desc="Complete")
+    logger.info("Chat response complete")
 
 
 def create_chat_interface(
