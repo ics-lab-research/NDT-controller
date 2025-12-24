@@ -6,12 +6,8 @@ import gradio as gr
 from ..core.models import ChatHistory, Mode, MultimodalMessage
 from ..core.project_manager import ProjectManager
 from ..core.llm import get_agent_response
-from .utils import (
-    build_conversation_history,
-    create_action_message,
-    create_intermediate_step_message,
-    create_status_message,
-)
+from .utils import build_conversation_history, create_message
+from ..core.models import MessageType
 
 
 def respond(
