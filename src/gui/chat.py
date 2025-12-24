@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Generator, List, Tuple
+from typing import Dict, Generator, List, Tuple
 
 import gradio as gr
 
@@ -15,7 +15,7 @@ from .utils import build_conversation_history, create_message
 
 
 def respond(
-    message: MultimodalMessage | dict[str, str | list[str]] | str,
+    message: Dict[str, str | List[str]] | str,
     history: ChatHistory,
     project_manager: ProjectManager,
     progress=gr.Progress(),
@@ -24,14 +24,14 @@ def respond(
     progress(0.0, desc="Starting agent...")
     # Handle multimodal message input
     if isinstance(message, dict):
-        message = MultimodalMessage(
+        multimodal_message = MultimodalMessage(
             text=message.get("text", ""), files=message.get("files", [])
         )
     elif isinstance(message, str):
-        message = MultimodalMessage(text=message, files=[])
+        multimodal_message = MultimodalMessage(text=message, files=[])
 
     # Add uploaded files to project manager
-    for file_path_str in message.files:
+    for file_path_str in multimodal_message.files:
         project_manager.add_multimodal_upload(Path(file_path_str))
 
     # Convert history to conversation messages, excluding the new messages
@@ -39,7 +39,7 @@ def respond(
 
     progress(0.25, desc="Processing request...")
     for agent_response in get_agent_response(
-        message.text, conversation_history, project_manager
+        multimodal_message.text, conversation_history, project_manager
     ):
         if agent_response.response:
             # Yield updated response message
