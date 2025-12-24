@@ -1,5 +1,7 @@
 import gradio as gr
+import tkinter as tk
 from pathlib import Path
+from tkinter import filedialog
 
 from ..core.models import Mode
 from ..core.project_manager import init_project_context
@@ -129,21 +131,28 @@ def create_main_interface() -> gr.Blocks:
             outputs=[sidebar_column],
         )
 
-        def set_pwd(selected_dirs, current_context):
-            if selected_dirs and len(selected_dirs) > 0:
-                current_context._pwd_path = Path(selected_dirs[0])
-            return current_context
+        def select_and_set_pwd(current_context):
+            """Select a folder using tkinter, set it in context, and return the path."""
+            root = tk.Tk()
+            root.withdraw()  # Hide the main window
+            folder_path = filedialog.askdirectory(title="Select PWD Folder")
+            root.destroy()
+            if folder_path:
+                current_context._pwd_path = Path(folder_path)
+                return folder_path, current_context
+            return "No folder selected", current_context
 
         with gr.Sidebar():
-            pwd_picker = gr.File(
+            pwd_textbox = gr.Textbox(
                 label="PWD Path",
-                file_count="directory",
+                value=str(project_manager._pwd_path) if hasattr(project_manager, '_pwd_path') else "",
+                interactive=False,
             )
-            set_pwd_button = gr.Button("Set PWD")
-            set_pwd_button.click(
-                set_pwd,
-                inputs=[pwd_picker, current_context],
-                outputs=[current_context],
+            select_pwd_button = gr.Button("Select PWD Folder")
+            select_pwd_button.click(
+                select_and_set_pwd,
+                inputs=[current_context],
+                outputs=[pwd_textbox, current_context],
             )
 
     return iface
