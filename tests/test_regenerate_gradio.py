@@ -3,7 +3,14 @@ import time
 from typing import Generator
 
 
-def test_stream() -> Generator[str, None, None]:
+def respond(message: str, history: list) -> Generator[dict, None, None]:
+    """Respond to user message with multiple yields simulating agent behavior."""
+    yield {"role": "assistant", "content": "Starting agent..."}
+    time.sleep(0.5)
+    yield {"role": "assistant", "content": "Thinking..."}
+    time.sleep(0.5)
+    yield {"role": "assistant", "content": "Planning..."}
+    time.sleep(0.5)
     full_content = """# Hello World
 
 This is a **longer response** in markdown format.
@@ -14,27 +21,9 @@ Here are some features:
 - `Code snippets` for technical details
 
 Enjoy your interaction!"""
-    content_parts = full_content.split("\n\n")  # Split into paragraphs
-    for part in content_parts:
-        yield part + "\n\n"
-        time.sleep(0.1)  # Simulate delay between chunks
-
-
-def respond(message: str, history: list) -> Generator[dict, None, None]:
-    """Respond to user message with a streamed response using test_stream."""
-    time.sleep(1)
-    accumulated_content = ""
-    for chunk in test_stream():
-        accumulated_content += chunk
-        yield {
-            "role": "assistant",
-            "content": accumulated_content,
-        }
-
-    # Final yield with metadata
     yield {
         "role": "assistant",
-        "content": accumulated_content,
+        "content": full_content,
         "metadata": {"title": "📊 Status"},
     }
 
