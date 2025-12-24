@@ -355,7 +355,12 @@ def create_experiments_tab(
 
             status_dropdown.change(
                 update_experiment_status,
-                inputs=[plans_state, plans_path_state, dropdown, status_dropdown],
+                inputs=[
+                    plans_state,
+                    plans_path_state,
+                    dropdown,
+                    status_dropdown,
+                ],
                 outputs=[plans_state],
             )
 
