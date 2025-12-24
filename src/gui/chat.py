@@ -29,13 +29,13 @@ def respond(
         files = message.get("files", [])
         if isinstance(files, str):
             files = [files]
-        multimodal_message = MultimodalMessage(text=text, files=files)
+        multimodal_message = MultimodalMessage(text=text, files=[Path(f) for f in files])
     elif isinstance(message, str):
         multimodal_message = MultimodalMessage(text=message, files=[])
 
     # Add uploaded files to project manager
-    for file_path_str in multimodal_message.files:
-        project_manager.add_multimodal_upload((file_path_str))
+    for file_path in multimodal_message.files:
+        project_manager.add_multimodal_upload(file_path)
 
     # Convert history to conversation messages, excluding the new messages
     conversation_history = build_conversation_history(history)
