@@ -137,8 +137,7 @@ def create_main_interface() -> gr.Blocks:
         with gr.Sidebar():
             pwd_picker = gr.FileExplorer(
                 label="PWD Path",
-                root=str(project_manager.pwd_path),
-                directory=True,
+                root_dir=str(project_manager.pwd_path),
                 file_count="single",
             )
             set_pwd_button = gr.Button("Set PWD")
