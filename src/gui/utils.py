@@ -13,6 +13,7 @@ class MessageType(Enum):
     STATUS = "status"
     INTERMEDIATE_STEP = "intermediate_step"
 
+
 from ..agents.experiment_planning import (
     save_experiment_plans,
 )
@@ -170,7 +171,9 @@ def build_conversation_history(
     return conversation
 
 
-def create_message(content: str, message_type: MessageType = MessageType.NORMAL) -> ChatMessage:
+def create_message(
+    content: str, message_type: MessageType = MessageType.NORMAL
+) -> ChatMessage:
     """Create a message dictionary with optional type-based metadata."""
     msg = {
         "role": "assistant",
