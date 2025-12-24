@@ -175,7 +175,7 @@ def create_message(
     content: str, message_type: MessageType = MessageType.NORMAL
 ) -> ChatMessage:
     """Create a message dictionary with optional type-based metadata."""
-    msg = {
+    msg: ChatMessage = {
         "role": "assistant",
         "content": content,
     }
