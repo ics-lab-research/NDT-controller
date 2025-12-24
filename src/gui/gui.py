@@ -135,9 +135,7 @@ def create_main_interface() -> gr.Blocks:
             """Select a folder using tkinter, set it in context, and return the path."""
             root = tk.Tk()
             root.withdraw()  # Hide the main window
-            folder_path = filedialog.askdirectory(
-                title="Select Data Dir Folder"
-            )
+            folder_path = filedialog.askdirectory(title="Select Data Folder")
             root.destroy()
             if folder_path:
                 current_context.set_data_dir_path(Path(folder_path))
@@ -146,11 +144,11 @@ def create_main_interface() -> gr.Blocks:
 
         with gr.Sidebar():
             data_dir_textbox = gr.Textbox(
-                label="Data Dir Path",
+                label="Data Folder Path",
                 value=str(project_manager.data_dir_path),
                 interactive=False,
             )
-            select_data_dir_button = gr.Button("Select Data Dir Folder")
+            select_data_dir_button = gr.Button("Select Data Folder")
             select_data_dir_button.click(
                 select_and_set_data_dir,
                 inputs=[current_context],
