@@ -95,7 +95,7 @@ def create_main_interface() -> gr.Blocks:
                                 allow_custom_value=True,
                                 elem_classes="small-dropdown",
                             )
-                            clear_button = gr.Button("Clear", scale=4)
+                            clear_button = gr.Button("Clear", scale=4, elem_classes="small-dropdown")
 
                     # Sidebar with tabs (hidden by default)
                     sidebar_column = create_sidebar(
