@@ -137,16 +137,22 @@ ModeMetadata = Union[
 ]
 
 
-class Message(TypedDict):
-    role: str
-    metadata: Dict[str, str]
-    content: str
-
-
+# ============================== Other models =================================
 class ChatMessage(TypedDict, total=False):
     role: str
     content: str
     metadata: Dict[str, str]
+
+
+# Type alias for chat history using OpenAI-style message format
+ChatHistory = List[ChatMessage]
+
+
+class MessageType(Enum):
+    NORMAL = "normal"
+    ACTION = "action"
+    STATUS = "status"
+    INTERMEDIATE_STEP = "intermediate_step"
 
 
 @dataclass
@@ -157,10 +163,6 @@ class AgentResponse:
     intermediate_step: str | None = None
     status: str | None = None
     action: str | None = None
-
-
-# Type alias for chat history using OpenAI-style message format
-ChatHistory = List[ChatMessage]
 
 
 @dataclass
