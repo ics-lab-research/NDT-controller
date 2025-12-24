@@ -262,7 +262,10 @@ def create_experiments_tab(
                 with gr.Column():
                     delete_button = gr.Button("🗑️ Delete Experiment")
 
-                    # create dropdown here contain value of ExperimentStatus AI!
+                    status_dropdown = gr.Dropdown(
+                        choices=[status.value for status in ExperimentStatus],
+                        label="Change Status",
+                    )
 
             details_df = gr.Dataframe(
                 headers=["Tool Name", "Parameter 1", "Parameter 2"],
