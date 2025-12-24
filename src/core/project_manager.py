@@ -48,6 +48,11 @@ class ProjectManager:
         """Get the list of multimodal uploads."""
         return self._multimodal_uploads
 
+    def add_multimodal_upload(self, file_path: Path) -> None:
+        """Add a file to the multimodal uploads list."""
+        logger.info(f"Added multimodal upload: {file_path}")
+        self._multimodal_uploads.append(file_path)
+
     def create_initial_experiment_state(self) -> State:
         """Create the initial experiment state for experiments."""
         position = RelativeOffset(x=0, y=0, z=1)
