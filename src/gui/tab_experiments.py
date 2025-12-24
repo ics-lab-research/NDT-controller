@@ -296,7 +296,7 @@ def create_experiments_tab(
                 outputs=[status_df, chatbot],
             )
 
-            timer = gr.Timer(1)
+            timer = gr.Timer(0.1)
             timer.tick(
                 update_scan_status,
                 inputs=[plans_path_state, log_state],
@@ -306,7 +306,7 @@ def create_experiments_tab(
         # ================ Plan Viewer tab =============================
         with gr.TabItem("Plan Viewer"):
             with gr.Row():
-                dropdown = gr.Dropdown(
+                exp_dropdown = gr.Dropdown(
                     choices=filenames,
                     label="Select Experiment",
                     value=filenames[0] if filenames else None,
@@ -327,30 +327,30 @@ def create_experiments_tab(
             with gr.Row():
                 save_button = gr.Button("💾 Save Changes")
                 reload_button = gr.Button("🔄 Reload Plans")
-            dropdown.change(
+            exp_dropdown.change(
                 lambda filename, current_plans: update_experiment_details(
                     current_plans, filename
                 ),
-                inputs=[dropdown, plans_state],
+                inputs=[exp_dropdown, plans_state],
                 outputs=details_df,
             )
             save_button.click(
                 lambda filename, data, current_plans: save_experiment_changes(
                     current_plans, plans_path, filename, data
                 ),
-                inputs=[dropdown, details_df, plans_state],
+                inputs=[exp_dropdown, details_df, plans_state],
                 outputs=[],
             )
             reload_button.click(
                 lambda: reload_plans(plans_path),
                 inputs=[],
-                outputs=[dropdown, details_df, plans_state],
+                outputs=[exp_dropdown, details_df, plans_state],
             )
 
             delete_button.click(
                 delete_experiment,
-                inputs=[plans_state, plans_path_state, dropdown],
-                outputs=[dropdown, details_df, plans_state],
+                inputs=[plans_state, plans_path_state, exp_dropdown],
+                outputs=[exp_dropdown, details_df, plans_state],
             )
 
             status_dropdown.change(
@@ -358,7 +358,7 @@ def create_experiments_tab(
                 inputs=[
                     plans_state,
                     plans_path_state,
-                    dropdown,
+                    exp_dropdown,
                     status_dropdown,
                 ],
                 outputs=[plans_state],
