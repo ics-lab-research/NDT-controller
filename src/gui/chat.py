@@ -59,7 +59,9 @@ def respond(
             agent_response.intermediate_step
             and agent_response.intermediate_step.strip()
         ):
-            yield create_intermediate_step_message(agent_response.intermediate_step)
+            yield create_intermediate_step_message(
+                agent_response.intermediate_step
+            )
 
     progress(1.0, desc="Complete")
 
