@@ -213,8 +213,8 @@ def create_experiments_tab(
             )
 
             with gr.Row():
-                approve_button = gr.Button("Approve all plans")
-                start_button = gr.Button("Start scan")
+                approve_button = gr.Button("✅ Approve all plans")
+                start_button = gr.Button("▶️ Start scan")
 
             # link to logic
             approve_button.click(
@@ -259,7 +259,7 @@ def create_experiments_tab(
                     value=filenames[0] if filenames else None,
                 )
 
-                delete_button = gr.Button("Delete Experiment")
+                delete_button = gr.Button("🗑️ Delete Experiment")
 
             details_df = gr.Dataframe(
                 headers=["Tool Name", "Parameter 1", "Parameter 2"],
@@ -267,8 +267,8 @@ def create_experiments_tab(
                 interactive=True,
             )
             with gr.Row():
-                save_button = gr.Button("Save Changes")
-                reload_button = gr.Button("Reload Plans")
+                save_button = gr.Button("💾 Save Changes")
+                reload_button = gr.Button("🔄 Reload Plans")
             dropdown.change(
                 lambda filename, current_plans: update_experiment_details(
                     current_plans, filename
