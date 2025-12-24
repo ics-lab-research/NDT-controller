@@ -359,13 +359,23 @@ def create_experiments_tab(
             reload_button.click(
                 lambda: reload_plans(plans_path),
                 inputs=[],
-                outputs=[exp_dropdown, details_df, status_dropdown, plans_state],
+                outputs=[
+                    exp_dropdown,
+                    details_df,
+                    status_dropdown,
+                    plans_state,
+                ],
             )
 
             delete_button.click(
                 delete_experiment,
                 inputs=[plans_state, plans_path_state, exp_dropdown],
-                outputs=[exp_dropdown, details_df, status_dropdown, plans_state],
+                outputs=[
+                    exp_dropdown,
+                    details_df,
+                    status_dropdown,
+                    plans_state,
+                ],
             )
 
             status_dropdown.change(
