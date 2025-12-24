@@ -19,7 +19,7 @@ from .experiment_api import (
     call_exp_router,
 )
 from .experiment_execution import execute_tool
-from .experiment_planning import save_experiment_plans
+from .experiment_planning import append_experiment_plans
 
 
 def yield_error(error: Error) -> Generator[AgentResponse, None, None]:
@@ -43,7 +43,7 @@ def save_plans(
 ) -> Generator[AgentResponse, None, None]:
     """Save experiment plans and yield appropriate response."""
     metadata = get_experiments_metadata(project_manager)
-    save_result = save_experiment_plans(plans, metadata.plans_path)
+    save_result = append_experiment_plans(plans, metadata.plans_path)
 
     if save_result["success"]:
         message = (
