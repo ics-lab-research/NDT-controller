@@ -204,39 +204,7 @@ def create_experiments_tab(
     project_manager_state = gr.State(project_manager)
 
     with gr.Tabs() as interface:
-        with gr.TabItem("Plans Viewer"):
-            dropdown = gr.Dropdown(
-                choices=filenames,
-                label="Select Experiment",
-                value=filenames[0] if filenames else None,
-            )
-            details_df = gr.Dataframe(
-                headers=["Tool Name", "Parameter 1", "Parameter 2"],
-                value=initial_data,
-                interactive=True,
-            )
-            with gr.Row():
-                save_button = gr.Button("Save Changes")
-                reload_button = gr.Button("Reload Plans")
-            dropdown.change(
-                lambda filename, current_plans: update_experiment_details(
-                    current_plans, filename
-                ),
-                inputs=[dropdown, plans_state],
-                outputs=details_df,
-            )
-            save_button.click(
-                lambda filename, data, current_plans: save_experiment_changes(
-                    current_plans, plans_path, filename, data
-                ),
-                inputs=[dropdown, details_df, plans_state],
-                outputs=[],
-            )
-            reload_button.click(
-                lambda: reload_plans(plans_path),
-                inputs=[],
-                outputs=[dropdown, details_df, plans_state],
-            )
+        # ================ Scan Status tab =============================
         with gr.TabItem("Scan Status"):
             status_df = gr.Dataframe(
                 headers=["Experiment Name", "Status"],
@@ -280,6 +248,41 @@ def create_experiments_tab(
                 update_scan_status,
                 inputs=[plans_path_state, log_state],
                 outputs=status_df,
+            )
+
+        # ================ Plan Viewer tab =============================
+        with gr.TabItem("Plan Viewer"):
+            dropdown = gr.Dropdown(
+                choices=filenames,
+                label="Select Experiment",
+                value=filenames[0] if filenames else None,
+            )
+            details_df = gr.Dataframe(
+                headers=["Tool Name", "Parameter 1", "Parameter 2"],
+                value=initial_data,
+                interactive=True,
+            )
+            with gr.Row():
+                save_button = gr.Button("Save Changes")
+                reload_button = gr.Button("Reload Plans")
+            dropdown.change(
+                lambda filename, current_plans: update_experiment_details(
+                    current_plans, filename
+                ),
+                inputs=[dropdown, plans_state],
+                outputs=details_df,
+            )
+            save_button.click(
+                lambda filename, data, current_plans: save_experiment_changes(
+                    current_plans, plans_path, filename, data
+                ),
+                inputs=[dropdown, details_df, plans_state],
+                outputs=[],
+            )
+            reload_button.click(
+                lambda: reload_plans(plans_path),
+                inputs=[],
+                outputs=[dropdown, details_df, plans_state],
             )
 
     return interface
