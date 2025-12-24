@@ -7,13 +7,6 @@ import pandas as pd
 from loguru import logger
 
 
-class MessageType(Enum):
-    NORMAL = "normal"
-    ACTION = "action"
-    STATUS = "status"
-    INTERMEDIATE_STEP = "intermediate_step"
-
-
 from ..agents.experiment_planning import (
     save_experiment_plans,
 )
@@ -36,6 +29,13 @@ from ..core.models import (
     ExperimentTool,
     ChatMessage,
 )
+
+
+class MessageType(Enum):
+    NORMAL = "normal"
+    ACTION = "action"
+    STATUS = "status"
+    INTERMEDIATE_STEP = "intermediate_step"
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
