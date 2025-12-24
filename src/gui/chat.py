@@ -62,8 +62,6 @@ def yield_agent_response_messages(
         )
 
 
-
-
 def respond(
     message: Dict[str, str | List[str]] | str,
     history: ChatHistory,
