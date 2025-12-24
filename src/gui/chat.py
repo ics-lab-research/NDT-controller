@@ -8,6 +8,7 @@ from ..core.models import (
     Mode,
     MultimodalMessage,
     MessageType,
+    ChatMessage,
 )
 from ..core.project_manager import ProjectManager
 from ..core.llm import get_agent_response
@@ -19,7 +20,7 @@ def respond(
     history: ChatHistory,
     project_manager: ProjectManager,
     progress=gr.Progress(),
-) -> Generator[dict, None, None]:
+) -> Generator[ChatMessage, None, None]:
     """Handle chat responses with streaming, yielding ChatMessage instances."""
     progress(0.0, desc="Starting agent...")
     # Handle multimodal message input
@@ -48,19 +49,15 @@ def respond(
     ):
         if agent_response.response:
             # Yield updated response message
-            yield create_message(agent_response.response).to_dict()
+            yield create_message(agent_response.response)
 
         # NOTE: yield latest status
         if agent_response.status and agent_response.status.strip():
-            yield create_message(
-                agent_response.status, MessageType.STATUS
-            ).to_dict()
+            yield create_message(agent_response.status, MessageType.STATUS)
 
         # NOTE: yield latest action
         if agent_response.action and agent_response.action.strip():
-            yield create_message(
-                agent_response.action, MessageType.ACTION
-            ).to_dict()
+            yield create_message(agent_response.action, MessageType.ACTION)
 
         # NOTE: yield each intermediate_step
         if (
@@ -69,7 +66,7 @@ def respond(
         ):
             yield create_message(
                 agent_response.intermediate_step, MessageType.INTERMEDIATE_STEP
-            ).to_dict()
+            )
 
     progress(1.0, desc="Complete")
 
