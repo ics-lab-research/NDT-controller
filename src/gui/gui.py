@@ -131,7 +131,9 @@ def create_main_interface() -> gr.Blocks:
             outputs=[sidebar_column],
         )
 
-        def select_and_set_data_dir(current_context: ProjectManager) -> tuple[str, ProjectManager]:
+        def select_and_set_data_dir(
+            current_context: ProjectManager,
+        ) -> tuple[str, ProjectManager]:
             """Select a folder using tkinter, set it in context, and return the path."""
             root = tk.Tk()
             root.withdraw()  # Hide the main window
