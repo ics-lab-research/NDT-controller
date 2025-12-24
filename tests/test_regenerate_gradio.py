@@ -17,12 +17,12 @@ Enjoy your interaction!"""
     content_parts = full_content.split("\n\n")  # Split into paragraphs
     for part in content_parts:
         yield part + "\n\n"
-        time.sleep(1)  # Simulate delay between chunks
+        time.sleep(0.1)  # Simulate delay between chunks
 
 
 def respond(message: str, history: list) -> Generator[dict, None, None]:
     """Respond to user message with a streamed response using test_stream."""
-    time.sleep(5)
+    time.sleep(1)
     accumulated_content = ""
     for chunk in test_stream():
         accumulated_content += chunk
