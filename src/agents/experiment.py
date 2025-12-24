@@ -153,12 +153,16 @@ def handle_multiple_scan(
         new_position = project_manager.experiment_state.home_position
         project_manager.update_experiment_state(new_position)
 
-        exp_plan = ExperimentPlan(filename=experiment.filename, experiment=tools)
+        exp_plan = ExperimentPlan(
+            filename=experiment.filename, experiment=tools
+        )
         return exp_plan, messages
 
     plans_to_save = []
     with ThreadPoolExecutor() as executor:
-        results = executor.map(process_experiment, orchestrator_output.experiments)
+        results = executor.map(
+            process_experiment, orchestrator_output.experiments
+        )
         for plan, msgs in results:
             for msg in msgs:
                 yield msg
