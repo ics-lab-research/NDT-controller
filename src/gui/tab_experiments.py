@@ -60,7 +60,7 @@ def approve_all_plans(
     plans: List[ExperimentPlan], plans_path: Path | None
 ) -> gr.Dataframe:
     if not plans_path:
-        gr.Info("Error: Plans path not configured")
+        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
         return gr.Dataframe(value=[])
     for plan in plans:
         if plan.status == ExperimentStatus.NOT_APPROVED:
@@ -70,7 +70,7 @@ def approve_all_plans(
     except Exception as e:
         error_msg = f"Error saving plans: {e}"
         logger.error(error_msg)
-        gr.Info(error_msg)
+        gr.Info(error_msg, title="❌ Error")
     filenames = [plan.filename for plan in plans]
     statuses = _get_experiment_statuses(plans)
     return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
@@ -80,7 +80,7 @@ def start_all_approved_plans(
     plans: List[ExperimentPlan], plans_path: Path | None
 ) -> gr.Dataframe:
     if not plans_path:
-        gr.Info("Error: Plans path not configured")
+        gr.Info("Error: Plans path not configured", title="❌ Error")
         return gr.Dataframe(value=[])
     for plan in plans:
         if plan.status == ExperimentStatus.APPROVED:
@@ -90,7 +90,7 @@ def start_all_approved_plans(
     except Exception as e:
         error_msg = f"Error saving plans: {e}"
         logger.error(error_msg)
-        gr.Info(error_msg)
+        gr.Info(error_msg, title="❌ Error")
     filenames = [plan.filename for plan in plans]
     statuses = _get_experiment_statuses(plans)
     return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
@@ -100,14 +100,18 @@ def reload_plans(
     plans_path: Path | None,
 ) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
     if not plans_path:
-        gr.Info("Error: Plans path not configured")
+        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
     try:
         plans = load_experiment_plans(plans_path, log=True)
         filenames = [plan.filename for plan in plans]
         initial_data = convert_plan_to_table_data(plans[0]) if plans else []
         initial_status = plans[0].status.value if plans else ""
-        gr.Info("Successfully reloaded experiment plans")
+        gr.Info(
+            "Successfully reloaded experiment plans",
+            duration=1,
+            title="✅ Info",
+        )
         return (
             gr.Dropdown(
                 choices=filenames, value=filenames[0] if filenames else None
@@ -119,7 +123,7 @@ def reload_plans(
     except Exception as e:
         error_msg = f"Error reloading plans: {str(e)}"
         logger.error(error_msg)
-        gr.Info(error_msg)
+        gr.Info(error_msg, title="❌ Error")
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
 
 
@@ -129,7 +133,7 @@ def delete_experiment(
     selected_filename: str,
 ) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
     if not plans_path:
-        gr.Info("Error: Plans path not configured")
+        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
     try:
         # Find and remove the plan
@@ -138,7 +142,7 @@ def delete_experiment(
         filenames = [plan.filename for plan in plans]
         initial_data = convert_plan_to_table_data(plans[0]) if plans else []
         initial_status = plans[0].status.value if plans else ""
-        gr.Info("Experiment deleted successfully")
+        gr.Info("Experiment deleted successfully", duration=1, title="✅ Info")
         return (
             gr.Dropdown(
                 choices=filenames, value=filenames[0] if filenames else None
@@ -150,7 +154,7 @@ def delete_experiment(
     except Exception as e:
         error_msg = f"Error deleting experiment: {str(e)}"
         logger.error(error_msg)
-        gr.Info(error_msg)
+        gr.Info(error_msg, title="❌ Error")
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
 
 
@@ -161,7 +165,7 @@ def update_experiment_status(
     new_status: str,
 ) -> List[ExperimentPlan]:
     if not plans_path:
-        gr.Info("Error: Plans path not configured")
+        gr.Info("Error: Plans path not configured", title="❌ Error")
         return plans
     try:
         for plan in plans:
@@ -169,12 +173,16 @@ def update_experiment_status(
                 plan.status = ExperimentStatus(new_status)
                 break
         save_experiment_plans(plans, plans_path)
-        gr.Info("Experiment status updated successfully")
+        gr.Info(
+            "Experiment status updated successfully",
+            duration=1,
+            title="✅ Info",
+        )
         return plans
     except Exception as e:
         error_msg = f"Error updating experiment status: {str(e)}"
         logger.error(error_msg)
-        gr.Info(error_msg)
+        gr.Info(error_msg, title="❌ Error")
         return plans
 
 
