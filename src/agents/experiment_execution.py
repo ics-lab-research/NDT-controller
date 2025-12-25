@@ -185,7 +185,7 @@ def execute_single_plan(plan: ExperimentPlan, project_manager: ProjectManager):
         if not result.success:
             plan.status = ExperimentStatus.ERROR
             raise ExperimentExecutionError(
-                filename=plan.filename, error_message=result.error
+                filename=plan.filename, error_message=result.error or "Unknown error"
             )
 
 
