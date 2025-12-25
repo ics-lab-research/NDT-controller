@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import Generator, List, Tuple
+from typing import Generator, List
 
 from loguru import logger
 
@@ -185,7 +185,8 @@ def execute_single_plan(plan: ExperimentPlan, project_manager: ProjectManager):
         if not result.success:
             plan.status = ExperimentStatus.ERROR
             raise ExperimentExecutionError(
-                filename=plan.filename, error_message=result.error or "Unknown error"
+                filename=plan.filename,
+                error_message=result.error or "Unknown error",
             )
 
 
