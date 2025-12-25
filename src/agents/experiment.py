@@ -213,6 +213,10 @@ def handle_experiment_mode(
 
     yield AgentResponse(response=router_response.response)
 
+    # natural conversation with user
+    if not router_response.action:
+        return
+
     # Determine next steps based on router action
     if router_response.action == ExpAction.ASK_CLARIFICATION:
         return

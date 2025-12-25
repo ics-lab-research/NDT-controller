@@ -57,7 +57,7 @@ class State {
 
 // ==================Output models===================
 class ExpRouterOutput {
-  action ExpAction
+  action ExpAction?
   response string? @description("only for ASK_CLARIFICATION")
   reformatted_message string? @description("for all except ASK_CLARIFICATION")
 }

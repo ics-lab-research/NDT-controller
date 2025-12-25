@@ -63,7 +63,7 @@ Step 5: Apply smart defaults:
 - Spacing: Omit if not mentioned
 - Accept ANY waveform type user provides
 
-Step 6: Reformat the message:
+Step 6: Reformat the message (ONLY ENGLISH):
 - Normalize units: cm, mm, kHz, Hz
 - Standardize format: "20 by 20"→20x20
 - Convert written numbers to digits
@@ -138,6 +138,7 @@ Output: {"action": "ASK_CLARIFICATION", "response": "Please specify the scan par
 - Spacing is OPTIONAL for multiple scans
 - Frequency is OPTIONAL
 - Default axis to X if not specified
+- Reformat output MUST be in ENGLISH
 </critical_reminders>
 
 {{ ctx.output_format }}

@@ -46,7 +46,6 @@
 
                   # for pick file support
                   python313Packages.tkinter
-                  python313Packages.numpy
                 ];
 
                 # https://devenv.sh/reference/options/
@@ -60,7 +59,6 @@
                 };
 
                 scripts.init-project.exec = ''
-                  
                   ${pkgs.uv}/bin/uv init
                   ${pkgs.uv}/bin/uv sync
                   ${pkgs.uv}/bin/uv add --dev -r dev-requirements.txt

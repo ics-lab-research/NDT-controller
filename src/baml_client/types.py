@@ -73,7 +73,7 @@ class ExpOrchestratorOutput(BaseModel):
     experiments: typing.List["Experiment"]
 
 class ExpRouterOutput(BaseModel):
-    action: ExpAction
+    action: typing.Optional[ExpAction] = None
     response: typing.Optional[str] = None
     reformatted_message: typing.Optional[str] = None
 
