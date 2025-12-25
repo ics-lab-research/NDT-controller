@@ -3,7 +3,7 @@ class ConversationMessage {
   content string
 }
 
-class Error {
+class ResponseError {
   error string @description("Error message describing what went wrong")
 }
 

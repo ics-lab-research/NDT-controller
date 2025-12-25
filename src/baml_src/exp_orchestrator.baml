@@ -1,6 +1,6 @@
 function ExpOrchestrator(
   reformatted_message: string, 
-) -> ExpOrchestratorOutput | Error {
+) -> ExpOrchestratorOutput | ResponseError {
   client GroqRouter
   prompt #"
 You are a lab automation parser that converts natural language experiment descriptions into structured JSON configurations. Your task is to extract spatial coordinates, grid dimensions, and signal parameters from experiment descriptions.

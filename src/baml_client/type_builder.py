@@ -20,7 +20,7 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["ConnectToViTool","ConversationMessage","Error","ExpOrchestratorOutput","ExpRouterOutput","Experiment","GetNumericIndicatorTool","GetViStatusTool","Grid","HandleSaveDialogTool","PressButtonTool","RelativeOffset","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","SignalParameter","State","StopViTool","ToolResult","WaitForOperationCompleteTool",]
+          ["ConnectToViTool","ConversationMessage","ExpOrchestratorOutput","ExpRouterOutput","Experiment","GetNumericIndicatorTool","GetViStatusTool","Grid","HandleSaveDialogTool","PressButtonTool","RelativeOffset","ResponseError","RunOpenViTool","SelectComboBoxTool","SelectTabTool","SetButtonStateTool","SetNumericControlTool","SignalParameter","State","StopViTool","ToolResult","WaitForOperationCompleteTool",]
         ), enums=set(
           ["ExpAction","ExpType","ScanStatus",]
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
@@ -53,10 +53,6 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def ConversationMessage(self) -> "ConversationMessageViewer":
         return ConversationMessageViewer(self)
-
-    @property
-    def Error(self) -> "ErrorViewer":
-        return ErrorViewer(self)
 
     @property
     def ExpOrchestratorOutput(self) -> "ExpOrchestratorOutputViewer":
@@ -93,6 +89,10 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def RelativeOffset(self) -> "RelativeOffsetViewer":
         return RelativeOffsetViewer(self)
+
+    @property
+    def ResponseError(self) -> "ResponseErrorViewer":
+        return ResponseErrorViewer(self)
 
     @property
     def RunOpenViTool(self) -> "RunOpenViToolViewer":
@@ -369,45 +369,6 @@ class ConversationMessageProperties:
     @property
     def content(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("content"))
-    
-    
-
-
-class ErrorAst:
-    def __init__(self, tb: type_builder.TypeBuilder):
-        _tb = tb._tb # type: ignore (we know how to use this private attribute)
-        self._bldr = _tb.class_("Error")
-        self._properties: typing.Set[str] = set([  "error",  ])
-        self._props = ErrorProperties(self._bldr, self._properties)
-
-    def type(self) -> baml_py.FieldType:
-        return self._bldr.field()
-
-    @property
-    def props(self) -> "ErrorProperties":
-        return self._props
-
-
-class ErrorViewer(ErrorAst):
-    def __init__(self, tb: type_builder.TypeBuilder):
-        super().__init__(tb)
-
-    
-    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
-        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
-    
-
-
-class ErrorProperties:
-    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
-        self.__bldr = bldr
-        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
-
-    
-    
-    @property
-    def error(self) -> type_builder.ClassPropertyViewer:
-        return type_builder.ClassPropertyViewer(self.__bldr.property("error"))
     
     
 
@@ -815,6 +776,45 @@ class RelativeOffsetProperties:
     @property
     def z(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("z"))
+    
+    
+
+
+class ResponseErrorAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("ResponseError")
+        self._properties: typing.Set[str] = set([  "error",  ])
+        self._props = ResponseErrorProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "ResponseErrorProperties":
+        return self._props
+
+
+class ResponseErrorViewer(ResponseErrorAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class ResponseErrorProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def error(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("error"))
     
     
 
@@ -1272,3 +1272,4 @@ class WaitForOperationCompleteToolProperties:
     
     
 
+

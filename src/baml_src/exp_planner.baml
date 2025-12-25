@@ -1,4 +1,4 @@
-function ExpPlanner(experiment: Experiment, state: State) -> string | Error {
+function ExpPlanner(experiment: Experiment, state: State) -> string | ResponseError {
   client GroqRouter
   prompt #"
 You are an experiment planning system that generates sequential movement and configuration plans for scientific experiments. Your task is to create a precise plan for experiment "{{ experiment.id }}".

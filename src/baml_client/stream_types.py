@@ -34,9 +34,6 @@ class ConversationMessage(BaseModel):
     role: typing.Optional[typing.Union[typing_extensions.Literal['user'], typing_extensions.Literal['assistant']]] = None
     content: typing.Optional[str] = None
 
-class Error(BaseModel):
-    error: typing.Optional[str] = None
-
 class ExpOrchestratorOutput(BaseModel):
     number_of_scans: typing.Optional[int] = None
     experiments: typing.List["Experiment"]
@@ -77,6 +74,9 @@ class RelativeOffset(BaseModel):
     x: typing.Optional[int] = None
     y: typing.Optional[int] = None
     z: typing.Optional[int] = None
+
+class ResponseError(BaseModel):
+    error: typing.Optional[str] = None
 
 class RunOpenViTool(BaseModel):
     tool_name: typing.Optional[typing_extensions.Literal['run_open_vi']] = None

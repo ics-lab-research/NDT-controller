@@ -22,9 +22,6 @@ type_map = {
     "types.ConversationMessage": types.ConversationMessage,
     "stream_types.ConversationMessage": stream_types.ConversationMessage,
 
-    "types.Error": types.Error,
-    "stream_types.Error": stream_types.Error,
-
     "types.ExpOrchestratorOutput": types.ExpOrchestratorOutput,
     "stream_types.ExpOrchestratorOutput": stream_types.ExpOrchestratorOutput,
 
@@ -51,6 +48,9 @@ type_map = {
 
     "types.RelativeOffset": types.RelativeOffset,
     "stream_types.RelativeOffset": stream_types.RelativeOffset,
+
+    "types.ResponseError": types.ResponseError,
+    "stream_types.ResponseError": stream_types.ResponseError,
 
     "types.RunOpenViTool": types.RunOpenViTool,
     "stream_types.RunOpenViTool": stream_types.RunOpenViTool,

@@ -3,7 +3,7 @@ from typing import List
 from ..baml_client import b
 from ..baml_client.types import (
     ConversationMessage,
-    Error,
+    ResponseError,
     Experiment,
     ExpOrchestratorOutput,
     ExpRouterOutput,
@@ -31,7 +31,7 @@ def call_exp_router(
 
 def call_exp_basic_executor(
     user_message: str,
-) -> List[BasicExpTool] | Error:
+) -> List[BasicExpTool] | ResponseError:
     """Call the basic experiment executor with a user message."""
     cr = get_client_registry("exp-basic-executor")
 
@@ -44,7 +44,7 @@ def call_exp_basic_executor(
 
 def call_exp_orchestrator(
     reformatted_message: str,
-) -> ExpOrchestratorOutput | Error:
+) -> ExpOrchestratorOutput | ResponseError:
     """Call the orchestrator agent with a reformatted message"""
     cr = get_client_registry("exp-orchestrator")
 
@@ -56,7 +56,7 @@ def call_exp_orchestrator(
     return response
 
 
-def call_exp_planner(experiment: Experiment, state: State) -> str | Error:
+def call_exp_planner(experiment: Experiment, state: State) -> str | ResponseError:
     """Get the experiment plan tools from BAML (synchronous)."""
     cr = get_client_registry("exp-planner")
 
@@ -68,7 +68,7 @@ def call_exp_planner(experiment: Experiment, state: State) -> str | Error:
     return response
 
 
-def call_exp_executor(plan: str, filename: str) -> List[ExperimentTool] | Error:
+def call_exp_executor(plan: str, filename: str) -> List[ExperimentTool] | ResponseError:
     """Call the experiment executor with a plan and filename."""
     cr = get_client_registry("exp-executor")
     response = b.ExpExecutor(

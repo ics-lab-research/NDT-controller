@@ -5,7 +5,7 @@ from loguru import logger
 
 from ..baml_client.types import (
     ConversationMessage,
-    Error,
+    ResponseError,
     ExpAction,
     Experiment,
     ExpOrchestratorOutput,
@@ -23,7 +23,7 @@ from .experiment_execution import execute_tool
 from .experiment_planning import append_experiment_plans
 
 
-def yield_error(error: Error) -> Generator[AgentResponse, None, None]:
+def yield_error(error: ResponseError) -> Generator[AgentResponse, None, None]:
     """Yield an error response."""
     logger.error(f"Error: {error.error}")
     yield AgentResponse(status=f"ERROR: {error.error}")
@@ -63,7 +63,7 @@ def save_plans(
 def process_single_experiment(
     experiment: Experiment,
     project_manager: ProjectManager,
-) -> Generator[AgentResponse, None, ExperimentPlan | Error]:
+) -> Generator[AgentResponse, None, ExperimentPlan | ResponseError]:
     """Process a single experiment through planning and execution."""
     yield AgentResponse(
         intermediate_step=f"Generating abstract plan for `{experiment.filename}`"
@@ -73,7 +73,7 @@ def process_single_experiment(
     )
 
     plan = call_exp_planner(experiment, project_manager.experiment_state)
-    if isinstance(plan, Error):
+    if isinstance(plan, ResponseError):
         yield from yield_error(plan)
         return plan
 
@@ -85,7 +85,7 @@ def process_single_experiment(
     )
 
     tools = call_exp_executor(plan, experiment.filename)
-    if isinstance(tools, Error):
+    if isinstance(tools, ResponseError):
         yield from yield_error(tools)
         return tools
 
@@ -133,7 +133,7 @@ def handle_multiple_scan(
         logger.debug(f"Processing experiment: {experiment.filename}")
 
         plan = call_exp_planner(experiment, project_manager.experiment_state)
-        if isinstance(plan, Error):
+        if isinstance(plan, ResponseError):
             yield from yield_error(plan)
             return None
 
@@ -145,7 +145,7 @@ def handle_multiple_scan(
         )
 
         tools = call_exp_executor(plan, experiment.filename)
-        if isinstance(tools, Error):
+        if isinstance(tools, ResponseError):
             yield from yield_error(tools)
             return None
 
@@ -188,7 +188,7 @@ def orchestrate_experiments(
     )
 
     orchestrator_output = call_exp_orchestrator(reformatted_message)
-    if isinstance(orchestrator_output, Error):
+    if isinstance(orchestrator_output, ResponseError):
         yield from yield_error(orchestrator_output)
         return
 
@@ -221,7 +221,7 @@ def handle_experiment_mode(
         yield AgentResponse(intermediate_step="Performing basic control")
 
         tools = call_exp_basic_executor(user_message)
-        if isinstance(tools, Error):
+        if isinstance(tools, ResponseError):
             yield from yield_error(tools)
             return
 

@@ -1,6 +1,6 @@
 function ExpBasicExecutor(
     user_message: string,
-) -> (ConnectToViTool | GetNumericIndicatorTool | GetViStatusTool | HandleSaveDialogTool | PressButtonTool | RunOpenViTool | SelectComboBoxTool | SelectTabTool | SetButtonStateTool | SetNumericControlTool | StopViTool )[] | Error {
+) -> (ConnectToViTool | GetNumericIndicatorTool | GetViStatusTool | HandleSaveDialogTool | PressButtonTool | RunOpenViTool | SelectComboBoxTool | SelectTabTool | SetButtonStateTool | SetNumericControlTool | StopViTool )[] | ResponseError {
   client GroqRouter
   prompt #"
 You are an autonomous agent that translates user requests into LabVIEW tool function calls. Your task: interpret natural language instructions and convert them into precise LabVIEW operations.
