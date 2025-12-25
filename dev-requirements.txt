@@ -1,3 +1,4 @@
-jupyterlab
-catppuccin-jupyterlab
-jupyterlab-vim
+# jupyterlab
+# catppuccin-jupyterlab
+# jupyterlab-vim
+pyinstaller

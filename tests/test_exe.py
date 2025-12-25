@@ -1,0 +1,13 @@
+import gradio as gr
+
+def greet(name):
+    return f"Hello {name}!"
+
+demo = gr.Interface(
+    fn=greet,
+    inputs=gr.Textbox(label="Name"),
+    outputs=gr.Textbox(label="Output"),
+)
+
+if __name__ == "__main__":
+    demo.launch(inbrowser=True)
