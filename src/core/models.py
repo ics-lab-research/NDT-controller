@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -67,6 +68,7 @@ BasicExpTool = Union[
 
 @dataclass
 class ExperimentPlan:
+    id: str
     filename: str
     experiment: List[ExperimentTool]
     status: ExperimentStatus = ExperimentStatus.NOT_APPROVED

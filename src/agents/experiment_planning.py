@@ -17,6 +17,7 @@ def save_experiment_plans(
     try:
         formatted_plans = [
             {
+                "id": plan.id,
                 "experiment": plan.filename,
                 "tools": [
                     {"type": type(tool).__name__, **tool.__dict__}
@@ -89,6 +90,7 @@ def load_experiment_plans(
                     tools.append("unknown")
             plans.append(
                 ExperimentPlan(
+                    id=plan_data.get("id", str(uuid.uuid4())),
                     filename=plan_data["experiment"],
                     experiment=tools,
                     status=ExperimentStatus(

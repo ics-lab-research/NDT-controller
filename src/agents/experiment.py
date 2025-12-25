@@ -88,7 +88,7 @@ def process_single_experiment(
         yield from yield_error(tools)
         return tools
 
-    return ExperimentPlan(filename=experiment.filename, experiment=tools)
+    return ExperimentPlan(id=str(uuid.uuid4()), filename=experiment.filename, experiment=tools)
 
 
 def handle_single_scan(
@@ -151,7 +151,7 @@ def handle_multiple_scan(
         project_manager.update_experiment_state(new_position)
 
         exp_plan = ExperimentPlan(
-            filename=experiment.filename, experiment=tools
+            id=str(uuid.uuid4()), filename=experiment.filename, experiment=tools
         )
         return exp_plan
 

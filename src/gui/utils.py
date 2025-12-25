@@ -117,14 +117,14 @@ def _convert_table_data_to_tools(
 
 
 def update_experiment_details(
-    plans: List[ExperimentPlan], selected_filename: str
+    plans: List[ExperimentPlan], selected_id: str
 ) -> List[List[str]]:
     """Updates and returns table data for the selected experiment plan."""
-    if not selected_filename:
+    if not selected_id:
         return []
-    plan = next((p for p in plans if p.filename == selected_filename), None)
+    plan = next((p for p in plans if p.id == selected_id), None)
     if not plan:
-        logger.warning(f"Plan not found for filename: {selected_filename}")
+        logger.warning(f"Plan not found for id: {selected_id}")
         return [["Error", "", ""]]
     return convert_plan_to_table_data(plan)
 
@@ -132,27 +132,27 @@ def update_experiment_details(
 def save_experiment_changes(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
-    selected_filename: str,
+    selected_id: str,
     table_data: pd.DataFrame,
 ):
     """Saves changes to the selected experiment plan from table data."""
-    if not selected_filename:
+    if not selected_id:
         gr.Info("Error: No experiment selected", title="❌ Error")
         return
     if not plans_path:
         gr.Info("Error: Plans path not configured", title="❌ Error")
         return
-    plan = next((p for p in plans if p.filename == selected_filename), None)
+    plan = next((p for p in plans if p.id == selected_id), None)
     if not plan:
         gr.Info(
-            f"Error: Plan not found for {selected_filename}", title="❌ Error"
+            f"Error: Plan not found for {selected_id}", title="❌ Error"
         )
         return
     try:
         plan.experiment = _convert_table_data_to_tools(table_data)
         save_experiment_plans(plans, plans_path)
         gr.Info(
-            f"Successfully saved changes to {selected_filename}",
+            f"Successfully saved changes to {selected_id}",
             duration=1,
             title="✅ Info",
         )
