@@ -144,9 +144,7 @@ def save_experiment_changes(
         return
     plan = next((p for p in plans if p.id == selected_id), None)
     if not plan:
-        gr.Info(
-            f"Error: Plan not found for {selected_id}", title="❌ Error"
-        )
+        gr.Info(f"Error: Plan not found for {selected_id}", title="❌ Error")
         return
     try:
         plan.experiment = _convert_table_data_to_tools(table_data)

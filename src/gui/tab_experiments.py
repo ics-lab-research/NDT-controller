@@ -26,9 +26,7 @@ from .utils import (
 )
 
 
-def get_experiment_status(
-    plans: List[ExperimentPlan], selected_id: str
-) -> str:
+def get_experiment_status(plans: List[ExperimentPlan], selected_id: str) -> str:
     """Gets the status value for the selected experiment."""
     plan = next((p for p in plans if p.id == selected_id), None)
     return plan.status.value if plan else ""
@@ -115,7 +113,8 @@ def reload_plans(
         )
         return (
             gr.Dropdown(
-                choices=[(f, i) for f, i in zip(filenames, ids)], value=ids[0] if ids else None
+                choices=[(f, i) for f, i in zip(filenames, ids)],
+                value=ids[0] if ids else None,
             ),
             gr.Dataframe(value=initial_data),
             initial_status,
@@ -147,7 +146,8 @@ def delete_experiment(
         gr.Info("Experiment deleted successfully", duration=1, title="✅ Info")
         return (
             gr.Dropdown(
-                choices=[(f, i) for f, i in zip(filenames, ids)], value=ids[0] if ids else None
+                choices=[(f, i) for f, i in zip(filenames, ids)],
+                value=ids[0] if ids else None,
             ),
             gr.Dataframe(value=initial_data),
             initial_status,
@@ -361,7 +361,9 @@ def create_experiments_tab(
                 outputs=[details_df, status_dropdown],
             )
             save_button.click(
-                lambda selected_id, data, current_plans: save_experiment_changes(
+                lambda selected_id,
+                data,
+                current_plans: save_experiment_changes(
                     current_plans, plans_path, selected_id, data
                 ),
                 inputs=[exp_dropdown, details_df, plans_state],

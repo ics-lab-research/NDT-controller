@@ -88,7 +88,9 @@ def process_single_experiment(
         yield from yield_error(tools)
         return tools
 
-    return ExperimentPlan(id=str(uuid.uuid4()), filename=experiment.filename, experiment=tools)
+    return ExperimentPlan(
+        id=str(uuid.uuid4()), filename=experiment.filename, experiment=tools
+    )
 
 
 def handle_single_scan(
