@@ -50,10 +50,12 @@ def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
     """Converts an experiment plan into a list of table data rows."""
     rows = []
     for step in plan.experiment:
-        for tool in step.tool_sequence:
+        tool_sequence = step.tool_sequence
+        for i, tool in enumerate(tool_sequence):
             row = _tool_to_table_row(tool)
             if row:
-                rows.append([step.step_name] + row)
+                step_name = step.step_name if i == 0 else ""
+                rows.append([step_name] + row)
     return rows
 
 
@@ -112,8 +114,17 @@ def _convert_table_data_to_tools(
         "StopViTool": StopViTool,
         "WaitForOperationCompleteTool": WaitForOperationCompleteTool,
     }
+    # Fill in empty step names with the last non-empty step name
+    filled_data = table_data.copy()
+    last_step_name = ""
+    for idx in filled_data.index:
+        step_name = str(filled_data.at[idx, 0]).strip()
+        if step_name:
+            last_step_name = step_name
+        else:
+            filled_data.at[idx, 0] = last_step_name
     steps = []
-    for step_name, group in table_data.groupby(0):
+    for step_name, group in filled_data.groupby(0):
         tools = [
             _create_tool_from_row(row, tool_map) for _, row in group.iterrows()
         ]
