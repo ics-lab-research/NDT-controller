@@ -2,13 +2,13 @@ import json
 import uuid
 from pathlib import Path
 from typing import Dict, List, Union
-  
+
 from loguru import logger
-  
+
 from ..baml_client import types as baml_types
 from ..core.models import ExperimentPlan, ExperimentStatus
-  
-  
+
+
 def save_experiment_plans(
     plans: List[ExperimentPlan],
     filepath: Path,
@@ -43,8 +43,8 @@ def save_experiment_plans(
     except Exception as e:
         logger.error(f"Failed to save experiment plans to {filepath}: {e}")
         return {"success": False, "error": str(e)}
-  
-  
+
+
 def append_experiment_plans(
     plans: List[ExperimentPlan],
     filepath: Path,
@@ -58,8 +58,8 @@ def append_experiment_plans(
     except Exception as e:
         logger.error(f"Failed to append experiment plans to {filepath}: {e}")
         return {"success": False, "error": str(e)}
-  
-  
+
+
 def load_experiment_plans(
     filepath: Path, log: bool = False
 ) -> List[ExperimentPlan]:
