@@ -2,13 +2,13 @@ import json
 import uuid
 from pathlib import Path
 from typing import Dict, List, Union
-
+  
 from loguru import logger
-
+  
 from ..baml_client import types as baml_types
 from ..core.models import ExperimentPlan, ExperimentStatus
-
-
+  
+  
 def save_experiment_plans(
     plans: List[ExperimentPlan],
     filepath: Path,
@@ -19,10 +19,16 @@ def save_experiment_plans(
         formatted_plans = [
             {
                 "id": plan.id,
-                "experiment": plan.filename,
-                "tools": [
-                    {"type": type(tool).__name__, **tool.__dict__}
-                    for tool in plan.experiment
+                "filename": plan.filename,
+                "steps": [
+                    {
+                        "step_name": step.step_name,
+                        "tool_sequence": [
+                            {"type": type(tool).__name__, **tool.__dict__}
+                            for tool in step.tool_sequence
+                        ],
+                    }
+                    for step in plan.experiment
                 ],
                 "status": plan.status.value,
             }
@@ -37,8 +43,8 @@ def save_experiment_plans(
     except Exception as e:
         logger.error(f"Failed to save experiment plans to {filepath}: {e}")
         return {"success": False, "error": str(e)}
-
-
+  
+  
 def append_experiment_plans(
     plans: List[ExperimentPlan],
     filepath: Path,
@@ -52,8 +58,8 @@ def append_experiment_plans(
     except Exception as e:
         logger.error(f"Failed to append experiment plans to {filepath}: {e}")
         return {"success": False, "error": str(e)}
-
-
+  
+  
 def load_experiment_plans(
     filepath: Path, log: bool = False
 ) -> List[ExperimentPlan]:
@@ -73,27 +79,35 @@ def load_experiment_plans(
             )
         plans = []
         for plan_data in plans_data:
-            tools = []
-            for tool_dict in plan_data.get("tools", []):
-                type_name = tool_dict.pop("type", None)
-                if type_name and hasattr(baml_types, type_name):
-                    tool_class = getattr(baml_types, type_name)
-                    try:
-                        tool = tool_class(**tool_dict)
-                        tools.append(tool)
-                    except Exception as e:
-                        if log:
-                            logger.error(
-                                f"Failed to instantiate {type_name}: {e}"
-                            )
-                        tools.append("unknown")
-                else:
-                    tools.append("unknown")
+            steps = []
+            for step_dict in plan_data.get("steps", []):
+                tool_sequence = []
+                for tool_dict in step_dict.get("tool_sequence", []):
+                    type_name = tool_dict.pop("type", None)
+                    if type_name and hasattr(baml_types, type_name):
+                        tool_class = getattr(baml_types, type_name)
+                        try:
+                            tool = tool_class(**tool_dict)
+                            tool_sequence.append(tool)
+                        except Exception as e:
+                            if log:
+                                logger.error(
+                                    f"Failed to instantiate {type_name}: {e}"
+                                )
+                            tool_sequence.append("unknown")
+                    else:
+                        tool_sequence.append("unknown")
+                steps.append(
+                    baml_types.ExperimentStep(
+                        step_name=step_dict["step_name"],
+                        tool_sequence=tool_sequence,
+                    )
+                )
             plans.append(
                 ExperimentPlan(
                     id=plan_data.get("id", str(uuid.uuid4())),
-                    filename=plan_data["experiment"],
-                    experiment=tools,
+                    filename=plan_data["filename"],
+                    experiment=steps,
                     status=ExperimentStatus(
                         plan_data.get(
                             "status", ExperimentStatus.NOT_APPROVED.value
