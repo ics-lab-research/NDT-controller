@@ -119,7 +119,9 @@ def _convert_table_data_to_tools(
         ]
         tools = [tool for tool in tools if tool is not None]
         if tools:
-            steps.append(ExperimentStep(step_name=str(step_name), tool_sequence=tools))
+            steps.append(
+                ExperimentStep(step_name=str(step_name), tool_sequence=tools)
+            )
     return steps
 
 

@@ -345,7 +345,12 @@ def create_experiments_tab(
             delete_button = gr.Button("🗑️ Delete Experiment")
 
             details_df = gr.Dataframe(
-                headers=["Step Name", "Tool Name", "Parameter 1", "Parameter 2"],
+                headers=[
+                    "Step Name",
+                    "Tool Name",
+                    "Parameter 1",
+                    "Parameter 2",
+                ],
                 value=initial_data,
                 interactive=True,
             )
