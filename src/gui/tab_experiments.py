@@ -21,7 +21,7 @@ from ..core.project_manager import ProjectManager
 from .utils import (
     convert_plan_to_table_data,
     create_message,
-    save_experiment_changes,
+    # save_experiment_changes,
     update_experiment_details,
 )
 
@@ -365,15 +365,15 @@ def create_experiments_tab(
                 inputs=[exp_dropdown, plans_state],
                 outputs=[details_df, status_dropdown],
             )
-            save_button.click(
-                lambda selected_id,
-                data,
-                current_plans: save_experiment_changes(
-                    current_plans, plans_path, selected_id, data
-                ),
-                inputs=[exp_dropdown, details_df, plans_state],
-                outputs=[],
-            )
+            # save_button.click(
+            #     lambda selected_id,
+            #     data,
+            #     current_plans: save_experiment_changes(
+            #         current_plans, plans_path, selected_id, data
+            #     ),
+            #     inputs=[exp_dropdown, details_df, plans_state],
+            #     outputs=[],
+            # )
             reload_button.click(
                 lambda: reload_plans(plans_path),
                 inputs=[],
