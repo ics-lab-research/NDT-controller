@@ -26,6 +26,7 @@ from ..baml_client.types import (
 from ..core.models import (
     ChatHistory,
     ExperimentPlan,
+    ExperimentStep,
     ExperimentTool,
     ChatMessage,
     MessageType,
@@ -34,7 +35,7 @@ from ..core.models import (
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
     """Converts an experiment tool into a list of strings for table display."""
-    tool_name = str(tool.tool_name)
+    tool_name = type(tool).__name__
     params = {k: v for k, v in vars(tool).items() if k != "tool_name"}
     param_list = [
         f"{k}={v.value if isinstance(v, Enum) else str(v)}"
@@ -47,12 +48,13 @@ def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
 
 def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
     """Converts an experiment plan into a list of table data rows."""
-    return [
-        row
-        for tool in plan.experiment
-        for row in [_tool_to_table_row(tool)]
-        if row
-    ]
+    rows = []
+    for step in plan.experiment:
+        for tool in step.tool_sequence:
+            row = _tool_to_table_row(tool)
+            if row:
+                rows.append([step.step_name] + row)
+    return rows
 
 
 def _parse_param(param_str: str) -> Tuple[str, str]:
@@ -66,7 +68,7 @@ def _parse_param(param_str: str) -> Tuple[str, str]:
 def _extract_params_from_row(row: pd.Series) -> Dict[str, str]:
     """Extracts parameters from a pandas Series row."""
     params = {}
-    for i in range(1, len(row)):
+    for i in range(2, len(row)):
         param_str = str(row.iloc[i]) if pd.notna(row.iloc[i]) else ""
         if param_str and param_str != "nan":
             key, value = _parse_param(param_str)
@@ -79,7 +81,7 @@ def _create_tool_from_row(
     row: pd.Series, tool_map: Dict[str, Any]
 ) -> ExperimentTool | None:
     """Creates an experiment tool from a pandas Series row using a tool map."""
-    tool_name = str(row.iloc[0]).strip() if len(row) > 0 else ""
+    tool_name = str(row.iloc[1]).strip() if len(row) > 1 else ""
     if not tool_name or tool_name == "nan":
         return None
     params = _extract_params_from_row(row)
@@ -96,24 +98,29 @@ def _create_tool_from_row(
 
 def _convert_table_data_to_tools(
     table_data: pd.DataFrame,
-) -> List[ExperimentTool]:
-    """Converts table data into a list of experiment tools."""
+) -> List[ExperimentStep]:
+    """Converts table data into a list of experiment steps."""
     tool_map = {
-        "connect_to_vi": ConnectToViTool,
-        "handle_save_dialog": HandleSaveDialogTool,
-        "press_button": PressButtonTool,
-        "run_open_vi": RunOpenViTool,
-        "select_combo_box": SelectComboBoxTool,
-        "select_tab": SelectTabTool,
-        "set_button_state": SetButtonStateTool,
-        "set_numeric_control": SetNumericControlTool,
-        "stop_vi": StopViTool,
-        "wait_for_operation_complete": WaitForOperationCompleteTool,
+        "ConnectToViTool": ConnectToViTool,
+        "HandleSaveDialogTool": HandleSaveDialogTool,
+        "PressButtonTool": PressButtonTool,
+        "RunOpenViTool": RunOpenViTool,
+        "SelectComboBoxTool": SelectComboBoxTool,
+        "SelectTabTool": SelectTabTool,
+        "SetButtonStateTool": SetButtonStateTool,
+        "SetNumericControlTool": SetNumericControlTool,
+        "StopViTool": StopViTool,
+        "WaitForOperationCompleteTool": WaitForOperationCompleteTool,
     }
-    tools = [
-        _create_tool_from_row(row, tool_map) for _, row in table_data.iterrows()
-    ]
-    return [tool for tool in tools if tool is not None]
+    steps = []
+    for step_name, group in table_data.groupby(0):
+        tools = [
+            _create_tool_from_row(row, tool_map) for _, row in group.iterrows()
+        ]
+        tools = [tool for tool in tools if tool is not None]
+        if tools:
+            steps.append(ExperimentStep(step_name=str(step_name), tool_sequence=tools))
+    return steps
 
 
 def update_experiment_details(
