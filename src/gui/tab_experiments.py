@@ -353,6 +353,7 @@ def create_experiments_tab(
                 ],
                 value=initial_data,
                 interactive=True,
+                column_widths=[80, 200, 200, 200],
             )
             with gr.Row():
                 save_button = gr.Button("💾 Save Changes")
