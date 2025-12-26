@@ -179,34 +179,3 @@ def create_message(
         metadata = {"title": "🔄 Intermediate step"}
     # For NORMAL, no metadata
     return ChatMessage(role="assistant", content=content, metadata=metadata)
-
-
-# def save_experiment_changes(
-#     plans: List[ExperimentPlan],
-#     plans_path: Path | None,
-#     selected_id: str,
-#     table_data: pd.DataFrame,
-# ):
-#     """Saves changes to the selected experiment plan from table data."""
-#     if not selected_id:
-#         gr.Info("Error: No experiment selected", title="❌ Error")
-#         return
-#     if not plans_path:
-#         gr.Info("Error: Plans path not configured", title="❌ Error")
-#         return
-#     plan = next((p for p in plans if p.id == selected_id), None)
-#     if not plan:
-#         gr.Info(f"Error: Plan not found for {selected_id}", title="❌ Error")
-#         return
-#     try:
-#         plan.experiment = _convert_table_data_to_tools(table_data)
-#         save_experiment_plans(plans, plans_path)
-#         gr.Info(
-#             f"Successfully saved changes to {selected_id}",
-#             duration=1,
-#             title="✅ Info",
-#         )
-#     except Exception as e:
-#         error_msg = f"Error saving changes: {str(e)}"
-#         logger.error(error_msg)
-#         gr.Info(error_msg, title="❌ Error")
