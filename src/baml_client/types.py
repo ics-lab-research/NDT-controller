@@ -57,7 +57,7 @@ class ScanStatus(str, Enum):
     ERROR = "ERROR"
 
 # #########################################################################
-# Generated classes (22)
+# Generated classes (23)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -83,6 +83,10 @@ class Experiment(BaseModel):
     signal: typing.List["SignalParameter"]
     relative_offset_mm: "RelativeOffset"
     filename: str
+
+class ExperimentStep(BaseModel):
+    step_name: str
+    tool_sequence: typing.List[typing.Union["ConnectToViTool", "HandleSaveDialogTool", "PressButtonTool", "RunOpenViTool", "SelectComboBoxTool", "SelectTabTool", "SetButtonStateTool", "SetNumericControlTool", "StopViTool", "WaitForOperationCompleteTool"]]
 
 class GetNumericIndicatorTool(BaseModel):
     tool_name: typing_extensions.Literal['get_numeric_indicator']

@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 from loguru import logger
 
 from ..baml_client import types as baml_types
-from ..core.models import ExperimentPlan, ExperimentStatus
+from ..core.models import ExperimentPlan, ExperimentStatus, ExperimentStep
 
 
 def save_experiment_plans(
@@ -35,7 +35,7 @@ def save_experiment_plans(
             for plan in plans
         ]
         with filepath.open("w") as f:
-            json.dump(formatted_plans, f, indent=4)
+            json.dump(formatted_plans, f, indent=2)
         logger.info(
             f"Successfully saved {len(plans)} experiment plans to {filepath}"
         )
@@ -98,7 +98,7 @@ def load_experiment_plans(
                     else:
                         tool_sequence.append("unknown")
                 steps.append(
-                    baml_types.ExperimentStep(
+                    ExperimentStep(
                         step_name=step_dict["step_name"],
                         tool_sequence=tool_sequence,
                     )

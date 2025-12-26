@@ -14,8 +14,3 @@ def create_sidebar(
         create_experiments_tab(project_manager, chatbot)
 
     return sidebar_column
-
-
-def toggle_sidebar(show: bool) -> gr.Column:
-    """Toggle sidebar visibility"""
-    return gr.Column(visible=show)

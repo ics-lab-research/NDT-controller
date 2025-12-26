@@ -1,33 +1,16 @@
-import gradio as gr
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog
 
+import gradio as gr
+
 from ..core.models import Mode
-from ..core.project_manager import init_project_context, ProjectManager
-from .artifacts import create_sidebar, toggle_sidebar
+from ..core.project_manager import ProjectManager, init_project_context
+from .artifacts import create_sidebar
 from .chat import (
     handle_mode_change,
     respond,
 )
-
-custom_css = """
-/* --- Chat area --- */
-.chatbot-container {
-    flex: 1 1 auto;
-    height: 65vh !important;       /* ⚖️ good balance */
-    max-height: 65vh !important;
-    overflow-y: auto !important;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 4px;
-}
-
-/* --- Align dropdown and button heights --- */
-.small-dropdown {
-    height: 60px !important;
-}
-"""
 
 
 def create_main_interface() -> gr.Blocks:
@@ -36,7 +19,6 @@ def create_main_interface() -> gr.Blocks:
         title="River Chat",
         fill_width=True,
         fill_height=True,
-        css=custom_css,
     ) as iface:
         # State
         project_manager = init_project_context()
@@ -50,14 +32,6 @@ def create_main_interface() -> gr.Blocks:
                 with gr.Row():
                     with gr.Column(scale=3):
                         gr.Markdown("# River Chat")
-
-                    with gr.Column(scale=1):
-                        show_sidebar = gr.Checkbox(
-                            label="Show Sidebar",
-                            value=False,
-                            elem_classes="checkbox-group",
-                            min_width=100,
-                        )
 
                 with gr.Row():
                     # Chat Column
@@ -74,7 +48,6 @@ def create_main_interface() -> gr.Blocks:
                             editable=True,
                             additional_inputs=[current_context],
                             chatbot=gr.Chatbot(
-                                type="messages",
                                 elem_classes="chatbot-container",
                                 latex_delimiters=[
                                     {
@@ -90,7 +63,6 @@ def create_main_interface() -> gr.Blocks:
                                 ],
                             ),
                             fill_width=True,
-                            type="messages",
                         )
 
                         with gr.Row():
@@ -114,7 +86,6 @@ def create_main_interface() -> gr.Blocks:
                         project_manager,
                         chat_interface.chatbot,
                     )
-                    sidebar_column.visible = False
 
         # Wire up events (only for Chat tab)
         clear_button.click(lambda: [], outputs=chat_interface.chatbot)
@@ -123,12 +94,6 @@ def create_main_interface() -> gr.Blocks:
             handle_mode_change,
             inputs=[mode_dropdown, current_context],
             outputs=[current_context],
-        )
-
-        show_sidebar.change(
-            toggle_sidebar,
-            inputs=[show_sidebar],
-            outputs=[sidebar_column],
         )
 
         def select_and_set_data_dir(

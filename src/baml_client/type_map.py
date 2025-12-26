@@ -31,6 +31,9 @@ type_map = {
     "types.Experiment": types.Experiment,
     "stream_types.Experiment": stream_types.Experiment,
 
+    "types.ExperimentStep": types.ExperimentStep,
+    "stream_types.ExperimentStep": stream_types.ExperimentStep,
+
     "types.GetNumericIndicatorTool": types.GetNumericIndicatorTool,
     "stream_types.GetNumericIndicatorTool": stream_types.GetNumericIndicatorTool,
 

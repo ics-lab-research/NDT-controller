@@ -17,6 +17,7 @@ from ..baml_client.types import (
     SetNumericControlTool,
     StopViTool,
     WaitForOperationCompleteTool,
+    ExperimentStep,
 )
 
 
@@ -69,7 +70,7 @@ BasicExpTool = Union[
 class ExperimentPlan:
     id: str
     filename: str
-    experiment: List[ExperimentTool]
+    experiment: List[ExperimentStep]
     status: ExperimentStatus = ExperimentStatus.NOT_APPROVED
 
 

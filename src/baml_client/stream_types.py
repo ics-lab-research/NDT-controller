@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (22)
+# Generated classes (23)
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
@@ -49,6 +49,10 @@ class Experiment(BaseModel):
     signal: typing.List["SignalParameter"]
     relative_offset_mm: typing.Optional["RelativeOffset"] = None
     filename: typing.Optional[str] = None
+
+class ExperimentStep(BaseModel):
+    step_name: typing.Optional[str] = None
+    tool_sequence: typing.List[typing.Union["ConnectToViTool", "HandleSaveDialogTool", "PressButtonTool", "RunOpenViTool", "SelectComboBoxTool", "SelectTabTool", "SetButtonStateTool", "SetNumericControlTool", "StopViTool", "WaitForOperationCompleteTool"]]
 
 class GetNumericIndicatorTool(BaseModel):
     tool_name: typing.Optional[typing_extensions.Literal['get_numeric_indicator']] = None

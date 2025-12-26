@@ -32,9 +32,9 @@ class LlmResponseParser:
 
     def ExpExecutor(
         self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.ResponseError"]:
+    ) -> typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="request")
-        return typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool", "types.WaitForOperationCompleteTool"]], "types.ResponseError"], __result__)
+        return typing.cast(typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"], __result__)
 
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
@@ -70,9 +70,9 @@ class LlmStreamParser:
 
     def ExpExecutor(
         self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.ResponseError"]:
+    ) -> typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"]:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="stream")
-        return typing.cast(typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool", "stream_types.WaitForOperationCompleteTool"]], "stream_types.ResponseError"], __result__)
+        return typing.cast(typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"], __result__)
 
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},

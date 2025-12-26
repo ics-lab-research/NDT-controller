@@ -1,6 +1,11 @@
+class ExperimentStep {
+  step_name string
+  tool_sequence (ConnectToViTool | HandleSaveDialogTool | PressButtonTool | RunOpenViTool | SelectComboBoxTool | SelectTabTool | SetButtonStateTool | SetNumericControlTool | StopViTool | WaitForOperationCompleteTool)[]
+}
+
 function ExpExecutor(
     plan: string, filename: string?
-) -> (ConnectToViTool | HandleSaveDialogTool | PressButtonTool | RunOpenViTool | SelectComboBoxTool | SelectTabTool | SetButtonStateTool | SetNumericControlTool | StopViTool | WaitForOperationCompleteTool)[] | ResponseError {
+) -> ExperimentStep[] | ResponseError {
   client GroqRouter
   prompt #"
 You are an autonomous agent that translates experimental plans into LabVIEW tool sequences. Your task: convert high-level measurement instructions into precise, synchronized function calls.
@@ -52,49 +57,74 @@ Coordinate System:
 - Y: backward (-) / forward (+)
 - Z: down (-) / up (+)
 </system_capabilities>
-</context>
 
 <instructions>
-CRITICAL RULES:
-1. ALWAYS start with connect_to_vi
-2. Stage 1 (Setup): Configure ALL parameters first (measurement mode, signal configuration, distances) WITHOUT running VI
-   - Switch to appropriate Measurement Mode (Scan Mode for scans)
-   - Select pulse type tab
-   - Select waveform (if Basic pulse type)
-   - Set all numeric parameters (frequencies, amplitudes, distances)
-3. Stage 2 onwards: Before ANY movement or scan operation, MUST start with:
-   - run_open_vi (run_vi: true)
-   - handle_save_dialog (save_directory: "data_dir", file_name: provided filename)
-4. Movement sequence (after run_open_vi and handle_save_dialog):
-   - Distance already set in Stage 1
-   - press_button for direction
-   - wait_for_operation_complete (exp_type: MOVEMENT)
-5. Scan sequence (after run_open_vi and handle_save_dialog):
-   - X/Y Auto Distance already set in Stage 1
-   - Signal already configured in Stage 1
-   - set_button_state (button_name: "Scan", state: true) - NEVER use press_button for Scan
-   - wait_for_operation_complete (exp_type: SCAN)
-6. ALWAYS include wait_for_operation_complete after movements and scans
-7. ALWAYS reconnect with connect_to_vi before each new stage
-8. ALWAYS end with stop_vi
+MANDATORY EXECUTION ORDER:
 
-Translation Mappings:
-- "configure signal" → select Pulse Types tab, select waveform, set freq, amp, etc. parameters
-- "move X/Y/Z direction distance" → set X/Y/Z Distance in Stage 1, then execute in later stage
-- "grid scan MxN" → Scan Mode, set X/Y Auto Distance to M and N, configure signal in Stage 1, then execute in later stage
-- frequency → Basic freq (Hz) for Basic pulse
-- amplitude → Basic amp for Basic pulse
-- waveform → Sine/Square/Triangle/Sawtooth in Basic Type combo box (Sine=0, Triangle=1, Square=2, Sawtooth=3)
+1. INITIALIZATION PHASE (Always First):
+   - Start with connect_to_vi
+   - Configure ALL signal parameters BEFORE running VI
+   - Configure scan distances BEFORE running VI (if scan operation exists in plan)
+   - Select appropriate tabs and modes BEFORE running VI
 
-Stage Structure:
-- Stage 1: Setup - connect_to_vi, set measurement mode, configure signal, set ALL distances (no run_open_vi, no movements)
-- Stage 2: Execution Preparation - connect_to_vi, run_open_vi, handle_save_dialog
-- Stage 3: Movements - execute movements with waits (if plan has movements)
-- Stage 4: Scan Operation - execute scan with wait (if plan has scan)
-- Stage 5: Post-scan Movements - execute return movements with waits (if needed)
-- Stage 6: Cleanup - connect_to_vi, stop_vi
+2. VI STARTUP PHASE (Required Before Any Operations):
+   - Execute run_open_vi with run_vi=true
+   - Immediately follow with handle_save_dialog
 
-If any instruction is unclear or uses controls not listed in system_capabilities, respond with error: "Unknown control or operation: [details]"
+3. OPERATIONS PHASE:
+   - Execute movements and scans in the order specified in the plan
+   - ALWAYS include wait_for_operation_complete after each movement or scan
+   - For movements: use press_button after setting distance
+   - For scans: use set_button_state (NOT press_button) to trigger scan
+
+4. CLEANUP PHASE (Always Last):
+   - Execute stop_vi with close_labview=true
+
+SIGNAL CONFIGURATION RULES:
+
+For Basic Pulse Type (sine, triangle, square, sawtooth):
+- Select Pulse Types tab with index 0
+- Use select_combo_box on "Basic Type" to choose waveform (0=Sine, 1=Triangle, 2=Square, 3=Sawtooth)
+- Use set_numeric_control on "Basic freq (Hz)" for frequency
+- Use set_numeric_control on "Basic amp" for amplitude
+
+For Gaussian Pulse Type:
+- Select Pulse Types tab with index 1
+- Use set_numeric_control on "Gauss freq (Hz)", "Gauss amp", "Gauss atten (dB)", "Gauss Nor. Band"
+
+For Chirp Pulse Type:
+- Select Pulse Types tab with index 2
+- Use set_numeric_control on "Chirp amp", "Chirp f1", "Chirp f2"
+
+MOVEMENT RULES:
+
+For each movement command (move X/Y/Z in direction):
+1. Use set_numeric_control to set the distance (X Distance, Y Distance, or Z Distance)
+2. Use press_button with the directional button name (x left, x right, y forward, y backward, z up, z down)
+3. Use wait_for_operation_complete with exp_type "MOVEMENT"
+
+SCAN RULES:
+
+For grid scan operations (execute grid scan):
+PRE-CONFIGURATION (must happen BEFORE run_open_vi):
+- Use select_tab on "Measurement Modes" with index 1 to select Scan Mode
+- Use set_numeric_control on "X Auto Distance" for horizontal grid steps
+- Use set_numeric_control on "Y Auto Distance" for vertical grid steps
+
+EXECUTION (must happen AFTER run_open_vi and handle_save_dialog):
+- Use set_button_state on button_name "Scan" with state true (NOT press_button)
+- Use wait_for_operation_complete with exp_type "SCAN"
+
+STEP NAMING CONVENTION:
+
+Each step in the output must have a descriptive StepName that maps back to the original plan:
+- "Step 0 - Initialization" for connect_to_vi
+- "Step N - [Original Plan Description]" for each plan item (e.g., "Step 1 - Configure Signal (frequency=1000, amplitude=6.0, waveform=sine)")
+- "Step N.M - Pre-configure [Operation]" for configurations that must happen before VI starts
+- "Step N.P - Start VI and Configure Save" for run_open_vi and handle_save_dialog
+- "Step FINAL - Cleanup" for stop_vi
+
+If a plan step requires multiple stages (like scan requiring both pre-configuration and execution), create separate steps with substep numbering.
 </instructions>
 
 <example>
@@ -111,67 +141,116 @@ Input Plan:
 Input Filename: experiment_001.tdms
 
 Output:
-[ 
-  // Stage 1: Setup - Configure ALL parameters WITHOUT running VI
-  {"tool_name": "connect_to_vi", "vi_path": "example.vi"}, // Connect to LabVIEW VI - ALWAYS FIRST
-  {"tool_name": "select_tab", "tab_control_name": "Measurement Modes", "index": 1}, // Switch to Scan Mode for grid scanning
-  {"tool_name": "select_tab", "tab_control_name": "Pulse Types", "index": 0}, // Select Basic pulse type
-  {"tool_name": "select_combo_box", "combo_box_name": "Basic Type", "index": 0}, // Select Sine waveform (0=Sine, 1=Triangle, 2=Square, 3=Sawtooth)
-  {"tool_name": "set_numeric_control", "control_name": "Basic freq (Hz)", "value": 1000.0}, // Set signal frequency to 1000 Hz
-  {"tool_name": "set_numeric_control", "control_name": "Basic amp", "value": 6.0}, // Set signal amplitude to 6.0
-  {"tool_name": "set_numeric_control", "control_name": "X Auto Distance", "value": 7.0}, // Set grid scan X distance to 7 (for 7x8 grid)
-  {"tool_name": "set_numeric_control", "control_name": "Y Auto Distance", "value": 8.0}, // Set grid scan Y distance to 8 (for 7x8 grid)
-  {"tool_name": "set_numeric_control", "control_name": "X Distance", "value": 10.0}, // Set X movement distance for later execution
-  {"tool_name": "set_numeric_control", "control_name": "Y Distance", "value": 20.0}, // Set Y movement distance for later execution
-  {"tool_name": "set_numeric_control", "control_name": "Z Distance", "value": 15.0}, // Set Z movement distance for later execution
-
-  // Stage 2: Execution Preparation - Run VI and configure save dialog
-  {"tool_name": "run_open_vi", "run_vi": true}, // Run the VI to enable operations - REQUIRED before any movement/scan
-  {"tool_name": "handle_save_dialog", "save_directory": "data_dir", "file_name": "experiment_001.tdms"}, // Configure save location - REQUIRED before any movement/scan
-
-  // Stage 3: Pre-scan Movements - Execute movements to target position
-  {"tool_name": "connect_to_vi", "vi_path": "example.vi"}, // Reconnect to ensure VI state
-  {"tool_name": "press_button", "button_name": "x left"}, // Execute X left movement (distance already set in Stage 1)
-  {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}, // CRITICAL: Wait for X movement to complete
-  {"tool_name": "press_button", "button_name": "y backward"}, // Execute Y backward movement (distance already set in Stage 1)
-  {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}, // CRITICAL: Wait for Y movement to complete
-  {"tool_name": "press_button", "button_name": "z up"}, // Execute Z up movement (distance already set in Stage 1)
-  {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}, // CRITICAL: Wait for Z movement to complete
-
-  // Stage 4: Scan Operation - Execute grid scan
-  {"tool_name": "connect_to_vi", "vi_path": "example.vi"}, // Reconnect to ensure VI state
-  {"tool_name": "set_button_state", "button_name": "Scan", "state": true}, // Start the scan operation - MUST use set_button_state, NOT press_button
-  {"tool_name": "wait_for_operation_complete", "exp_type": "SCAN"}, // CRITICAL: Wait for scan to complete before proceeding
-
-  // Stage 5: Post-scan Movements - Return movements to compensate
-  {"tool_name": "connect_to_vi", "vi_path": "example.vi"}, // Reconnect for return movements
-  {"tool_name": "set_numeric_control", "control_name": "X Distance", "value": 7.0}, // Set return X distance (step 6 in plan)
-  {"tool_name": "press_button", "button_name": "x left"}, // Move X left as specified in step 6
-  {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}, // Wait for X return movement
-  {"tool_name": "set_numeric_control", "control_name": "Y Distance", "value": 8.0}, // Set return Y distance (step 7 in plan)
-  {"tool_name": "press_button", "button_name": "y forward"}, // Move Y forward as specified in step 7
-  {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}, // Wait for Y return movement
-
-  // Stage 6: Cleanup - Stop VI and close LabVIEW
-  {"tool_name": "connect_to_vi", "vi_path": "example.vi"}, // Final connection for cleanup
-  {"tool_name": "stop_vi", "close_labview": true} // Stop VI and close LabVIEW - ALWAYS LAST
+[
+  {
+    "step_name": "Step 0 - Initialization",
+    "tool_sequence": [
+      {"tool_name": "connect_to_vi", "vi_path": "example.vi"}
+    ]
+  },
+  {
+    "step_name": "Step 1 - Configure Signal (frequency=1000, amplitude=6.0, waveform=sine)",
+    "tool_sequence": [
+      {"tool_name": "select_tab", "tab_control_name": "Pulse Types", "index": 0},
+      {"tool_name": "select_combo_box", "combo_box_name": "Basic Type", "index": 0},
+      {"tool_name": "set_numeric_control", "control_name": "Basic freq (Hz)", "value": 1000.0},
+      {"tool_name": "set_numeric_control", "control_name": "Basic amp", "value": 6.0}
+    ]
+  },
+  {
+    "step_name": "Step 5.1 - Pre-configure Grid Scan (7x8)",
+    "tool_sequence": [
+      {"tool_name": "select_tab", "tab_control_name": "Measurement Modes", "index": 1},
+      {"tool_name": "set_numeric_control", "control_name": "X Auto Distance", "value": 7.0},
+      {"tool_name": "set_numeric_control", "control_name": "Y Auto Distance", "value": 8.0}
+    ]
+  },
+  {
+    "step_name": "Step 1.1 - Start VI and Configure Save",
+    "tool_sequence": [
+      {"tool_name": "run_open_vi", "run_vi": true},
+      {"tool_name": "handle_save_dialog", "save_directory": "data_dir", "file_name": "experiment_001.tdms"}
+    ]
+  },
+  {
+    "step_name": "Step 2 - Move X left (distance 10 mm)",
+    "tool_sequence": [
+      {"tool_name": "set_numeric_control", "control_name": "X Distance", "value": 10.0},
+      {"tool_name": "press_button", "button_name": "x left"},
+      {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}
+    ]
+  },
+  {
+    "step_name": "Step 3 - Move Y backward (distance 20 mm)",
+    "tool_sequence": [
+      {"tool_name": "set_numeric_control", "control_name": "Y Distance", "value": 20.0},
+      {"tool_name": "press_button", "button_name": "y backward"},
+      {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}
+    ]
+  },
+  {
+    "step_name": "Step 4 - Move Z up (distance 15 mm)",
+    "tool_sequence": [
+      {"tool_name": "set_numeric_control", "control_name": "Z Distance", "value": 15.0},
+      {"tool_name": "press_button", "button_name": "z up"},
+      {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}
+    ]
+  },
+  {
+    "step_name": "Step 5.2 - Execute Grid Scan (7x8)",
+    "tool_sequence": [
+      {"tool_name": "set_button_state", "button_name": "Scan", "state": true},
+      {"tool_name": "wait_for_operation_complete", "exp_type": "SCAN"}
+    ]
+  },
+  {
+    "step_name": "Step 6 - Move X left (distance 7 mm)",
+    "tool_sequence": [
+      {"tool_name": "set_numeric_control", "control_name": "X Distance", "value": 7.0},
+      {"tool_name": "press_button", "button_name": "x left"},
+      {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}
+    ]
+  },
+  {
+    "step_name": "Step 7 - Move Y forward (distance 8 mm)",
+    "tool_sequence": [
+      {"tool_name": "set_numeric_control", "control_name": "Y Distance", "value": 8.0},
+      {"tool_name": "press_button", "button_name": "y forward"},
+      {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}
+    ]
+  },
+  {
+    "step_name": "Step FINAL - Cleanup",
+    "tool_sequence": [
+      {"tool_name": "stop_vi", "close_labview": true}
+    ]
+  }
 ]
 </example>
 
+<output_requirements>
+Return a JSON array where each element contains:
+- step_name: A descriptive string that maps to the original plan step (e.g., "Step 2 - Move X left (distance 10 mm)")
+- tool_sequence: An array of tool function calls to execute for that step
+
+The output must follow the structure shown in the example above.
+
+If the plan is invalid, incomplete, or cannot be translated, return:
+{"error": "description of the issue"}
+</output_requirements>
+
 <critical_reminders>
-- ALWAYS include connect_to_vi as the first operation
-- Stage 1: Set ALL parameters (mode, signal, distances) WITHOUT running VI
-- Before ANY movement or scan: MUST have run_open_vi and handle_save_dialog
-- Movement/scan operations: ALWAYS follow with wait_for_operation_complete
-- Scan button: MUST use set_button_state (button_name: "Scan", state: true), NEVER use press_button
-- Use save_directory="data_dir" and file_name from the provided filename parameter
-- Movement directions: X (left/right), Y (backward/forward), Z (down/up)
-- Grid scan MxN means M steps in X direction, N steps in Y direction
-- Reconnect with connect_to_vi before each major stage
-- ALWAYS end with stop_vi
+1. ALL configurations (signal parameters, scan distances, mode selections) MUST occur BEFORE run_open_vi
+2. run_open_vi and handle_save_dialog MUST be executed together before any movement or scan operations
+3. ALWAYS use wait_for_operation_complete after movements (exp_type: "MOVEMENT") and scans (exp_type: "SCAN")
+4. For scan operations, use set_button_state NOT press_button
+5. Step names must be descriptive and map back to the original plan items
+6. Follow the mandatory execution order: Initialization → Configuration → VI Startup → Operations → Cleanup
+7. Grid scan requires TWO separate steps: pre-configuration step and execution step
+8. Use substep numbering (e.g., Step 1.1, Step 5.2) when operations need to be split or reordered
 </critical_reminders>
 
-Now translate the given experimental plan into the appropriate tool function sequence.
+Now translate the given experimental plan into the appropriate tool function sequence with explicit step-by-step mapping.
 {{ ctx.output_format }}
 "#
 }

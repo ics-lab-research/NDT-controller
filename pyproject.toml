@@ -5,11 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+  "baml-py>=0.215.2",
   "dotenv>=0.9.9",
+  "gradio>=6.2.0",
   "loguru>=0.7.3",
-  "baml-py==0.215",
-  "pydantic>=2.11.7",
-  "gradio>=5.48.0",
+  "pydantic>=2.12.5",
   "pywin32>=311; sys_platform == 'win32'",
   "pywinauto>=0.6.9; sys_platform == 'win32'",
 ]
