@@ -117,5 +117,8 @@ def load_experiment_plans(
             )
         return plans
     except (json.JSONDecodeError, KeyError) as e:
-        logger.error(f"Failed to load experiment plans from {filepath}: {e}")
+        if log:
+            logger.error(
+                f"Failed to load experiment plans from {filepath}: {e}"
+            )
         return []
