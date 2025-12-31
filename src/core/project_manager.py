@@ -58,6 +58,11 @@ class ProjectManager:
         """Get the list of multimodal uploads."""
         return self._multimodal_uploads
 
+    @property
+    def dry_run(self) -> bool:
+        """Get whether dry run mode is enabled from environment variable."""
+        return os.environ.get("DRY_RUN", "false").lower() == "true"
+
     def add_multimodal_upload(self, file_path: Path) -> None:
         """Add a file to the multimodal uploads list."""
         logger.info(f"Added multimodal upload: {file_path}")

@@ -14,6 +14,6 @@ exp_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
 exp_basic_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
 
 [logging]
-baml_log = "info"
-log_level = "debug"
-dry_run = true
+baml_log = "info"   # level logging for baml
+log_level = "debug" # level logging for loguru
+dry_run = true      # dry_run mode when execute tool functions
