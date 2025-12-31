@@ -241,7 +241,7 @@ Output:
         {"key": "frequency_hz", "value": "2000"}
       ],
       "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "sine_20x20_2khz"
+      "filename": "sine_20x20_2khz_Z1"
     },
     {
       "id": "exp_2",
@@ -251,7 +251,7 @@ Output:
         {"key": "frequency_hz", "value": "2000"}
       ],
       "relative_offset_mm": {"x": 0, "y": 0, "z": 2},
-      "filename": "sine_20x20_2khz_2"
+      "filename": "sine_20x20_2khz_Z2"
     },
     {
       "id": "exp_3",
@@ -261,7 +261,7 @@ Output:
         {"key": "frequency_hz", "value": "2000"}
       ],
       "relative_offset_mm": {"x": 0, "y": 0, "z": 3},
-      "filename": "sine_20x20_2khz_3"
+      "filename": "sine_20x20_2khz_Z3"
     }
   ]
 }

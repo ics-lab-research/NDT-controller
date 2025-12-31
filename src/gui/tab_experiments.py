@@ -21,18 +21,20 @@ from ..core.project_manager import ProjectManager
 from .utils import (
     convert_plan_to_table_data,
     create_message,
-    # save_experiment_changes,
     update_experiment_details,
+    save_experiment_changes,
 )
 
 
-def get_experiment_status(plans: List[ExperimentPlan], selected_id: str) -> str:
+def _get_experiment_status(
+    plans: List[ExperimentPlan], selected_id: str
+) -> str:
     """Gets the status value for the selected experiment."""
     plan = next((p for p in plans if p.id == selected_id), None)
     return plan.status.value if plan else ""
 
 
-def update_scan_status(
+def _update_scan_status(
     plans_path: Path | None, log: bool = False
 ) -> gr.Dataframe:
     if not plans_path:
@@ -54,7 +56,7 @@ def _get_experiment_statuses(
     return [plan.status.value for plan in plans]
 
 
-def approve_all_plans(
+def _approve_all_plans(
     plans: List[ExperimentPlan], plans_path: Path | None
 ) -> gr.Dataframe:
     if not plans_path:
@@ -74,27 +76,7 @@ def approve_all_plans(
     return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
 
 
-def start_all_approved_plans(
-    plans: List[ExperimentPlan], plans_path: Path | None
-) -> gr.Dataframe:
-    if not plans_path:
-        gr.Info("Error: Plans path not configured", title="❌ Error")
-        return gr.Dataframe(value=[])
-    for plan in plans:
-        if plan.status == ExperimentStatus.APPROVED:
-            plan.status = ExperimentStatus.PENDING
-    try:
-        save_experiment_plans(plans, plans_path)
-    except Exception as e:
-        error_msg = f"Error saving plans: {e}"
-        logger.error(error_msg)
-        gr.Info(error_msg, title="❌ Error")
-    filenames = [plan.filename for plan in plans]
-    statuses = _get_experiment_statuses(plans)
-    return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
-
-
-def reload_plans(
+def _reload_plans(
     plans_path: Path | None,
 ) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
     if not plans_path:
@@ -127,7 +109,7 @@ def reload_plans(
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
 
 
-def delete_experiment(
+def _delete_experiment(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
     selected_id: str,
@@ -160,7 +142,7 @@ def delete_experiment(
         return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
 
 
-def update_experiment_status(
+def _update_experiment_status(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
     selected_id: str,
@@ -188,7 +170,7 @@ def update_experiment_status(
         return plans
 
 
-def start_execution(
+def _start_execution(
     plans: List[ExperimentPlan],
     plans_path: Path | None,
     current_chatbot: ChatHistory,
@@ -217,7 +199,7 @@ def start_execution(
             error_msg = f"Error saving plans: {e}"
             logger.error(error_msg)
             yield (
-                update_scan_status(plans_path),
+                _update_scan_status(plans_path),
                 current_chatbot
                 + [
                     create_message(
@@ -241,7 +223,7 @@ def start_execution(
                 status_index = len(current_chatbot) - 1
             else:
                 current_chatbot[status_index]["content"] = message
-            yield update_scan_status(plans_path), current_chatbot
+            yield _update_scan_status(plans_path), current_chatbot
     except StopIteration as e:
         error = e.value
         if error:
@@ -256,7 +238,7 @@ def start_execution(
                 current_chatbot[status_index]["content"] = (
                     f"Execution error: {error.error_message}"
                 )
-            yield update_scan_status(plans_path), current_chatbot
+            yield _update_scan_status(plans_path), current_chatbot
 
 
 def create_experiments_tab(
@@ -296,7 +278,7 @@ def create_experiments_tab(
             # link to logic
             approve_button.click(
                 lambda plans, plans_path, current_chatbot: (
-                    approve_all_plans(plans, plans_path),
+                    _approve_all_plans(plans, plans_path),
                     current_chatbot
                     + [
                         create_message(
@@ -310,7 +292,7 @@ def create_experiments_tab(
             )
 
             start_button.click(
-                start_execution,
+                _start_execution,
                 inputs=[
                     plans_state,
                     plans_path_state,
@@ -322,7 +304,7 @@ def create_experiments_tab(
 
             timer = gr.Timer(0.1)
             timer.tick(
-                update_scan_status,
+                _update_scan_status,
                 inputs=[plans_path_state, log_state],
                 outputs=status_df,
             )
@@ -361,22 +343,23 @@ def create_experiments_tab(
             exp_dropdown.change(
                 lambda selected_id, current_plans: (
                     update_experiment_details(current_plans, selected_id),
-                    get_experiment_status(current_plans, selected_id),
+                    _get_experiment_status(current_plans, selected_id),
                 ),
                 inputs=[exp_dropdown, plans_state],
                 outputs=[details_df, status_dropdown],
             )
-            # save_button.click(
-            #     lambda selected_id,
-            #     data,
-            #     current_plans: save_experiment_changes(
-            #         current_plans, plans_path, selected_id, data
-            #     ),
-            #     inputs=[exp_dropdown, details_df, plans_state],
-            #     outputs=[],
-            # )
+            save_button.click(
+                save_experiment_changes,
+                inputs=[
+                    plans_state,
+                    plans_path_state,
+                    exp_dropdown,
+                    details_df,
+                ],
+                outputs=[plans_state],
+            )
             reload_button.click(
-                lambda: reload_plans(plans_path),
+                lambda: _reload_plans(plans_path),
                 inputs=[],
                 outputs=[
                     exp_dropdown,
@@ -387,7 +370,7 @@ def create_experiments_tab(
             )
 
             delete_button.click(
-                delete_experiment,
+                _delete_experiment,
                 inputs=[plans_state, plans_path_state, exp_dropdown],
                 outputs=[
                     exp_dropdown,
@@ -398,7 +381,7 @@ def create_experiments_tab(
             )
 
             status_dropdown.change(
-                update_experiment_status,
+                _update_experiment_status,
                 inputs=[
                     plans_state,
                     plans_path_state,
