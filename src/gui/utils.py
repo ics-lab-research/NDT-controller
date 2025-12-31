@@ -57,6 +57,7 @@ tool_name_map: Dict[str, str] = {
 
 
 def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
+    """Converts an experiment tool into a list of strings for table display."""
     tool_name = type(tool).__name__
     params = {k: v for k, v in vars(tool).items() if k != "tool_name"}
     param_list = [
@@ -69,6 +70,7 @@ def _tool_to_table_row(tool: ExperimentTool) -> List[str]:
 
 
 def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
+    """Converts an experiment plan into a list of table data rows."""
     rows = []
     for step in plan.experiment:
         tool_sequence = step.tool_sequence
@@ -80,81 +82,59 @@ def convert_plan_to_table_data(plan: ExperimentPlan) -> List[List[str]]:
     return rows
 
 
-def _parse_row_params(param1: str, param2: str) -> Dict[str, Any]:
-    params = {}
-    for param in [param1, param2]:
-        if not param:
-            continue
-        try:
-            key, value = param.split("=", 1)
-            try:
-                value = int(value)
-            except ValueError:
-                pass
-            params[key] = value
-        except ValueError:
-            continue
-    return params
-
-
-def _instantiate_tool(
-    tool_name: str, params: Dict[str, Any]
-) -> ExperimentTool | None:
-    if tool_name in tool_name_map:
-        params["tool_name"] = tool_name_map[tool_name]
-    tool_class = tool_map.get(tool_name)
-    if not tool_class:
-        return None
-    try:
-        return tool_class(**params)
-    except Exception:
-        logger.warning(
-            f"Failed to instantiate {tool_name} with params {params}"
-        )
-        return None
-
-
-def _process_table_row(
-    row: pd.Series,
-    current_step_name: str | None,
-    current_tools: List[ExperimentTool],
-) -> tuple[str | None, List[ExperimentTool]]:
-    if len(row) < 4:
-        return current_step_name, current_tools
-    step_name = str(row.iloc[0]) if pd.notna(row.iloc[0]) else ""
-    tool_name = str(row.iloc[1]) if pd.notna(row.iloc[1]) else ""
-    param1 = str(row.iloc[2]) if pd.notna(row.iloc[2]) else ""
-    param2 = str(row.iloc[3]) if pd.notna(row.iloc[3]) else ""
-    if step_name:
-        return step_name, []
-    params = _parse_row_params(param1, param2)
-    tool = _instantiate_tool(tool_name, params)
-    if tool:
-        current_tools.append(tool)
-    return current_step_name, current_tools
-
-
 def convert_table_data_to_experiment_steps(
     table_data: pd.DataFrame,
 ) -> List[ExperimentStep]:
-    steps = []
-    current_step_name = None
-    current_tools = []
+    """Converts table data back into a list of experiment steps."""
+    steps: List[ExperimentStep] = []
+    current_step_name: str | None = None
+    current_tools: List[ExperimentTool] = []
     for _, row in table_data.iterrows():
-        current_step_name, current_tools = _process_table_row(
-            row, current_step_name, current_tools
-        )
-        if current_step_name and not current_tools:
-            continue
-        if current_step_name and current_tools:
-            steps.append(
-                ExperimentStep(
-                    step_name=current_step_name,
-                    tool_sequence=current_tools.copy(),
+        if len(row) < 4:
+            continue  # Skip invalid rows
+        step_name: str = str(row.iloc[0]) if pd.notna(row.iloc[0]) else ""
+        tool_name: str = str(row.iloc[1]) if pd.notna(row.iloc[1]) else ""
+        param1: str = str(row.iloc[2]) if pd.notna(row.iloc[2]) else ""
+        param2: str = str(row.iloc[3]) if pd.notna(row.iloc[3]) else ""
+
+        if step_name:
+            if current_step_name:
+                steps.append(
+                    ExperimentStep(
+                        step_name=current_step_name, tool_sequence=current_tools
+                    )
                 )
-            )
-            current_step_name = None
+            current_step_name = step_name
             current_tools = []
+        # Parse parameters
+        params: Dict[str, Any] = {}
+        for param in [param1, param2]:
+            if param:
+                try:
+                    key: str
+                    value: Any
+                    key, value = param.split("=", 1)
+                    # Attempt to convert to int if possible, otherwise keep as str
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        pass
+                    params[key] = value
+                except ValueError:
+                    continue  # Skip malformed params
+        # Add tool_name if available
+        if tool_name in tool_name_map:
+            params["tool_name"] = tool_name_map[tool_name]
+        # Instantiate tool
+        tool_class: Any | None = tool_map.get(tool_name)
+        if tool_class:
+            try:
+                tool: ExperimentTool = tool_class(**params)
+                current_tools.append(tool)
+            except Exception:
+                logger.warning(
+                    f"Failed to instantiate {tool_name} with params {params}"
+                )
     if current_step_name:
         steps.append(
             ExperimentStep(
@@ -167,6 +147,7 @@ def convert_table_data_to_experiment_steps(
 def update_experiment_details(
     plans: List[ExperimentPlan], selected_id: str
 ) -> List[List[str]]:
+    """Updates and returns table data for the selected experiment plan."""
     if not selected_id:
         return []
     plan = next((p for p in plans if p.id == selected_id), None)
@@ -179,6 +160,7 @@ def update_experiment_details(
 def build_conversation_history(
     history: ChatHistory,
 ) -> List[ConversationMessage]:
+    """Builds a list of conversation messages from chat history."""
     conversation = []
     for msg in history:
         role = msg["role"]
@@ -198,6 +180,7 @@ def save_experiment_changes(
     selected_id: str,
     table_data: pd.DataFrame,
 ) -> List[ExperimentPlan]:
+    """Saves changes to the selected experiment plan from table data."""
     if not plans_path:
         gr.Info("Error: Plans path not configured", title="⚠️ Warning")
         return plans
@@ -223,6 +206,7 @@ def save_experiment_changes(
 def create_message(
     content: str, message_type: MessageType = MessageType.NORMAL
 ) -> ChatMessage:
+    """Creates a chat message with optional type-based metadata."""
     metadata = None
     if message_type == MessageType.ACTION:
         metadata = {"title": "⚡ Action"}
@@ -230,4 +214,5 @@ def create_message(
         metadata = {"title": "📊 Status"}
     elif message_type == MessageType.INTERMEDIATE_STEP:
         metadata = {"title": "🔄 Intermediate step"}
+    # For NORMAL, no metadata
     return ChatMessage(role="assistant", content=content, metadata=metadata)
