@@ -16,3 +16,4 @@ exp_basic_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
 [logging]
 baml_log = "info"
 log_level = "debug"
+dry_run = true

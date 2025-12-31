@@ -2,7 +2,5 @@
 
 # TODO:
 
-1. [x] Basic control
-2. [x] Add and edit status scan
-3. [x] We can set by hand some path (in GUI)
-4. [ ] .exe file
+1. [ ] data folder (now project manager not update)
+2. [ ]
