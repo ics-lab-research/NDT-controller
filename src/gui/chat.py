@@ -14,7 +14,7 @@ from ..core.models import (
     MultimodalMessage,
 )
 from ..core.project_manager import ProjectManager
-from .utils import build_conversation_history, create_message
+from .chat_utils import build_conversation_history, create_message
 
 
 def parse_multimodal_message(
@@ -105,7 +105,6 @@ def create_chat_interface(
 ) -> Tuple[gr.Chatbot, gr.Textbox, gr.Dropdown, gr.Button]:
     """Create the chat interface components."""
     chatbot = gr.Chatbot(
-        type="messages",
         elem_classes="chatbot-container",
         latex_delimiters=[
             {"left": "$", "right": "$", "display": False},

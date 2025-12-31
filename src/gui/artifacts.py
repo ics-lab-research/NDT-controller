@@ -1,7 +1,7 @@
 import gradio as gr
 
 from ..core.project_manager import ProjectManager
-from .tab_experiments import create_experiments_tab
+from .tab_experiment import create_experiments_tab
 
 
 def create_sidebar(
