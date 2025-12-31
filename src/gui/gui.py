@@ -25,7 +25,7 @@ def create_main_interface() -> gr.Blocks:
 
         # NOTE: set mode to test
         project_manager.set_mode(Mode.EXPERIMENTS)
-        current_context = gr.State(project_manager)
+        project_state = gr.State(project_manager)
 
         with gr.Row():
             with gr.Column():
@@ -46,7 +46,7 @@ def create_main_interface() -> gr.Blocks:
                             respond,
                             multimodal=True,
                             editable=True,
-                            additional_inputs=[current_context],
+                            additional_inputs=[project_state],
                             chatbot=gr.Chatbot(
                                 elem_classes="chatbot-container",
                                 latex_delimiters=[
@@ -82,8 +82,8 @@ def create_main_interface() -> gr.Blocks:
                             )
 
                     # Sidebar with tabs (hidden by default)
-                    sidebar_column = create_sidebar(
-                        project_manager,
+                    create_sidebar(
+                        project_state,
                         chat_interface.chatbot,
                     )
 
@@ -92,8 +92,8 @@ def create_main_interface() -> gr.Blocks:
 
         mode_dropdown.select(
             handle_mode_change,
-            inputs=[mode_dropdown, current_context],
-            outputs=[current_context],
+            inputs=[mode_dropdown, project_state],
+            outputs=[project_state],
         )
 
         def select_and_set_data_dir(
@@ -102,7 +102,7 @@ def create_main_interface() -> gr.Blocks:
             """Select a folder using tkinter, set it in context, and return the path."""
             root = tk.Tk()
             root.withdraw()  # Hide the main window
-            folder_path = filedialog.askdirectory(title="Select Data Folder")
+            folder_path = filedialog.askdirectory(title="Select data folder")
             root.destroy()
             if folder_path:
                 current_context.set_data_dir_path(Path(folder_path))
@@ -111,15 +111,15 @@ def create_main_interface() -> gr.Blocks:
 
         with gr.Sidebar():
             data_dir_textbox = gr.Textbox(
-                label="Data Folder Path",
+                label="Data folder path",
                 value=str(project_manager.data_dir_path),
                 interactive=False,
             )
-            select_data_dir_button = gr.Button("Select Data Folder")
+            select_data_dir_button = gr.Button("Select data folder")
             select_data_dir_button.click(
                 select_and_set_data_dir,
-                inputs=[current_context],
-                outputs=[data_dir_textbox, current_context],
+                inputs=[project_state],
+                outputs=[data_dir_textbox, project_state],
             )
 
     return iface
