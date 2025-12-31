@@ -38,13 +38,13 @@ Step 3: Categorize into ONE of these actions:
 2. SINGLE_SCAN
    - Use when: One scan with parameters
    - Required info: Grid size (NxN) AND waveform type
-   - Optional info: Frequency, amplitude, lift-off, sample name, naming convention
+   - Optional info: Frequency, amplitude, lift-off, sample name, naming instructions
    - Output: Standardized scan request
 
 3. MULTIPLE_SCAN
    - Use when: Multiple scans indicated by numbers ("2 scans", "3 experiments", etc.)
    - Required info: Number of scans AND scan parameters (grid size + waveform)
-   - Optional info: Spacing distance/axis, multiple lift-offs, multiple waveforms, frequencies, amplitudes, sample names, naming conventions
+   - Optional info: Spacing distance/axis, multiple lift-offs, multiple waveforms, frequencies, amplitudes, sample names, naming instructions
    - Output: Structured experiment description
    - Calculate total scans as PRODUCT of all parameter variations
 
@@ -69,7 +69,17 @@ Step 6: Reformat the message (ONLY ENGLISH):
 - Convert written numbers to digits
 - Format parameters: amp=X.XX, freq=XXXHz, f1=XXXHz f2=XXXHz
 - Include sample names: sample="name" or sample: name
-- Include naming conventions: naming="instruction"
+- Include naming instructions: naming="[user's exact instruction]"
+  * Preserve the COMPLETE naming instruction exactly as user provides it
+  * DO NOT parse, extract, or separate any components from the naming instruction
+  * Examples of naming instructions to preserve as-is:
+    - "name it exp1"
+    - "use prefix test_"
+    - "add suffix _final"
+    - "include waveform and frequency in name"
+    - "exclude lift-off from filename"
+    - "put sample name first"
+    - "format: samplename_waveform_date"
 - For multiple scans: "N scans: [params]" or "N scans [distance] apart on [axis]: [params]"
 - For combinatorial: "N scans (X waveforms x Y lift-offs): [detailed params]"
 </routing_mode>
@@ -100,7 +110,16 @@ Input: "scan sample 'corrosion' 270x270, 3 waveforms: square amp=2.1 freq=200Hz,
 Output: {"action": "MULTIPLE_SCAN", "response": null, "reformatted_message": "9 scans (3 waveforms x 3 lift-offs): square 270x270 amp=2.1 at 200Hz, gaussian 270x270 amp=3.88 at 1000Hz, chirp 270x270 amp=2.97 f1=500Hz f2=1500Hz, lift-offs [1mm, 2mm, 3mm], sample: corrosion"}
 
 Input: "scan sample 'corrosion' size 270x270, 3 waveforms: square amp=2.1 freq=200Hz, gaussian amp=3.88 freq=1000Hz, chirp amp=2.97 f1=500Hz f2=1500Hz, lift-offs: 1mm, 2mm, 3mm, note: when naming put sample name first"
-Output: {"action": "MULTIPLE_SCAN", "response": null, "reformatted_message": "9 scans (3 waveforms x 3 lift-offs): square 270x270 amp=2.1 at 200Hz, gaussian 270x270 amp=3.88 at 1000Hz, chirp 270x270 amp=2.97 f1=500Hz f2=1500Hz, lift-offs [1mm, 2mm, 3mm], sample: corrosion, naming: sample name first"}
+Output: {"action": "MULTIPLE_SCAN", "response": null, "reformatted_message": "9 scans (3 waveforms x 3 lift-offs): square 270x270 amp=2.1 at 200Hz, gaussian 270x270 amp=3.88 at 1000Hz, chirp 270x270 amp=2.97 f1=500Hz f2=1500Hz, lift-offs [1mm, 2mm, 3mm], naming: put sample name first"}
+
+Input: "run 2 scans 50x50 gaussian at 2kHz, name them exp1 and exp2"
+Output: {"action": "MULTIPLE_SCAN", "response": null, "reformatted_message": "2 scans: gaussian 50x50 at 2kHz, naming: name them exp1 and exp2"}
+
+Input: "scan 30x30 square, use prefix test_ for the filename"
+Output: {"action": "SINGLE_SCAN", "response": null, "reformatted_message": "scan 30x30 square, naming: use prefix test_"}
+
+Input: "scan 40x40 chirp, include waveform and frequency in the name but exclude lift-off"
+Output: {"action": "SINGLE_SCAN", "response": null, "reformatted_message": "scan 40x40 chirp, naming: include waveform and frequency in the name but exclude lift-off"}
 
 # BASIC_CONTROL
 Input: "turn on the pump"
@@ -134,7 +153,13 @@ Output: {"action": "ASK_CLARIFICATION", "response": "Please specify the scan par
 - Accept ANY waveform type
 - ONLY ask clarification when user clearly wants to scan but missing grid size AND waveform
 - Detect COMBINATORIAL experiments (multiply variations)
-- Preserve ALL metadata (sample names, naming conventions, notes)
+- Preserve ALL metadata (sample names, naming instructions, notes)
+- NAMING INSTRUCTIONS: Treat as a black box - copy user's exact words without parsing or extracting components
+  + User says "name it exp1" → naming: name it exp1
+  + User says "use prefix test_" → naming: use prefix test_
+  + User says "include waveform" → naming: include waveform
+  + User says "put sample name first" → naming: put sample name first
+  + NEVER modify, interpret, or extract parts from naming instructions
 - Spacing is OPTIONAL for multiple scans
 - Frequency is OPTIONAL
 - Default axis to X if not specified

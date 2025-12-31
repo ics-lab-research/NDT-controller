@@ -37,7 +37,6 @@ Identify patterns and extract values:
 - "XdB" → attenuation (preserve unit: "10dB")
 - "Xus", "Xms", "Xs" → pulse_width or duration (preserve unit: "100us")
 - "lift-off", "liftoff", "z-height" → z-axis positioning values
-- "sample:", "sample name" → sample identifier for naming
 
 Parameters persist across experiments unless explicitly changed.
 
@@ -149,126 +148,245 @@ Examples:
 Sequential format: exp_1, exp_2, exp_3, ...
 </instructions>
 
-<example>
-Input: "9 scans (3 waveforms x 3 lift-offs): square 270x270 amp=2.1 at 200Hz, gaussian 270x270 amp=3.88 at 1000Hz, chirp 270x270 amp=2.97 f1=500Hz f2=1500Hz, lift-offs [1mm, 2mm, 3mm], sample: corrosion, naming: sample name first"
+// Replace the single long <example> block with multiple shorter examples:
 
-Processing steps:
-1. Parse: 3 waveforms (square, gaussian, chirp) with different parameters
-2. Parse: 3 lift-off values [1mm, 2mm, 3mm] for z-axis
-3. Parse naming: "sample: corrosion" and "sample name first"
-4. Generate 9 experiments (3 waveforms x 3 lift-offs = 9 combinations)
-5. Apply naming convention: sample name first in filename
-6. Apply lift-off values to z coordinate in offset
+<examples>
+<example1>
+<title>Basic Grid Scan</title>
+Input: "10x10 gaussian at 1kHz"
 
 Output:
 {
-  "number_of_scans": 9,
+  "number_of_scans": 1,
   "experiments": [
     {
       "id": "exp_1",
-      "grid": {"rows": 270, "cols": 270},
-      "signal": [
-        {"key": "waveform", "value": "square"},
-        {"key": "frequency_hz", "value": "200"},
-        {"key": "amplitude", "value": "2.1"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "corrosion_square_270x270_200Hz_2.1"
-    },
-    {
-      "id": "exp_2",
-      "grid": {"rows": 270, "cols": 270},
-      "signal": [
-        {"key": "waveform", "value": "square"},
-        {"key": "frequency_hz", "value": "200"},
-        {"key": "amplitude", "value": "2.1"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 2},
-      "filename": "corrosion_square_270x270_200Hz_2.1_2"
-    },
-    {
-      "id": "exp_3",
-      "grid": {"rows": 270, "cols": 270},
-      "signal": [
-        {"key": "waveform", "value": "square"},
-        {"key": "frequency_hz", "value": "200"},
-        {"key": "amplitude", "value": "2.1"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 3},
-      "filename": "corrosion_square_270x270_200Hz_2.1_3"
-    },
-    {
-      "id": "exp_4",
-      "grid": {"rows": 270, "cols": 270},
+      "grid": {"rows": 10, "cols": 10},
       "signal": [
         {"key": "waveform", "value": "gaussian"},
-        {"key": "frequency_hz", "value": "1000"},
-        {"key": "amplitude", "value": "3.88"}
+        {"key": "frequency_hz", "value": "1000"}
       ],
       "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "corrosion_gaussian_270x270_1000Hz_3.88"
-    },
-    {
-      "id": "exp_5",
-      "grid": {"rows": 270, "cols": 270},
-      "signal": [
-        {"key": "waveform", "value": "gaussian"},
-        {"key": "frequency_hz", "value": "1000"},
-        {"key": "amplitude", "value": "3.88"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 2},
-      "filename": "corrosion_gaussian_270x270_1000Hz_3.88_2"
-    },
-    {
-      "id": "exp_6",
-      "grid": {"rows": 270, "cols": 270},
-      "signal": [
-        {"key": "waveform", "value": "gaussian"},
-        {"key": "frequency_hz", "value": "1000"},
-        {"key": "amplitude", "value": "3.88"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 3},
-      "filename": "corrosion_gaussian_270x270_1000Hz_3.88_3"
-    },
-    {
-      "id": "exp_7",
-      "grid": {"rows": 270, "cols": 270},
-      "signal": [
-        {"key": "waveform", "value": "chirp"},
-        {"key": "frequency_start_hz", "value": "500"},
-        {"key": "frequency_end_hz", "value": "1500"},
-        {"key": "amplitude", "value": "2.97"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "corrosion_chirp_270x270_500-1500Hz_2.97"
-    },
-    {
-      "id": "exp_8",
-      "grid": {"rows": 270, "cols": 270},
-      "signal": [
-        {"key": "waveform", "value": "chirp"},
-        {"key": "frequency_start_hz", "value": "500"},
-        {"key": "frequency_end_hz", "value": "1500"},
-        {"key": "amplitude", "value": "2.97"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 2},
-      "filename": "corrosion_chirp_270x270_500-1500Hz_2.97_2"
-    },
-    {
-      "id": "exp_9",
-      "grid": {"rows": 270, "cols": 270},
-      "signal": [
-        {"key": "waveform", "value": "chirp"},
-        {"key": "frequency_start_hz", "value": "500"},
-        {"key": "frequency_end_hz", "value": "1500"},
-        {"key": "amplitude", "value": "2.97"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 3},
-      "filename": "corrosion_chirp_270x270_500-1500Hz_2.97_3"
+      "filename": "gaussian_10x10_1khz"
     }
   ]
 }
-</example>
+</example1>
+
+<example2>
+<title>Multiple Grids with Cartesian Product</title>
+Input: "10x10 and 20x20 square at 500Hz and 1kHz"
+
+Output:
+{
+  "number_of_scans": 4,
+  "experiments": [
+    {
+      "id": "exp_1",
+      "grid": {"rows": 10, "cols": 10},
+      "signal": [
+        {"key": "waveform", "value": "square"},
+        {"key": "frequency_hz", "value": "500"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "square_10x10_500hz"
+    },
+    {
+      "id": "exp_2",
+      "grid": {"rows": 10, "cols": 10},
+      "signal": [
+        {"key": "waveform", "value": "square"},
+        {"key": "frequency_hz", "value": "1000"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "square_10x10_1khz"
+    },
+    {
+      "id": "exp_3",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "square"},
+        {"key": "frequency_hz", "value": "500"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "square_20x20_500hz"
+    },
+    {
+      "id": "exp_4",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "square"},
+        {"key": "frequency_hz", "value": "1000"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "square_20x20_1khz"
+    }
+  ]
+}
+</example2>
+
+<example3>
+<title>Lift-off Heights (Z-axis)</title>
+Input: "20x20 sine at 2kHz, lift-offs [1mm, 2mm, 3mm]"
+
+Output:
+{
+  "number_of_scans": 3,
+  "experiments": [
+    {
+      "id": "exp_1",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "sine"},
+        {"key": "frequency_hz", "value": "2000"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "sine_20x20_2khz"
+    },
+    {
+      "id": "exp_2",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "sine"},
+        {"key": "frequency_hz", "value": "2000"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 2},
+      "filename": "sine_20x20_2khz_2"
+    },
+    {
+      "id": "exp_3",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "sine"},
+        {"key": "frequency_hz", "value": "2000"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 3},
+      "filename": "sine_20x20_2khz_3"
+    }
+  ]
+}
+</example3>
+
+<example4>
+<title>Spatial Positioning with Axis Spacing</title>
+Input: "15x15 gaussian at 800Hz, run 3 times, 10mm apart on X axis"
+
+Output:
+{
+  "number_of_scans": 3,
+  "experiments": [
+    {
+      "id": "exp_1",
+      "grid": {"rows": 15, "cols": 15},
+      "signal": [
+        {"key": "waveform", "value": "gaussian"},
+        {"key": "frequency_hz", "value": "800"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "gaussian_15x15_800hz"
+    },
+    {
+      "id": "exp_2",
+      "grid": {"rows": 15, "cols": 15},
+      "signal": [
+        {"key": "waveform", "value": "gaussian"},
+        {"key": "frequency_hz", "value": "800"}
+      ],
+      "relative_offset_mm": {"x": 10, "y": 0, "z": 1},
+      "filename": "gaussian_15x15_800hz_2"
+    },
+    {
+      "id": "exp_3",
+      "grid": {"rows": 15, "cols": 15},
+      "signal": [
+        {"key": "waveform", "value": "gaussian"},
+        {"key": "frequency_hz", "value": "800"}
+      ],
+      "relative_offset_mm": {"x": 20, "y": 0, "z": 1},
+      "filename": "gaussian_15x15_800hz_3"
+    }
+  ]
+}
+</example4>
+
+<example5>
+<title>Chirp Signal with Frequency Range</title>
+Input: "30x30 chirp f1=100Hz f2=500Hz amp=2.5V"
+
+Output:
+{
+  "number_of_scans": 1,
+  "experiments": [
+    {
+      "id": "exp_1",
+      "grid": {"rows": 30, "cols": 30},
+      "signal": [
+        {"key": "waveform", "value": "chirp"},
+        {"key": "frequency_start_hz", "value": "100"},
+        {"key": "frequency_end_hz", "value": "500"},
+        {"key": "amplitude", "value": "2.5V"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "chirp_30x30_100-500hz_2.5v"
+    }
+  ]
+}
+</example5>
+
+<example6>
+<title>Custom Naming with Prefix</title>
+Input: "25x25 square at 1.5kHz, naming: use prefix test_sample_"
+
+Output:
+{
+  "number_of_scans": 1,
+  "experiments": [
+    {
+      "id": "exp_1",
+      "grid": {"rows": 25, "cols": 25},
+      "signal": [
+        {"key": "waveform", "value": "square"},
+        {"key": "frequency_hz", "value": "1500"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "test_sample_square_25x25_1.5khz"
+    }
+  ]
+}
+</example6>
+
+<example7>
+<title>Sample Name First</title>
+Input: "20x20 gaussian at 2kHz, sample: steel_plate, sample name first"
+
+Output:
+{
+  "number_of_scans": 1,
+  "experiments": [
+    {
+      "id": "exp_1",
+      "grid": {"rows": 20, "cols": 20},
+      "signal": [
+        {"key": "waveform", "value": "gaussian"},
+        {"key": "frequency_hz", "value": "2000"}
+      ],
+      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+      "filename": "steel_plate_gaussian_20x20_2khz"
+    }
+  ]
+}
+</example7>
+
+<example8>
+<title>Error Case - Missing Axis</title>
+Input: "10x10 square at 1kHz, 5mm apart"
+
+Output:
+{
+  "error": "Please specify axis for spacing (e.g., '5mm apart on X axis' or '5mm apart on Y axis')"
+}
+</example8>
+</examples>
 
 <critical_reminders>
 - Default offset is (x:0, y:0, z:1) for ALL experiments unless explicitly specified
