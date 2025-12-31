@@ -355,6 +355,7 @@ def start_execution(
         ExperimentStatus.APPROVED,
         ExperimentStatus.PENDING,
         ExperimentStatus.ERROR,
+        ExperimentStatus.SCANNING,
     ]
     if not any(plan.status in runnable_statuses for plan in plans):
         yield (
