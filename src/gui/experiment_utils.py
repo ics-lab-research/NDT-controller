@@ -351,10 +351,31 @@ def start_execution(
             ],
         )
         return
-    approved_plans = [p for p in plans if p.status == ExperimentStatus.APPROVED]
-    if approved_plans:
+    runnable_statuses = [
+        ExperimentStatus.APPROVED,
+        ExperimentStatus.PENDING,
+        ExperimentStatus.ERROR,
+    ]
+    if not any(plan.status in runnable_statuses for plan in plans):
+        yield (
+            gr.Dataframe(value=[]),
+            current_chatbot
+            + [
+                create_message(
+                    content="No experiments available to run",
+                    message_type=MessageType.STATUS,
+                )
+            ],
+        )
+        return
+    plans_to_run = [
+        p
+        for p in plans
+        if p.status in [ExperimentStatus.APPROVED, ExperimentStatus.SCANNING]
+    ]
+    if plans_to_run:
         # Set to PENDING
-        for plan in approved_plans:
+        for plan in plans_to_run:
             plan.status = ExperimentStatus.PENDING
         try:
             save_experiment_plans(plans, plans_path)
