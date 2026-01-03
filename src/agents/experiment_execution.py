@@ -4,7 +4,7 @@ from typing import Generator, List
 
 from loguru import logger
 
-from ..agents.dry_run_execution import execute_tool_dry_run
+from ..agents.experiment_dry_run import execute_tool_dry_run
 from ..agents.experiment_planning import save_experiment_plans
 from ..baml_client.types import (
     ConnectToViTool,
