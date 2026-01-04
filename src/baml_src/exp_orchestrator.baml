@@ -9,8 +9,6 @@ You are a lab automation parser that converts natural language experiment descri
 {{ reformatted_message }}
 </user_message>
 
-You are a lab automation parser that converts natural language experiment descriptions into structured JSON configurations. Your task is to extract spatial coordinates, grid dimensions, signal parameters, and naming conventions from experiment descriptions.
-
 <instructions>
 DETAILED INSTRUCTIONS:
 
