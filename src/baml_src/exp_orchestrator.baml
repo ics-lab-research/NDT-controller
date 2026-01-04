@@ -356,8 +356,8 @@ Output:
 </example6>
 
 <example7>
-<title>Sample Name First</title>
-Input: "20x20 gaussian at 2kHz, sample: steel_plate, sample name first"
+SAMPLE NAME FIRST
+Input: "20x20 gaussian at 2kHz, naming: steel_plate first"
 
 Output:
 {
@@ -378,7 +378,7 @@ Output:
 </example7>
 
 <example8>
-<title>Error Case - Missing Axis</title>
+Error Case - Missing Axis
 Input: "10x10 square at 1kHz, 5mm apart"
 
 Output:
