@@ -152,7 +152,7 @@ Sequential format: exp_1, exp_2, exp_3, ...
 
 <examples>
 <example1>
-<title>Basic Grid Scan</title>
+BASIC GRID SCAN
 Input: "10x10 gaussian at 1kHz"
 
 Output:
@@ -174,7 +174,7 @@ Output:
 </example1>
 
 <example2>
-<title>Multiple Grids with Cartesian Product</title>
+MULTIPLE GRIDS WITH CARTESIAN PRODUCT
 Input: "10x10 and 20x20 square at 500Hz and 1kHz"
 
 Output:
@@ -226,7 +226,7 @@ Output:
 </example2>
 
 <example3>
-<title>Lift-off Heights (Z-axis)</title>
+LIFT-OFF HEIGHTS (Z-AXIS)
 Input: "20x20 sine at 2kHz, lift-offs [1mm, 2mm, 3mm]"
 
 Output:
@@ -268,7 +268,7 @@ Output:
 </example3>
 
 <example4>
-<title>Spatial Positioning with Axis Spacing</title>
+SPATIAL POSITIONING WITH AXIS SPACING
 Input: "15x15 gaussian at 800Hz, run 3 times, 10mm apart on X axis"
 
 Output:
@@ -310,7 +310,7 @@ Output:
 </example4>
 
 <example5>
-<title>Chirp Signal with Frequency Range</title>
+CHIRP SIGNAL WITH FREQUENCY RANGE
 Input: "30x30 chirp f1=100Hz f2=500Hz amp=2.5V"
 
 Output:
@@ -334,7 +334,7 @@ Output:
 </example5>
 
 <example6>
-<title>Custom Naming with Prefix</title>
+CUSTOM NAMING WITH PREFIX
 Input: "25x25 square at 1.5kHz, naming: use prefix test_sample_"
 
 Output:
