@@ -43,4 +43,9 @@ def gui():
 
 
 if __name__ == "__main__":
+    print("EXPERIMENT_BASE:", os.getenv("EXPERIMENT_BASE"))
+    print("EXPERIMENT_DATA_PATH:", os.getenv("EXPERIMENT_DATA_PATH"))
+    print("EXPERIMENT_PLANS_PATH:", os.getenv("EXPERIMENT_PLANS_PATH"))
+    print("EXPERIMENT_VI_PATH:", os.getenv("EXPERIMENT_VI_PATH"))
+    print("EXPERIMENT_PLOTS_PATH:", os.getenv("EXPERIMENT_PLOTS_PATH"))
     gui()

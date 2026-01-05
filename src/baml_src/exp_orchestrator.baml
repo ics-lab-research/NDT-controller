@@ -3,402 +3,132 @@ function ExpOrchestrator(
 ) -> ExpOrchestratorOutput | ResponseError {
   client GroqRouter
   prompt #"
-You are a lab automation parser that converts natural language experiment descriptions into structured JSON configurations. Your task is to extract spatial coordinates, grid dimensions, and signal parameters from experiment descriptions.
+You are a lab automation parser converting natural language experiment descriptions into structured JSON.
 
 <user_message>
 {{ reformatted_message }}
 </user_message>
 
 <instructions>
-DETAILED INSTRUCTIONS:
+1. ANALYZE REQUEST
+- What experiments, ranges, spatial relationships, signal parameters, and naming conventions are specified?
+- If unclear: Return {"error": "I don't know how to parse this request. Please provide more details about [specific missing information]."}
 
-1. ANALYZE THE REQUEST
-Think through the input before processing:
-- What experiments are requested?
-- What ranges need expansion?
-- What spatial relationships exist?
-- What signal parameters are specified?
-- What naming conventions are specified?
+2. PARSE & EXTRACT
+Split on: commas, "and", "then", "next", "after"
 
-If unclear or uncertain, respond with JSON error schema: {"error": "I don't know how to parse this request. Please provide more details about [specific missing information]."}
+Extract patterns:
+- "NxM" → grid dimensions (rows:N, cols:M)
+- Waveforms: "gaussian", "sine", "square", "chirp"
+- Frequency: "XkHz" or "XHz" → normalize to Hz (1kHz = 1000)
+- Chirp: "f1=XHz", "f2=XHz" → frequency_start_hz/frequency_end_hz
+- Amplitude: "XV" → preserve unit ("2.5V")
+- Attenuation: "XdB" → preserve unit ("10dB")
+- Duration: "Xus", "Xms", "Xs" → preserve unit ("100us")
+- Z-axis: "lift-off", "liftoff", "z-height"
 
-2. PARSE THE TEXT
-Split input on delimiters: commas, "and", "then", "next", "after"
+Parameters persist unless explicitly changed.
 
-3. EXTRACT PARAMETERS
-Identify patterns and extract values:
-- "NxM"→ grid dimensions (rows:N, cols:M)
-- "gaussian", "sine", "square", "chirp" → waveform type
-- "XkHz" or "XHz" → frequency_hz (normalize to Hz: 1kHz = 1000)
-- "f1=XHz", "f2=XHz" → chirp frequencies (start/end)
-- "XV" → amplitude (preserve unit: "2.5V")
-- "XdB" → attenuation (preserve unit: "10dB")
-- "Xus", "Xms", "Xs" → pulse_width or duration (preserve unit: "100us")
-- "lift-off", "liftoff", "z-height" → z-axis positioning values
+3. EXPAND RANGES (only if confident)
+- Numeric: "X to Y" → 3 equal steps [X, (X+Y)/2, Y]
+- Unit-based: "1V to 3V" → [1V, 2V, 3V]
+- Explicit lists: "[1mm, 2mm, 3mm]" → [1, 2, 3]
+- Custom steps: "X to Y by Z" → increment by Z
 
-Parameters persist across experiments unless explicitly changed.
+4. GENERATE EXPERIMENTS (Cartesian Product)
+Multiple ranges create all combinations. Each experiment has single values only.
+Example: "10x10 and 20x20 at 1kHz and 2kHz" → 4 experiments (all combinations)
 
-4. EXPAND RANGES
-Only expand if confident about range specification:
+5. SPATIAL OFFSETS (priority order, stop at first match)
+DEFAULT: {x:0, y:0, z:1}
 
-NUMERIC RANGES (integer endpoints): "X to Y" → 3 equal steps
-- "10 to 30" → [10, 20, 30]
-- "1000-3000Hz" → [1000, 2000, 3000]
+Priority 1 - ABSOLUTE: "at position (x,y,z)" → exact coordinates
+Priority 2 - AXIS SPACING: 
+  - "Xmm apart on X axis" → increment x: (0,0,1), (X,0,1), (2X,0,1)
+  - "Xmm apart on Y axis" → increment y: (0,0,1), (0,X,1), (0,2X,1)
+  - CRITICAL: If "Xmm apart" WITHOUT axis → return error: {"error": "Please specify axis for spacing (e.g., 'Xmm apart on X axis')"}
+Priority 3 - Z-HEIGHT: "liftoff Xmm" → set z only, keep x:0, y:0
+Priority 4 - RELATIVE: "move Xmm left/right/up/down" → relative to previous
 
-UNIT-BASED RANGES: Standard increments
-- Voltage: "1V to 3V" → [1V, 2V, 3V]
-- Frequency: "1kHz to 3kHz" → [1kHz, 2kHz, 3kHz]
+6. NAMING CONVENTIONS
+Detect patterns:
+- "naming: [instruction]", "sample: [name]", "prefix/suffix [name]"
+- "[parameter] first/last", "use/omit [parameter] in filename"
+- "call it [name]" or "filename [name]"
 
-EXPLICIT LISTS: Use as-is
-- "lift-offs [1mm, 2mm, 3mm]" → [1, 2, 3] (z values in mm)
-- "[10Hz, 50Hz, 100Hz]" → [10, 50, 100]
+Default format: {waveform}_{rows}x{cols}_{distinctive_params}
+Apply directives: sample positioning, prefix/suffix, custom names
+Rules: Include distinctive params, max 50 chars, unique (add _2, _3 if needed), lowercase, underscores for spaces
 
-CUSTOM STEPS: "X to Y by Z" → use Z as increment
-- "1V to 3V by 0.5V" → [1V, 1.5V, 2V, 2.5V, 3V]
-
-5. GENERATE EXPERIMENTS VIA CARTESIAN PRODUCT
-Multiple ranges create all combinations. Each experiment contains single values only, not arrays.
-
-Example: "10x10 and 20x20 at 1kHz and 2kHz" produces 4 experiments:
-- exp_1: 10x10 at 1kHz
-- exp_2: 10x10 at 2kHz
-- exp_3: 20x20 at 1kHz
-- exp_4: 20x20 at 2kHz
-
-6. DETERMINE SPATIAL OFFSETS
-DEFAULT: All experiments start at offset (x:0, y:0, z:1) unless explicitly specified.
-
-Apply offset rules in priority order (stop at first match):
-
-PRIORITY 1 - ABSOLUTE POSITION:
-"at position (x,y,z)" or "offset (x,y,z)" → Use exact coordinates
-Example: "at (10,20,2)" → offset: {x:10, y:20, z:2}
-
-PRIORITY 2 - AXIS SPACING:
-"Xmm apart on X axis" → Increment x: exp_1 (0,0,1), exp_2 (X,0,1), exp_3 (2X,0,1)
-"Xmm apart on Y axis" → Increment y: exp_1 (0,0,1), exp_2 (0,X,1), exp_3 (0,2X,1)
-
-CRITICAL: If spacing mentioned WITHOUT axis (e.g., "10mm apart"), return error:
-{"error": "Please specify axis for spacing (e.g., '10mm apart on X axis' or '10mm apart on Y axis')"}
-
-PRIORITY 3 - Z-HEIGHT:
-"liftoff Xmm" or "Z height Xmm" or "lift-off Xmm" → Set z value only, keep x:0, y:0
-When multiple lift-off values specified (e.g., "[1mm, 2mm, 3mm]"), apply to z coordinate
-
-PRIORITY 4 - RELATIVE MOVEMENT:
-"move Xmm left/right" or "shift Xmm up/down" → Relative to previous offset
-
-PRIORITY 5 - DEFAULT:
-{x:0, y:0, z:1}
-
-7. PARSE NAMING CONVENTIONS
-Extract naming instructions from user message:
-
-NAMING PATTERNS TO DETECT:
-- "naming: [instruction]" → Explicit naming directive
-- "sample: [name]" → Sample identifier to include
-- "prefix [name]" → Add prefix to all filenames
-- "suffix [name]" → Add suffix to all filenames
-- "[parameter] first" → Put specified parameter at start of filename
-- "[parameter] last" → Put specified parameter at end of filename
-- "use [parameter] in filename" → Include specific parameter
-- "omit [parameter] from filename" → Exclude specific parameter
-- "call it [name]" → Use specific custom name for experiment(s)
-- "filename [name]" → Use specific filename
-
-NAMING ORDERS:
-- "sample name first" → Start filename with sample identifier
-- "waveform first" → Start filename with waveform type
-- "frequency first" → Start filename with frequency value
-- Default order if not specified: {waveform}_{grid}_{distinctive_params}
-
-SAMPLE IDENTIFIERS:
-- "sample: corrosion" → Include "corrosion" in filename
-- "sample name: steel_plate" → Include "steel_plate" in filename
-- Position based on order directive (first/last/default)
-
-8. GENERATE FILENAMES
-Format: Construct based on naming directives or use default pattern
-
-Default pattern: {waveform}_{rows}x{cols}_{distinctive_params}
-
-With naming directives:
-- Apply sample name positioning (first/last)
-- Apply prefix/suffix if specified
-- Include/exclude parameters as directed
-- Use custom names if provided for specific experiments
-
-Rules:
-- Include most distinctive signal parameters (frequency, amplitude, attenuation, chirp ranges)
-- Maximum 50 characters
-- Must be unique per experiment
-- Add suffix _2, _3, etc. if duplicates exist
-- Replace spaces with underscores
-- Use lowercase for consistency unless user specifies otherwise
-
-Examples:
-- "sample name first" with "sample: corrosion" → "corrosion_square_270x270_200Hz_2.1"
-- "prefix exp_" → "exp_gaussian_20x20_1kHz"
-- Custom: "call it test_scan" → "test_scan" (for single experiment)
-- Per-experiment naming: "call exp_1 baseline and exp_2 test" → apply specific names to specific experiments
-
-9. ASSIGN EXPERIMENT IDS
-Sequential format: exp_1, exp_2, exp_3, ...
+7. ASSIGN IDs
+Sequential: exp_1, exp_2, exp_3, ...
 </instructions>
-
-// Replace the single long <example> block with multiple shorter examples:
 
 <examples>
 <example1>
-BASIC GRID SCAN
 Input: "10x10 gaussian at 1kHz"
-
 Output:
 {
   "number_of_scans": 1,
-  "experiments": [
-    {
-      "id": "exp_1",
-      "grid": {"rows": 10, "cols": 10},
-      "signal": [
-        {"key": "waveform", "value": "gaussian"},
-        {"key": "frequency_hz", "value": "1000"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "gaussian_10x10_1khz"
-    }
-  ]
+  "experiments": [{
+    "id": "exp_1",
+    "grid": {"rows": 10, "cols": 10},
+    "signal": [
+      {"key": "waveform", "value": "gaussian"},
+      {"key": "frequency_hz", "value": "1000"}
+    ],
+    "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
+    "filename": "gaussian_10x10_1khz"
+  }]
 }
 </example1>
 
 <example2>
-MULTIPLE GRIDS WITH CARTESIAN PRODUCT
 Input: "10x10 and 20x20 square at 500Hz and 1kHz"
-
-Output:
-{
-  "number_of_scans": 4,
-  "experiments": [
-    {
-      "id": "exp_1",
-      "grid": {"rows": 10, "cols": 10},
-      "signal": [
-        {"key": "waveform", "value": "square"},
-        {"key": "frequency_hz", "value": "500"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "square_10x10_500hz"
-    },
-    {
-      "id": "exp_2",
-      "grid": {"rows": 10, "cols": 10},
-      "signal": [
-        {"key": "waveform", "value": "square"},
-        {"key": "frequency_hz", "value": "1000"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "square_10x10_1khz"
-    },
-    {
-      "id": "exp_3",
-      "grid": {"rows": 20, "cols": 20},
-      "signal": [
-        {"key": "waveform", "value": "square"},
-        {"key": "frequency_hz", "value": "500"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "square_20x20_500hz"
-    },
-    {
-      "id": "exp_4",
-      "grid": {"rows": 20, "cols": 20},
-      "signal": [
-        {"key": "waveform", "value": "square"},
-        {"key": "frequency_hz", "value": "1000"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "square_20x20_1khz"
-    }
-  ]
-}
+Output: 4 experiments (cartesian: 2 grids x 2 frequencies)
+[exp_1: 10x10 at 500Hz, exp_2: 10x10 at 1kHz, exp_3: 20x20 at 500Hz, exp_4: 20x20 at 1kHz]
 </example2>
 
 <example3>
-LIFT-OFF HEIGHTS (Z-AXIS)
 Input: "20x20 sine at 2kHz, lift-offs [1mm, 2mm, 3mm]"
-
-Output:
-{
-  "number_of_scans": 3,
-  "experiments": [
-    {
-      "id": "exp_1",
-      "grid": {"rows": 20, "cols": 20},
-      "signal": [
-        {"key": "waveform", "value": "sine"},
-        {"key": "frequency_hz", "value": "2000"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "sine_20x20_2khz_Z1"
-    },
-    {
-      "id": "exp_2",
-      "grid": {"rows": 20, "cols": 20},
-      "signal": [
-        {"key": "waveform", "value": "sine"},
-        {"key": "frequency_hz", "value": "2000"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 2},
-      "filename": "sine_20x20_2khz_Z2"
-    },
-    {
-      "id": "exp_3",
-      "grid": {"rows": 20, "cols": 20},
-      "signal": [
-        {"key": "waveform", "value": "sine"},
-        {"key": "frequency_hz", "value": "2000"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 3},
-      "filename": "sine_20x20_2khz_Z3"
-    }
-  ]
-}
+Output: 3 experiments with z values [1, 2, 3], filenames include Z1, Z2, Z3
 </example3>
 
 <example4>
-SPATIAL POSITIONING WITH AXIS SPACING
 Input: "15x15 gaussian at 800Hz, run 3 times, 10mm apart on X axis"
-
-Output:
-{
-  "number_of_scans": 3,
-  "experiments": [
-    {
-      "id": "exp_1",
-      "grid": {"rows": 15, "cols": 15},
-      "signal": [
-        {"key": "waveform", "value": "gaussian"},
-        {"key": "frequency_hz", "value": "800"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "gaussian_15x15_800hz"
-    },
-    {
-      "id": "exp_2",
-      "grid": {"rows": 15, "cols": 15},
-      "signal": [
-        {"key": "waveform", "value": "gaussian"},
-        {"key": "frequency_hz", "value": "800"}
-      ],
-      "relative_offset_mm": {"x": 10, "y": 0, "z": 1},
-      "filename": "gaussian_15x15_800hz_2"
-    },
-    {
-      "id": "exp_3",
-      "grid": {"rows": 15, "cols": 15},
-      "signal": [
-        {"key": "waveform", "value": "gaussian"},
-        {"key": "frequency_hz", "value": "800"}
-      ],
-      "relative_offset_mm": {"x": 20, "y": 0, "z": 1},
-      "filename": "gaussian_15x15_800hz_3"
-    }
-  ]
-}
+Output: 3 experiments at x offsets [0, 10, 20]
 </example4>
 
 <example5>
-CHIRP SIGNAL WITH FREQUENCY RANGE
 Input: "30x30 chirp f1=100Hz f2=500Hz amp=2.5V"
-
-Output:
-{
-  "number_of_scans": 1,
-  "experiments": [
-    {
-      "id": "exp_1",
-      "grid": {"rows": 30, "cols": 30},
-      "signal": [
-        {"key": "waveform", "value": "chirp"},
-        {"key": "frequency_start_hz", "value": "100"},
-        {"key": "frequency_end_hz", "value": "500"},
-        {"key": "amplitude", "value": "2.5V"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "chirp_30x30_100-500hz_2.5v"
-    }
-  ]
-}
+Output: Use frequency_start_hz/frequency_end_hz instead of frequency_hz
 </example5>
 
 <example6>
-CUSTOM NAMING WITH PREFIX
 Input: "25x25 square at 1.5kHz, naming: use prefix test_sample_"
-
-Output:
-{
-  "number_of_scans": 1,
-  "experiments": [
-    {
-      "id": "exp_1",
-      "grid": {"rows": 25, "cols": 25},
-      "signal": [
-        {"key": "waveform", "value": "square"},
-        {"key": "frequency_hz", "value": "1500"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "test_sample_square_25x25_1.5khz"
-    }
-  ]
-}
+Output: filename = "test_sample_square_25x25_1.5khz"
 </example6>
 
 <example7>
-SAMPLE NAME FIRST
 Input: "20x20 gaussian at 2kHz, naming: steel_plate first"
-
-Output:
-{
-  "number_of_scans": 1,
-  "experiments": [
-    {
-      "id": "exp_1",
-      "grid": {"rows": 20, "cols": 20},
-      "signal": [
-        {"key": "waveform", "value": "gaussian"},
-        {"key": "frequency_hz", "value": "2000"}
-      ],
-      "relative_offset_mm": {"x": 0, "y": 0, "z": 1},
-      "filename": "steel_plate_gaussian_20x20_2khz"
-    }
-  ]
-}
+Output: filename = "steel_plate_gaussian_20x20_2khz"
 </example7>
 
 <example8>
-Error Case - Missing Axis
 Input: "10x10 square at 1kHz, 5mm apart"
-
-Output:
-{
-  "error": "Please specify axis for spacing (e.g., '5mm apart on X axis' or '5mm apart on Y axis')"
-}
+Output: {"error": "Please specify axis for spacing (e.g., '5mm apart on X axis')"}
 </example8>
 </examples>
 
-<critical_reminders>
-- Default offset is (x:0, y:0, z:1) for ALL experiments unless explicitly specified
-- Multiple ranges create separate experiments with ALL combinations (Cartesian product)
-- Parse naming conventions from user message and apply to filename generation
-- Support naming patterns: sample name first/last, prefix/suffix, custom names, parameter ordering, per-experiment names
-- Filenames must be unique - add _2, _3 suffixes to prevent duplicates
-- Frequency must be normalized to Hz (1kHz → 1000)
-- Chirp signals use frequency_start_hz and frequency_end_hz instead of frequency_hz
-- Return error if spacing mentioned without axis specification
-- Only process if confident - respond with error JSON if uncertain
-- Think through the request before answering
-- Answer only if you are very confident about the parsing
-</critical_reminders>
+<critical_rules>
+- Default offset: (x:0, y:0, z:1) unless specified
+- Cartesian product for multiple ranges
+- Normalize frequency to Hz (1kHz → 1000)
+- Chirp uses frequency_start_hz and frequency_end_hz
+- Error if spacing without axis
+- Unique filenames (add _2, _3 suffixes)
+- Only answer if confident, otherwise return error JSON
+</critical_rules>
 
 {{ ctx.output_format }}
 "#

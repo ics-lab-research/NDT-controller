@@ -2,10 +2,10 @@
 experiment = "EXPERIMENT"
 
 [experiment]
-data_path = "data"
-plot_path = "plots"
-plans_path = "labview_experiment_plans.json"
 vi_path = "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
+plans_path = "labview_experiment_plans.json"
+data_path = "data"
+plots_path = "plots"
 
 [models]
 exp_router = "openrouter/google/gemini-2.5-flash-preview-09-2025"

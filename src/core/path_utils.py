@@ -21,9 +21,20 @@ class PathManager:
     def experiment_data_path(self) -> Path:
         if self._experiment_data_path is not None:
             return self._experiment_data_path
-        experiments_base = os.environ.get("EXPERIMENTS_BASE", "EXPERIMENTS")
-        data_dir_rel = os.environ.get("EXPERIMENTS_DATA_PATH", "data")
-        return self._pwd_path / experiments_base / data_dir_rel
+
+        experiments_base = os.environ.get("EXPERIMENT_BASE")
+        data_path = os.environ.get("EXPERIMENT_DATA_PATH")
+
+        if experiments_base is None:
+            raise ValueError(
+                "Environment variables EXPERIMENT_BASE must be set"
+            )
+        if data_path is None:
+            raise ValueError(
+                "Environment variables EXPERIMENT_DATA_PATH must be set"
+            )
+
+        return self._pwd_path / experiments_base / data_path
 
     def set_data_dir_path(self, path: Path) -> None:
         logger.info(f"Setting data dir path to {path}")
