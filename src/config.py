@@ -31,7 +31,7 @@ def set_env_vars_from_section(config: dict[str, Any], section: str) -> None:
         os.environ[key.upper()] = str(value)
 
 
-def load_config():
+def load_toml_config():
     """Load configuration and set environment variables."""
     config_path = get_config_path()
     config = load_config_dict(config_path)
