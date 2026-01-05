@@ -333,6 +333,26 @@ def update_experiment_status(
         return plans
 
 
+def delete_all_experiments(
+    plans: List[ExperimentPlan], plans_path: Path | None
+) -> gr.Dataframe:
+    if not plans_path:
+        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
+        return gr.Dataframe(value=[])
+    try:
+        plans.clear()
+        save_experiment_plans(plans, plans_path)
+        gr.Info(
+            "All experiments deleted successfully", duration=1, title="✅ Info"
+        )
+        return gr.Dataframe(value=[])
+    except Exception as e:
+        error_msg = f"Error deleting all experiments: {e}"
+        logger.error(error_msg)
+        gr.Info(error_msg, title="❌ Error")
+        return gr.Dataframe(value=[])
+
+
 def start_execution(
     plans: List[ExperimentPlan],
     plans_path: Path | None,

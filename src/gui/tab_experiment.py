@@ -13,6 +13,7 @@ from .experiment_utils import (
     approve_all_plans,
     convert_plan_to_table_data,
     create_message,
+    delete_all_experiments,
     delete_experiment,
     get_experiment_status,
     get_experiment_statuses,
@@ -60,6 +61,8 @@ def create_experiments_tab(
                 approve_button = gr.Button("✅ Approve all plans")
                 start_button = gr.Button("▶️ Start scan")
 
+            delete_all_button = gr.Button("🗑️ Delete all experiments")
+
             # link to logic
             approve_button.click(
                 lambda plans, plans_path, current_chatbot: (
@@ -74,6 +77,22 @@ def create_experiments_tab(
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
                 outputs=[status_df, chatbot],
+            )
+
+            delete_all_button.click(
+                lambda plans, plans_path, current_chatbot: (
+                    delete_all_experiments(plans, plans_path),
+                    [],
+                    current_chatbot
+                    + [
+                        create_message(
+                            content="All experiments deleted",
+                            message_type=MessageType.STATUS,
+                        )
+                    ],
+                ),
+                inputs=[plans_state, plans_path_state, chatbot],
+                outputs=[status_df, plans_state, chatbot],
             )
 
             start_button.click(
@@ -133,6 +152,8 @@ def create_experiments_tab(
                 inputs=[exp_dropdown, plans_state],
                 outputs=[details_df, status_dropdown],
             )
+
+            # link to logic
             save_button.click(
                 save_experiment_changes,
                 inputs=[

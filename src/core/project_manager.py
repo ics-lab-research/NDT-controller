@@ -1,193 +1,72 @@
-import dataclasses
-import os
-import shutil
 from pathlib import Path
-from typing import Dict, List
-
-from loguru import logger
-
-from ..baml_client.types import RelativeOffset, State
-from .models import (
-    ExperimentsMetadata,
-    Mode,
-    ModeMetadata,
-)
+from typing import List
+from .models import Mode
+from .mode_utils import ModeManager
+from .path_utils import PathManager
+from .state_utils import StateManager
+from .metadata_utils import get_all_mode_metadata
 
 
 class ProjectManager:
-    """Unified project context for all modes."""
+    """Unified project context for all modes (facade)."""
 
     def __init__(
-        self,
-        current_mode: Mode = Mode.EXPERIMENTS,
-        pwd_path: Path = Path.cwd(),
+        self, current_mode: Mode = Mode.EXPERIMENTS, pwd_path: Path = Path.cwd()
     ):
-        """Initialize project context."""
-        self._current_mode = current_mode
-        self._pwd_path = pwd_path
-        self._data_dir_path: Path | None = None
-        self._experiment_state = self.create_init_experiment_state()
-        self._multimodal_uploads: List[Path] = []
+        self._mode_mgr = ModeManager(current_mode)
+        self._path_mgr = PathManager(pwd_path)
+        self._state_mgr = StateManager()
 
     @property
     def current_mode(self) -> Mode:
-        """Get the current mode."""
-        return self._current_mode
+        return self._mode_mgr.current_mode
 
     @property
     def pwd_path(self) -> Path:
-        """Get the present working directory path."""
-        return self._pwd_path
+        return self._path_mgr.pwd_path
 
     @property
     def data_dir_path(self) -> Path:
-        """Get the data directory path."""
-        if self._data_dir_path is not None:
-            return self._data_dir_path
-        experiments_base = os.environ.get("EXPERIMENTS_BASE", "EXPERIMENTS")
-        data_dir_rel = os.environ.get("EXPERIMENTS_DATA_DIR_PATH", "data")
-        return self._pwd_path / experiments_base / data_dir_rel
+        return self._path_mgr.data_dir_path
 
     @property
-    def experiment_state(self) -> State:
-        """Get the current experiment state."""
-        return self._experiment_state
+    def experiment_state(self):
+        return self._state_mgr.experiment_state
 
     @property
     def multimodal_uploads(self) -> List[Path]:
-        """Get the list of multimodal uploads."""
-        return self._multimodal_uploads
+        return self._state_mgr.multimodal_uploads
 
     @property
     def dry_run(self) -> bool:
-        """Get whether dry run mode is enabled from environment variable."""
+        import os
+
         return os.environ.get("DRY_RUN", "false").lower() == "true"
 
     def add_multimodal_upload(self, file_path: Path) -> None:
-        """Add a file to the multimodal uploads list."""
-        logger.info(f"Added multimodal upload: {file_path}")
-        self._multimodal_uploads.append(file_path)
+        self._state_mgr.add_multimodal_upload(file_path)
 
-    def create_init_experiment_state(self) -> State:
-        """Create the initial experiment state for experiments."""
-        position = RelativeOffset(x=0, y=0, z=1)
-        return State(current_position=position, home_position=position)
+    def update_experiment_state(self, relative_offset_mm):
+        self._state_mgr.update_experiment_state(relative_offset_mm)
 
-    def update_experiment_state(
-        self, relative_offset_mm: RelativeOffset
-    ) -> None:
-        """Update the experiment state based on executed tools."""
-        new_x = relative_offset_mm.x
-        new_y = relative_offset_mm.y
-        new_z = relative_offset_mm.z
-        new_position = RelativeOffset(x=new_x, y=new_y, z=new_z)
-        self._experiment_state = State(
-            current_position=new_position,
-            home_position=self._experiment_state.home_position,
-        )
+    def get_mode_metadata(self, mode: Mode):
+        all_metadata = get_all_mode_metadata(self._path_mgr.pwd_path)
+        return self._mode_mgr.get_mode_metadata(mode, all_metadata)
 
-    def _get_experiments_metadata(self) -> ExperimentsMetadata:
-        experiments_base = os.environ.get("EXPERIMENTS_BASE", "EXPERIMENTS")
-        plans_path = os.environ.get(
-            "EXPERIMENTS_PLANS_PATH", "labview_experiment_plans.json"
-        )
-        vi_path_str = os.environ.get(
-            "EXPERIMENTS_VI_PATH",
-            "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi",
-        )
-        return ExperimentsMetadata(
-            data_dir_path=self.data_dir_path,
-            plans_path=self._pwd_path / experiments_base / plans_path,
-            vi_path=Path(vi_path_str),
-        )
+    def set_mode(self, mode: Mode) -> None:
+        self._mode_mgr.set_mode(mode)
 
-    def _get_all_mode_metadata(self) -> Dict[Mode, ModeMetadata]:
-        """Get metadata for all modes, with paths loaded from environment variables."""
-        return {
-            Mode.EXPERIMENTS: self._get_experiments_metadata(),
-        }
-
-    def get_mode_metadata(self, mode: Mode) -> ModeMetadata:
-        """Get metadata for the specified mode."""
-        if mode != Mode.EXPERIMENTS:
-            raise ValueError(f"Only EXPERIMENTS mode is supported: {mode}")
-
-        all_metadata = self._get_all_mode_metadata()
-        return all_metadata[mode]
-
-    def set_mode(self, mode: Mode):
-        """Set the mode for the current context."""
-        logger.info(f"Setting mode to {mode}")
-        self._current_mode = mode
-
-    def set_data_dir_path(self, path: Path):
-        """Set the data directory path."""
-        logger.info(f"Setting data dir path to {path}")
-        self._data_dir_path = path
-
-    def _ensure_file_exists(self, file_path: Path):
-        """Ensure a file exists, copying from template if available."""
-        if not file_path.exists():
-            logger.debug(f"Ensuring file exists: {file_path}")
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            template_path = (
-                self._pwd_path
-                / "templates"
-                / file_path.relative_to(self._pwd_path)
-            )
-            if template_path.exists():
-                logger.debug(
-                    f"Copying from template: {template_path} to {file_path}"
-                )
-                shutil.copy(template_path, file_path)
-            else:
-                logger.debug(
-                    f"Template not found, creating empty file: {file_path}"
-                )
-                file_path.touch()
-
-    def _ensure_directory_exists(self, dir_path: Path):
-        """Ensure a directory exists, creating it if necessary."""
-        if dir_path:
-            logger.debug(f"Ensuring directory exists: {dir_path}")
-            dir_path.mkdir(parents=True, exist_ok=True)
+    def set_data_dir_path(self, path: Path) -> None:
+        self._path_mgr.set_data_dir_path(path)
 
     @classmethod
-    def create_default(
-        cls,
-        mode: Mode = Mode.EXPERIMENTS,
-    ) -> "ProjectManager":
-        """Create a default project context with all necessary files and directories."""
-        context = cls(
-            current_mode=mode,
-        )
-
-        context.ensure_mode_specific_paths()
-
+    def create_default(cls, mode: Mode = Mode.EXPERIMENTS) -> "ProjectManager":
+        context = cls(current_mode=mode)
+        all_metadata = get_all_mode_metadata(context._path_mgr.pwd_path)
+        context._path_mgr.ensure_mode_specific_paths(all_metadata)
         return context
 
-    def ensure_mode_specific_paths(self):
-        """Ensure all mode-specific directories and files exist."""
-        logger.info("Ensuring mode-specific paths exist")
-        metadata = self._get_experiments_metadata()
-        for field in dataclasses.fields(metadata):
-            if field.name == "vi_path":
-                continue
-            paths = getattr(metadata, field.name)
-            # Normalize to a list if it's a single Path
-            if isinstance(paths, Path):
-                paths = [paths]
-            for path in paths:
-                if path.suffix:  # It's a file (has extension)
-                    self._ensure_file_exists(path)
-                else:  # It's a directory
-                    self._ensure_directory_exists(path)
-        logger.info("Mode-specific paths ensured")
 
-
-# Backward compatibility function
-def init_project_context(
-    mode: Mode = Mode.EXPERIMENTS,
-) -> ProjectManager:
-    """Initialize a new project context with all necessary files and directories."""
+# Backward compatibility
+def init_project_context(mode: Mode = Mode.EXPERIMENTS) -> ProjectManager:
     return ProjectManager.create_default(mode)
