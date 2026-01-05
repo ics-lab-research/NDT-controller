@@ -4,7 +4,7 @@ import gradio as gr
 
 from ..agents.experiment_planning import load_experiment_plans
 from ..core.models import (
-    ExperimentsMetadata,
+    ExperimentMetadata,
     ExperimentStatus,
     MessageType,
     Mode,
@@ -27,15 +27,15 @@ from .experiment_utils import (
 )
 
 
-def create_experiments_tab(
+def create_experiment_tab(
     project_state: gr.State,
     chatbot: gr.Chatbot,
 ) -> gr.Tabs:
     project_manager: ProjectManager = project_state.value
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
     plans = []
     plans_path = None
-    if isinstance(metadata, ExperimentsMetadata):
+    if isinstance(metadata, ExperimentMetadata):
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path, log=True)

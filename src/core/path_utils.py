@@ -11,23 +11,23 @@ class PathManager:
 
     def __init__(self, pwd_path: Path):
         self._pwd_path = pwd_path
-        self._data_dir_path: Path | None = None
+        self._experiment_data_path: Path | None = None
 
     @property
     def pwd_path(self) -> Path:
         return self._pwd_path
 
     @property
-    def data_dir_path(self) -> Path:
-        if self._data_dir_path is not None:
-            return self._data_dir_path
+    def experiment_data_path(self) -> Path:
+        if self._experiment_data_path is not None:
+            return self._experiment_data_path
         experiments_base = os.environ.get("EXPERIMENTS_BASE", "EXPERIMENTS")
-        data_dir_rel = os.environ.get("EXPERIMENTS_DATA_DIR_PATH", "data")
+        data_dir_rel = os.environ.get("EXPERIMENTS_DATA_PATH", "data")
         return self._pwd_path / experiments_base / data_dir_rel
 
     def set_data_dir_path(self, path: Path) -> None:
         logger.info(f"Setting data dir path to {path}")
-        self._data_dir_path = path
+        self._experiment_data_path = path
 
     def ensure_mode_specific_paths(self, all_metadata: dict) -> None:
         """Ensure paths exist for all modes."""

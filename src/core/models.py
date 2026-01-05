@@ -75,7 +75,7 @@ class ExperimentPlan:
 
 
 @dataclass
-class ExperimentsMetadata:
+class ExperimentMetadata:
     """Metadata for experiments mode."""
 
     data_dir_path: Path
@@ -134,7 +134,7 @@ class ReportingMetadata:
 ModeMetadata = Union[
     OrchestratorMetadata,
     IdeaMetadata,
-    ExperimentsMetadata,
+    ExperimentMetadata,
     DataScienceMetadata,
     ReportingMetadata,
 ]
@@ -178,7 +178,7 @@ class MultimodalMessage:
 
 class Mode(Enum):
     IDEA = "idea"
-    EXPERIMENTS = "experiments"
+    EXPERIMENT = "experiments"
     DATA_SCIENCE = "data-science"
     REPORTING = "reporting"
 

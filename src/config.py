@@ -38,15 +38,15 @@ def set_paths_env_vars(config: dict[str, Any]) -> None:
         os.environ["EXPERIMENTS_BASE"] = paths["experiments"]
 
 
-def set_experiments_env_vars(config: dict[str, Any]) -> None:
+def set_experiment_env_vars(config: dict[str, Any]) -> None:
     """Set environment variables for the experiments section."""
     experiments = config.get("experiments", {})
     if "data_dir_path" in experiments:
-        os.environ["EXPERIMENTS_DATA_DIR_PATH"] = experiments["data_dir_path"]
+        os.environ["EXPERIMENT_DATA_PATH"] = experiments["data_path"]
     if "plans_path" in experiments:
-        os.environ["EXPERIMENTS_PLANS_PATH"] = experiments["plans_path"]
+        os.environ["EXPERIMENT_PLANS_PATH"] = experiments["plans_path"]
     if "vi_path" in experiments:
-        os.environ["EXPERIMENTS_VI_PATH"] = experiments["vi_path"]
+        os.environ["EXPERIMENT_VI_PATH"] = experiments["vi_path"]
 
 
 def load_config():
@@ -54,7 +54,7 @@ def load_config():
     config_path = get_config_path()
     config = load_config_dict(config_path)
     set_paths_env_vars(config)
-    set_experiments_env_vars(config)
+    set_experiment_env_vars(config)
     set_env_vars_from_section(config, "models")
     set_env_vars_from_section(config, "logging")
     logger.info("Configuration loaded and environment variables set.")

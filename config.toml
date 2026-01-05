@@ -1,9 +1,9 @@
 [paths]
-experiments = "EXPERIMENTS"
+experiment = "EXPERIMENT"
 
-[experiments]
-data_dir_path = "data"
-plot_dir_path = "data"
+[experiment]
+data_path = "data"
+plot_path = "plots"
 plans_path = "labview_experiment_plans.json"
 vi_path = "D:\\PECT LLM\\MAIN - PECT - Autonics - Pulses - encoder_TCP1.vi"
 

@@ -18,13 +18,13 @@ from ..baml_client.types import (
     ToolResult,
     WaitForOperationCompleteTool,
 )
-from ..core.models import BasicExpTool, ExperimentsMetadata, ExperimentTool
+from ..core.models import BasicExpTool, ExperimentMetadata, ExperimentTool
 
 BUTTON_STATE_DELAY = 1
 
 
 def execute_tool_dry_run(
-    tool: BasicExpTool | ExperimentTool, metadata: ExperimentsMetadata
+    tool: BasicExpTool | ExperimentTool, metadata: ExperimentMetadata
 ) -> ToolResult:
     """Simulate execution of a single experiment tool by logging inputs and returning a mock success."""
     if isinstance(tool, ConnectToViTool):

@@ -13,7 +13,7 @@ class ProjectManager:
     """Unified project context for all modes (facade)."""
 
     def __init__(
-        self, current_mode: Mode = Mode.EXPERIMENTS, pwd_path: Path = Path.cwd()
+        self, current_mode: Mode = Mode.EXPERIMENT, pwd_path: Path = Path.cwd()
     ):
         self._mode_mgr = ModeManager(current_mode)
         self._path_mgr = PathManager(pwd_path)
@@ -29,7 +29,7 @@ class ProjectManager:
 
     @property
     def experiment_data_path(self) -> Path:
-        return self._path_mgr.data_dir_path
+        return self._path_mgr.experiment_data_path
 
     @property
     def experiment_state(self):
@@ -60,7 +60,7 @@ class ProjectManager:
         self._path_mgr.set_data_dir_path(path)
 
     @classmethod
-    def create_default(cls, mode: Mode = Mode.EXPERIMENTS) -> "ProjectManager":
+    def create_default(cls, mode: Mode = Mode.EXPERIMENT) -> "ProjectManager":
         context = cls(current_mode=mode)
         all_metadata = get_all_mode_metadata(context._path_mgr.pwd_path)
         context._path_mgr.ensure_mode_specific_paths(all_metadata)
@@ -68,5 +68,5 @@ class ProjectManager:
 
 
 # Backward compatibility
-def init_project_context(mode: Mode = Mode.EXPERIMENTS) -> ProjectManager:
+def init_project_context(mode: Mode = Mode.EXPERIMENT) -> ProjectManager:
     return ProjectManager.create_default(mode)

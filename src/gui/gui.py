@@ -24,7 +24,7 @@ def create_main_interface() -> gr.Blocks:
         project_manager = init_project_context()
 
         # NOTE: set mode to test
-        project_manager.set_mode(Mode.EXPERIMENTS)
+        project_manager.set_mode(Mode.EXPERIMENT)
         project_state = gr.State(project_manager)
 
         with gr.Row():

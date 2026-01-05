@@ -12,7 +12,7 @@ def get_agent_response(
     project_manager: ProjectManager,
 ) -> Generator[AgentResponse, None, None]:
     """Get a response from the LLM"""
-    if project_manager.current_mode == Mode.EXPERIMENTS:
+    if project_manager.current_mode == Mode.EXPERIMENT:
         yield from handle_experiment_mode(
             user_message, conversation_history, project_manager
         )

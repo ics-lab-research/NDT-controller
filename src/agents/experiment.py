@@ -10,7 +10,7 @@ from ..baml_client.types import (
     Experiment,
     ExpOrchestratorOutput,
 )
-from ..core.models import AgentResponse, ExperimentPlan, ExperimentsMetadata
+from ..core.models import AgentResponse, ExperimentPlan, ExperimentMetadata
 from ..core.project_manager import ProjectManager
 from .experiment_api import (
     call_exp_basic_executor,
@@ -29,13 +29,13 @@ def yield_error(error: ResponseError) -> Generator[AgentResponse, None, None]:
     yield AgentResponse(status=f"ERROR: {error.error}")
 
 
-def get_experiments_metadata(
+def get_experiment_metadata(
     project_manager: ProjectManager,
-) -> ExperimentsMetadata:
-    """Get and validate experiments metadata from project manager."""
+) -> ExperimentMetadata:
+    """Get and validate experiment metadata from project manager."""
     metadata = project_manager.get_mode_metadata(project_manager.current_mode)
-    if not isinstance(metadata, ExperimentsMetadata):
-        raise ValueError("Metadata is not ExperimentsMetadata")
+    if not isinstance(metadata, ExperimentMetadata):
+        raise ValueError("Metadata is not ExperimentMetadata")
     return metadata
 
 
@@ -43,7 +43,7 @@ def save_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
 ) -> Generator[AgentResponse, None, None]:
     """Save experiment plans and yield appropriate response."""
-    metadata = get_experiments_metadata(project_manager)
+    metadata = get_experiment_metadata(project_manager)
     save_result = append_experiment_plans(plans, metadata.plans_path)
 
     if save_result["success"]:
@@ -119,12 +119,12 @@ def handle_multiple_scan(
     orchestrator_output: ExpOrchestratorOutput,
     project_manager: ProjectManager,
 ) -> Generator[AgentResponse, None, None]:
-    """Handle multiple scan experiments workflow."""
+    """Handle multiple scan experiment workflow."""
     yield AgentResponse(
         intermediate_step=f"Number of scans is {orchestrator_output.number_of_scans}, generating abstract plans for each experiment."
     )
     logger.debug(
-        f"Generating abstract plans for experiments: {[e.filename for e in orchestrator_output.experiments]}"
+        f"Generating abstract plans for experiment: {[e.filename for e in orchestrator_output.experiments]}"
     )
 
     def process_experiment(
@@ -203,7 +203,7 @@ def handle_experiment_mode(
     conversation_history: List[ConversationMessage],
     project_manager: ProjectManager,
 ) -> Generator[AgentResponse, None, None]:
-    """Handle EXPERIMENTS mode: orchestrate experiments based on user message."""
+    """Handle EXPERIMENT mode: orchestrate experiments based on user message."""
     logger.info("Handling experiment mode")
     logger.debug(f"Calling ExpRouter with user_message: '{user_message}'")
 

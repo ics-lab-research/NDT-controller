@@ -26,7 +26,7 @@ from ..baml_client.types import (
 from ..core.models import (
     ExperimentExecutionError,
     ExperimentPlan,
-    ExperimentsMetadata,
+    ExperimentMetadata,
     ExperimentStatus,
     ExperimentTool,
     BasicExpTool,
@@ -56,13 +56,13 @@ def tool_wait_for_operation_complete(
     exp_type: ExpType, project_manager: ProjectManager
 ) -> ToolResult:
     if exp_type == ExpType.SCAN:
-        metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
-        if not isinstance(metadata, ExperimentsMetadata):
+        metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
+        if not isinstance(metadata, ExperimentMetadata):
             return ToolResult(
                 name="wait_for_operation_complete",
                 success=False,
                 output=None,
-                error="Not in experiments mode",
+                error="Not in experiment mode",
             )
 
         vi_path = metadata.vi_path
@@ -115,9 +115,9 @@ def execute_tool(
     tool: BasicExpTool | ExperimentTool, project_manager: ProjectManager
 ) -> ToolResult:
     """Execute a single experiment tool."""
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
-    if not isinstance(metadata, ExperimentsMetadata):
-        raise ValueError("Not in experiments mode")
+    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
+    if not isinstance(metadata, ExperimentMetadata):
+        raise ValueError("Not in experiment mode")
 
     if project_manager.experiment_dry_run:
         return execute_tool_dry_run(tool, metadata)
@@ -201,14 +201,14 @@ def execute_multiple_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
 ) -> Generator[str, None, ExperimentExecutionError | None]:
     """Execute multiple experiment plans with system reinitialization after each plan."""
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
+    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
     for plan in plans:
         # Only execute plans that are pending or previously errored
         if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):
             yield f"Executing plan: `{plan.filename}`"
             plan.status = ExperimentStatus.SCANNING
             # Save progress before execution
-            if isinstance(metadata, ExperimentsMetadata):
+            if isinstance(metadata, ExperimentMetadata):
                 save_experiment_plans(plans, metadata.plans_path)
             try:
                 execute_single_plan(plan, project_manager)
@@ -218,16 +218,16 @@ def execute_multiple_plans(
                 )
                 yield error_message
                 # Save error state
-                if isinstance(metadata, ExperimentsMetadata):
+                if isinstance(metadata, ExperimentMetadata):
                     save_experiment_plans(plans, metadata.plans_path)
                 return e
             yield f"Plan `{plan.filename}` completed"
             plan.status = ExperimentStatus.COMPLETED
             # Save completion state
-            if isinstance(metadata, ExperimentsMetadata):
+            if isinstance(metadata, ExperimentMetadata):
                 save_experiment_plans(plans, metadata.plans_path)
             # Allow hardware to settle before next plan
             time.sleep(HARDWARE_SETTLE_DELAY)
     # Final save of all plans
-    if isinstance(metadata, ExperimentsMetadata):
+    if isinstance(metadata, ExperimentMetadata):
         save_experiment_plans(plans, metadata.plans_path)
