@@ -105,7 +105,7 @@ def create_main_interface() -> gr.Blocks:
             folder_path = filedialog.askdirectory(title="Select data folder")
             root.destroy()
             if folder_path:
-                current_context.set_data_dir_path(Path(folder_path))
+                current_context.set_experiment_data_path(Path(folder_path))
                 return folder_path, current_context
             return "No folder selected", current_context
 
