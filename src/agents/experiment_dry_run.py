@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 from loguru import logger
 
@@ -55,7 +56,8 @@ def execute_tool_dry_run(
     elif isinstance(tool, HandleSaveDialogTool):
         save_directory = metadata.data_dir_path
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{tool.file_name}_{timestamp}"
+        base_name = Path(tool.file_name).stem
+        filename = f"{base_name}_{timestamp}"
         logger.debug(
             f"Dry run: Would call tool_handle_save_dialog with save_directory={save_directory}, filename={filename}"
         )

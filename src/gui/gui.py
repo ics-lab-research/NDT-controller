@@ -112,7 +112,7 @@ def create_main_interface() -> gr.Blocks:
         with gr.Sidebar():
             data_dir_textbox = gr.Textbox(
                 label="Data folder path",
-                value=str(project_manager.data_dir_path),
+                value=str(project_manager.experiment_data_path),
                 interactive=False,
             )
             select_data_dir_button = gr.Button("Select data folder")

@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Generator, List
 
 from loguru import logger
@@ -118,7 +119,7 @@ def execute_tool(
     if not isinstance(metadata, ExperimentsMetadata):
         raise ValueError("Not in experiments mode")
 
-    if project_manager.dry_run:
+    if project_manager.experiment_dry_run:
         return execute_tool_dry_run(tool, metadata)
 
     if isinstance(tool, ConnectToViTool):
@@ -143,7 +144,8 @@ def execute_tool(
     elif isinstance(tool, HandleSaveDialogTool):
         save_directory = metadata.data_dir_path
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{tool.file_name}_{timestamp}"
+        base_name = Path(tool.file_name).stem
+        filename = f"{base_name}_{timestamp}"
         return tool_handle_save_dialog(save_directory, filename=filename)
 
     elif isinstance(tool, PressButtonTool):

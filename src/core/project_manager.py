@@ -1,10 +1,12 @@
+import os
 from pathlib import Path
 from typing import List
-from .models import Mode
+
+from .metadata_utils import get_all_mode_metadata
 from .mode_utils import ModeManager
+from .models import Mode
 from .path_utils import PathManager
 from .state_utils import StateManager
-from .metadata_utils import get_all_mode_metadata
 
 
 class ProjectManager:
@@ -26,7 +28,7 @@ class ProjectManager:
         return self._path_mgr.pwd_path
 
     @property
-    def data_dir_path(self) -> Path:
+    def experiment_data_path(self) -> Path:
         return self._path_mgr.data_dir_path
 
     @property
@@ -38,9 +40,7 @@ class ProjectManager:
         return self._state_mgr.multimodal_uploads
 
     @property
-    def dry_run(self) -> bool:
-        import os
-
+    def experiment_dry_run(self) -> bool:
         return os.environ.get("DRY_RUN", "false").lower() == "true"
 
     def add_multimodal_upload(self, file_path: Path) -> None:

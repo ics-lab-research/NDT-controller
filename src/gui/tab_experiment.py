@@ -9,6 +9,7 @@ from ..core.models import (
     MessageType,
     Mode,
 )
+from ..core.project_manager import ProjectManager
 from .experiment_utils import (
     approve_all_plans,
     convert_plan_to_table_data,
@@ -30,7 +31,7 @@ def create_experiments_tab(
     project_state: gr.State,
     chatbot: gr.Chatbot,
 ) -> gr.Tabs:
-    project_manager = project_state.value
+    project_manager: ProjectManager = project_state.value
     metadata = project_manager.get_mode_metadata(Mode.EXPERIMENTS)
     plans = []
     plans_path = None
@@ -46,7 +47,6 @@ def create_experiments_tab(
     statuses = get_experiment_statuses(plans)
     plans_path_state = gr.State(plans_path)
     log_state = gr.State(False)
-    project_manager_state = project_state
 
     with gr.Tabs() as interface:
         # ================ Scan Status tab =============================
@@ -101,7 +101,7 @@ def create_experiments_tab(
                     plans_state,
                     plans_path_state,
                     chatbot,
-                    project_manager_state,
+                    project_state,
                 ],
                 outputs=[status_df, chatbot],
             )
@@ -196,5 +196,9 @@ def create_experiments_tab(
                 ],
                 outputs=[plans_state],
             )
+
+        # ================ View Data tab =============================
+        with gr.TabItem("Data Viewer"):
+            pass
 
     return interface
