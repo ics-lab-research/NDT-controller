@@ -3,7 +3,7 @@ import sys
 import time
 from os import environ
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 try:
     import win32com.client  # type: ignore
@@ -35,7 +35,9 @@ class LabVIEWController:
         response.update(kwargs)
         return response
 
-    def run_open_vi_subprocess(self, run_vi: bool = True) -> Dict[str, Any]:
+    def run_open_vi_subprocess(
+        self, run_vi: bool = True, log: bool = True
+    ) -> Dict[str, Any]:
         """Run open_vi.py in a subprocess to open and run the VI"""
         try:
             # If not running the VI and no path is set, just return success
@@ -72,6 +74,8 @@ class LabVIEWController:
             cmd = [sys.executable, str(open_vi_path), str(self.vi_path)]
             if not run_vi:
                 cmd.append("--no-run")
+            if not log:
+                cmd.append("--no-log")
             logger.debug(f"Running command: {' '.join(cmd)}")
             popen_kwargs = {
                 "stdout": subprocess.PIPE,
@@ -193,32 +197,36 @@ class LabVIEWController:
             self.vi_path = None
             return False
 
-    def get_control_value(self, control_name: str) -> Any:
+    def get_control_value(self, control_name: str, log: bool = True) -> Any:
         """Get the value of a control on the front panel."""
         try:
             if not self.vi_reference:
                 return None
             value = self.vi_reference.GetControlValue(control_name)
-            logger.debug(f"Got control value - {control_name}: {value}")
+            if log:
+                logger.debug(f"Got control value - {control_name}: {value}")
             return value
         except Exception as e:
             logger.error(f"Failed to get control value '{control_name}': {e}")
             return None
 
-    def set_control_value(self, control_name: str, value: Any) -> bool:
+    def set_control_value(
+        self, control_name: str, value: Any, log: bool = True
+    ) -> bool:
         """Set the value of a control on the front panel."""
         try:
             if not self.vi_reference:
                 return False
             self.vi_reference.SetControlValue(control_name, value)
-            logger.debug(f"Set control value - {control_name}: {value}")
+            if log:
+                logger.debug(f"Set control value - {control_name}: {value}")
             return True
         except Exception as e:
             logger.error(f"Failed to set control value '{control_name}': {e}")
             return False
 
     def press_button(
-        self, button_name: str, press_duration: float = 0.1
+        self, button_name: str, press_duration: float = 0.1, log: bool = True
     ) -> bool:
         """Press a button on the front panel."""
         try:
@@ -227,34 +235,41 @@ class LabVIEWController:
             self.vi_reference.SetControlValue(button_name, True)
             time.sleep(press_duration)
             self.vi_reference.SetControlValue(button_name, False)
-            logger.debug(f"Pressed button: {button_name}")
+            if log:
+                logger.debug(f"Pressed button: {button_name}")
             return True
         except Exception as e:
             logger.error(f"Failed to press button '{button_name}': {e}")
             return False
 
-    def set_button_state(self, button_name: str, state: bool) -> bool:
+    def set_button_state(
+        self, button_name: str, state: bool, log: bool = True
+    ) -> bool:
         """Set the state of a button on the front panel."""
         try:
             if not self.vi_reference:
                 return False
             self.vi_reference.SetControlValue(button_name, state)
             state_text = "pressed/on" if state else "released/off"
-            logger.debug(f"Set button '{button_name}' to {state_text}")
+            if log:
+                logger.debug(f"Set button '{button_name}' to {state_text}")
             return True
         except Exception as e:
             logger.error(f"Failed to set button state '{button_name}': {e}")
             return False
 
-    def select_combo_box(self, combo_box_name: str, index: int) -> bool:
+    def select_combo_box(
+        self, combo_box_name: str, index: int, log: bool = True
+    ) -> bool:
         """Select an item in a combo box control by index (int) or string value."""
         try:
             if not self.vi_reference:
                 return False
             self.vi_reference.SetControlValue(combo_box_name, index)
-            logger.debug(
-                f"Selected combo box '{combo_box_name}' to index: {index}"
-            )
+            if log:
+                logger.debug(
+                    f"Selected combo box '{combo_box_name}' to index: {index}"
+                )
             return True
         except Exception as e:
             logger.error(f"Failed to select combo box '{combo_box_name}': {e}")
@@ -324,7 +339,9 @@ class LabVIEWController:
             logger.error(f"Failed to get VI status: {e}")
             return {"connected": False, "error": str(e)}
 
-    def set_tab_index(self, control_name: str, tab_index: int) -> bool:
+    def set_tab_index(
+        self, control_name: str, tab_index: int, log: bool = True
+    ) -> bool:
         """Select a page in a LabVIEW Tab control by zero-based index."""
         try:
             if not self.vi_reference:
@@ -335,7 +352,10 @@ class LabVIEWController:
             if numeric_index < 0:
                 raise ValueError("tab_index must be >= 0")
             self.vi_reference.SetControlValue(control_name, numeric_index)
-            logger.debug(f"Set tab '{control_name}' to index {numeric_index}")
+            if log:
+                logger.debug(
+                    f"Set tab '{control_name}' to index {numeric_index}"
+                )
             return True
         except Exception as e:
             logger.error(f"Failed to set tab index for '{control_name}': {e}")
@@ -423,15 +443,16 @@ class LabVIEWController:
             logger.error(f"Failed to close LabVIEW application: {e}")
             return False
 
-    def stop_vi(self, close_labview: bool = False) -> bool:
+    def stop_vi(self, close_labview: bool = False, log: bool = True) -> bool:
         """Stop the currently running VI, optionally close LabVIEW."""
         try:
             if not self.vi_reference:
                 return False
             initial_state = self.vi_reference.ExecState
-            logger.debug(
-                f"Initial VI state: {initial_state} (0=Idle, 1=Running, 2=Stopped)"
-            )
+            if log:
+                logger.debug(
+                    f"Initial VI state: {initial_state} (0=Idle, 1=Running, 2=Stopped)"
+                )
             methods_tried = []
             vi_stopped = self._try_abort(methods_tried)
             if not vi_stopped:
@@ -439,15 +460,22 @@ class LabVIEWController:
             if not vi_stopped:
                 vi_stopped = self._try_multiple_aborts(methods_tried)
             final_state = self.vi_reference.ExecState
-            logger.debug(f"Final VI state after all attempts: {final_state}")
-            logger.debug(f"Methods tried: {methods_tried}")
-            if initial_state == 1 and final_state != 1:
+            if log:
                 logger.debug(
-                    "VI state changed from running - considering it stopped"
+                    f"Final VI state after all attempts: {final_state}"
                 )
+                logger.debug(f"Methods tried: {methods_tried}")
+            if initial_state == 1 and final_state != 1:
+                if log:
+                    logger.debug(
+                        "VI state changed from running - considering it stopped"
+                    )
                 vi_stopped = True
             elif initial_state != 1:
-                logger.debug("VI was not running initially - no action needed")
+                if log:
+                    logger.debug(
+                        "VI was not running initially - no action needed"
+                    )
                 vi_stopped = True
             else:
                 logger.error(

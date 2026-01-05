@@ -16,6 +16,7 @@ except ImportError:
 def parse_arguments():
     """Parse command line arguments to determine if the VI should be run and get the VI path."""
     run_vi = "--no-run" not in sys.argv
+    log = "--no-log" not in sys.argv
 
     # Find the VI path (skip the script name and any flags)
     vi_path = None
@@ -27,12 +28,13 @@ def parse_arguments():
     if vi_path is None:
         raise ValueError("VI path must be provided as a command line argument.")
 
-    return run_vi, vi_path
+    return run_vi, vi_path, log
 
 
-def open_and_run_vi(vi_path, run_vi):
+def open_and_run_vi(vi_path, run_vi, log: bool = True):
     """Open the specified VI and optionally run it."""
-    logger.info(f"Attempting to open VI: {vi_path}, run: {run_vi}")
+    if log:
+        logger.info(f"Attempting to open VI: {vi_path}, run: {run_vi}")
     if win32com is None:
         raise ImportError(
             "win32com is required but not available on this platform."
@@ -51,24 +53,26 @@ def open_and_run_vi(vi_path, run_vi):
     if run_vi:
         vi_reference.Run()
 
-    logger.info(f"Successfully opened VI: {vi_path}")
-    if run_vi:
-        logger.info("VI is now running")
-    else:
-        logger.info("VI is open but not running")
+    if log:
+        logger.info(f"Successfully opened VI: {vi_path}")
+        if run_vi:
+            logger.info("VI is now running")
+        else:
+            logger.info("VI is open but not running")
 
 
-def main(run_vi=True, vi_path=None):
+def main(run_vi=True, vi_path=None, log: bool = True):
     """Main function to open and run the VI."""
     try:
         if vi_path is None:
             raise ValueError("VI path must be provided.")
-        open_and_run_vi(vi_path, run_vi)
+        open_and_run_vi(vi_path, run_vi, log=log)
     except Exception as e:
-        logger.error(f"Error: {e}")
+        if log:
+            logger.error(f"Error: {e}")
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    run_vi, vi_path = parse_arguments()
-    main(run_vi=run_vi, vi_path=vi_path)
+    run_vi, vi_path, log = parse_arguments()
+    main(run_vi=run_vi, vi_path=vi_path, log=log)

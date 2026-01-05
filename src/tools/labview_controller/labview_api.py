@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 from ...baml_client.types import ToolResult
 from .labview_controller import LabVIEWController
@@ -9,11 +9,11 @@ from .labview_controller import LabVIEWController
 controller = LabVIEWController()
 
 
-def tool_run_open_vi(run_vi: bool = True) -> ToolResult:
+def tool_run_open_vi(run_vi: bool = True, log: bool = True) -> ToolResult:
     """
     Run open_vi.py in a subprocess to open and run the VI file.
     """
-    result = controller.run_open_vi_subprocess(run_vi=run_vi)
+    result = controller.run_open_vi_subprocess(run_vi=run_vi, log=log)
     return ToolResult(
         name="tool_run_open_vi",
         success=result["success"],
@@ -26,7 +26,9 @@ def tool_run_open_vi(run_vi: bool = True) -> ToolResult:
     )
 
 
-def tool_connect_to_vi(vi_path: Path | None = None) -> ToolResult:
+def tool_connect_to_vi(
+    vi_path: Path | None = None, log: bool = True
+) -> ToolResult:
     """
     Connect to an existing LabVIEW VI and also opens the front panel if not already open.
     """
@@ -49,7 +51,7 @@ def tool_connect_to_vi(vi_path: Path | None = None) -> ToolResult:
         )
 
 
-def tool_press_button(button_name: str) -> ToolResult:
+def tool_press_button(button_name: str, log: bool = True) -> ToolResult:
     """Press a button on the LabVIEW front panel."""
     if not controller.vi_reference:
         return ToolResult(
@@ -58,7 +60,7 @@ def tool_press_button(button_name: str) -> ToolResult:
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.press_button(button_name):
+    if controller.press_button(button_name, log=log):
         return ToolResult(
             name="tool_press_button",
             success=True,
@@ -74,7 +76,9 @@ def tool_press_button(button_name: str) -> ToolResult:
         )
 
 
-def tool_set_button_state(button_name: str, state: bool) -> ToolResult:
+def tool_set_button_state(
+    button_name: str, state: bool, log: bool = True
+) -> ToolResult:
     """Set the state of a button (True=pressed/on, False=released/off)."""
     if not controller.vi_reference:
         return ToolResult(
@@ -83,7 +87,7 @@ def tool_set_button_state(button_name: str, state: bool) -> ToolResult:
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.set_button_state(button_name, state):
+    if controller.set_button_state(button_name, state, log=log):
         state_text = "pressed/on" if state else "released/off"
         return ToolResult(
             name="tool_set_button_state",
@@ -100,7 +104,9 @@ def tool_set_button_state(button_name: str, state: bool) -> ToolResult:
         )
 
 
-def tool_set_numeric_control(control_name: str, value: float) -> ToolResult:
+def tool_set_numeric_control(
+    control_name: str, value: float, log: bool = True
+) -> ToolResult:
     """Set a numeric control value on the front panel."""
     if not controller.vi_reference:
         return ToolResult(
@@ -109,7 +115,7 @@ def tool_set_numeric_control(control_name: str, value: float) -> ToolResult:
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.set_control_value(control_name, float(value)):
+    if controller.set_control_value(control_name, float(value), log=log):
         return ToolResult(
             name="tool_set_numeric_control",
             success=True,
@@ -128,7 +134,9 @@ def tool_set_numeric_control(control_name: str, value: float) -> ToolResult:
         )
 
 
-def tool_get_numeric_indicator(indicator_name: str) -> ToolResult:
+def tool_get_numeric_indicator(
+    indicator_name: str, log: bool = True
+) -> ToolResult:
     """Get a numeric indicator value from the front panel."""
     if not controller.vi_reference:
         return ToolResult(
@@ -137,7 +145,7 @@ def tool_get_numeric_indicator(indicator_name: str) -> ToolResult:
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    value = controller.get_control_value(indicator_name)
+    value = controller.get_control_value(indicator_name, log=log)
     if value is not None:
         return ToolResult(
             name="tool_get_numeric_indicator",
@@ -157,7 +165,7 @@ def tool_get_numeric_indicator(indicator_name: str) -> ToolResult:
         )
 
 
-def tool_get_vi_status() -> ToolResult:
+def tool_get_vi_status(log: bool = True) -> ToolResult:
     """Get the current status of the connected VI."""
     result = controller.get_vi_status()
     return ToolResult(
@@ -173,7 +181,7 @@ def tool_get_vi_status() -> ToolResult:
 
 
 def tool_select_combo_box(
-    combo_box_name: str, index: int
+    combo_box_name: str, index: int, log: bool = True
 ) -> ToolResult:
     """Select an item in a combo box control by index."""
     if not controller.vi_reference:
@@ -183,7 +191,7 @@ def tool_select_combo_box(
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.select_combo_box(combo_box_name, index):
+    if controller.select_combo_box(combo_box_name, index, log=log):
         return ToolResult(
             name="tool_select_combo_box",
             success=True,
@@ -206,6 +214,7 @@ def tool_select_tab(
     tab_control_name: str,
     tab: Any,
     name_to_index: Optional[Dict[str, int]] = None,
+    log: bool = True,
 ) -> ToolResult:
     """Select a page in a LabVIEW Tab control by index or name."""
     if not controller.vi_reference:
@@ -235,7 +244,7 @@ def tool_select_tab(
             output=None,
             error="'tab' must be int or str",
         )
-    if controller.set_tab_index(tab_control_name, int(resolved_index)):
+    if controller.set_tab_index(tab_control_name, int(resolved_index), log=log):
         return ToolResult(
             name="tool_select_tab",
             success=True,
@@ -253,7 +262,7 @@ def tool_select_tab(
         )
 
 
-def tool_stop_vi(close_labview: bool = True) -> ToolResult:
+def tool_stop_vi(close_labview: bool = True, log: bool = True) -> ToolResult:
     """Stop the VI, and optionally close LabVIEW."""
     if not controller.vi_reference:
         return ToolResult(
@@ -262,7 +271,7 @@ def tool_stop_vi(close_labview: bool = True) -> ToolResult:
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.stop_vi(close_labview=close_labview):
+    if controller.stop_vi(close_labview=close_labview, log=log):
         msg = (
             "VI stopped and LabVIEW application closed"
             if close_labview
@@ -284,7 +293,7 @@ def tool_stop_vi(close_labview: bool = True) -> ToolResult:
 
 
 def tool_handle_save_dialog(
-    save_directory: Path, filename: str, **kwargs
+    save_directory: Path, filename: str, log: bool = True, **kwargs
 ) -> ToolResult:
     """Handle the Windows Save File dialog."""
     result = controller.handle_save_file_dialog(
