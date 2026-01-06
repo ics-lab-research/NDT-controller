@@ -31,9 +31,7 @@ def create_experiment_tab(
     project_state: gr.State,
     chatbot: gr.Chatbot,
 ) -> gr.Tabs:
-    plans = []
-    plans_path = None
-    plots_dir = None
+    plans, plans_path, plots_dir = [], None, None
 
     project_manager: ProjectManager = project_state.value
     metadata = project_manager.get_mode_metadata
