@@ -302,10 +302,6 @@ def tool_handle_save_dialog(
     return ToolResult(
         name="tool_handle_save_dialog",
         success=result["success"],
-        output={
-            k: str(v)
-            for k, v in result.items()
-            if k not in ["success", "error"]
-        },
+        output=filename,
         error=result.get("error"),
     )

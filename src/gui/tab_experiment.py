@@ -211,12 +211,20 @@ def create_experiment_tab(
             else:
                 images = []
 
-            gallery = gr.Gallery(
-                value=images,
-                label="Data Viewer",
-                show_label=True,
-                columns=3,
+            current_image = gr.Image(
+                value=images[0] if images else None,
+                label="Current Image",
                 height=400,
             )
+
+            scan_status = gr.Dropdown(
+                choices=["Pending", "Approved", "Rejected"],
+                label="Scan Status",
+                value="Pending",
+            )
+
+            with gr.Row():
+                prev_button = gr.Button("⏮️ Prev")
+                next_button = gr.Button("⏭️ Next")
 
     return interface

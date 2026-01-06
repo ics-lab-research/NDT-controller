@@ -1,9 +1,10 @@
+from pathlib import Path
+from typing import Any, Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
 from nptdms import TdmsFile
-from pathlib import Path
 from scipy.signal import firwin, lfilter
-from typing import Any, Tuple
 
 
 def _loadscan_tdms(tdms_file_path: Path) -> Tuple[np.ndarray, int, int]:
@@ -186,10 +187,13 @@ def _LPF(
     Returns:
     np.ndarray: Filtered signal.
     """
-    # b = firwin(filter_order+1, cutoff_frequency, window = ('gaussian', len(signal)), pass_zero = False)
-    # b = firwin(filter_order + 1, cutoff_frequency, window="hamming", pass_zero="lowpass")
+
+    # BUG: not exist lowpass for pass_zero
     b = firwin(
-        filter_order + 1, cutoff_frequency, window="hamming", pass_zero=False
+        filter_order + 1,
+        cutoff_frequency,
+        window="hamming",
+        # pass_zero="lowpass",
     )
     signal = np.pad(
         signal, (50, 50), "constant", constant_values=(signal[0], signal[-1])

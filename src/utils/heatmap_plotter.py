@@ -46,7 +46,7 @@ def process_tdms_file(
     data -= np.mean(data, axis=2, keepdims=True)
 
     data = data - data[:, :, :1]
-    X_filter = LPF_2D(data, cutoff_frequency=lpf_cutoff, filter_order=lpf_order)
+    X_filter = LPF_2D(data, lpf_cutoff, lpf_order)
     X_filter -= np.mean(X_filter, axis=2, keepdims=True)
 
     X_feat_slice = extract_features(
@@ -83,12 +83,12 @@ def plot_individual_heatmaps(
     X_feat_slice: np.ndarray,
     X_feat_loi: np.ndarray,
     X_feat_peak: np.ndarray,
-    tdms_file: Path,
+    experiment_id: str,
     output_folder: Path,
 ):
     """Plot and save individual heatmaps for a single file."""
-    logger.info(f"Plotting individual heatmaps for: {tdms_file.name}")
-    fig = plt.figure(figsize=(24, 8))
+    logger.info(f"Plotting individual heatmaps for experiment: {experiment_id}")
+    # fig = plt.figure(figsize=(24, 8))
 
     plt.subplot(1, 3, 1)
     plt.imshow(
@@ -117,7 +117,7 @@ def plot_individual_heatmaps(
     plt.colorbar()
 
     plt.tight_layout()
-    output_filename = tdms_file.stem + "_heatmaps.png"
+    output_filename = experiment_id + ".png"
     output_path = output_folder / output_filename
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close()
@@ -134,7 +134,7 @@ def plot_summary_comparison(
     n_files = len(tdms_files)
     if n_files == 0:
         return
-    fig = plt.figure(figsize=(24, 8 * n_files))
+    # fig = plt.figure(figsize=(24, 8 * n_files))
 
     for idx, (X_feat_slice, X_feat_loi, X_feat_peak) in enumerate(
         features_list
@@ -177,14 +177,12 @@ def plot_summary_comparison(
     logger.info(f"Summary comparison saved to: {summary_path}")
 
 
-def generate_heatmaps(data_folder: Path):
-    """Main function to process TDMS files and generate plots."""
-    logger.info(f"Starting generate_heatmaps for folder: {data_folder}")
-    if not data_folder.is_dir():
-        logger.error(f"Provided path is not a directory: {data_folder}")
+def generate_heatmaps(tdms_file: Path, experiment_id: str, output_folder: Path):
+    """Main function to process a TDMS file and generate plots."""
+    if not tdms_file.is_file() or not tdms_file.suffix == ".tdms":
+        logger.error(f"Provided path is not a valid TDMS file: {tdms_file}")
         return
 
-    output_folder = data_folder / "heatmap_plots"
     output_folder.mkdir(exist_ok=True)
 
     slice_window = range(0, 50)
@@ -193,32 +191,20 @@ def generate_heatmaps(data_folder: Path):
     lpf_cutoff = 0.04
     lpf_order = 24
 
-    tdms_files = get_tdms_files(data_folder)
-    if not tdms_files:
-        logger.warning("No TDMS files found")
-        return
-
     plt.rc("font", size=24)
 
-    features_list = []
-    for tdms_file in tdms_files:
-        try:
-            features = process_tdms_file(
-                tdms_file,
-                slice_window,
-                loi_window,
-                peak_window,
-                lpf_cutoff,
-                lpf_order,
-            )
-            features_list.append(features)
-            plot_individual_heatmaps(*features, tdms_file, output_folder)
-        except Exception as e:
-            logger.error(f"Error processing {tdms_file.name}: {str(e)}")
-            continue
+    try:
+        features = process_tdms_file(
+            tdms_file,
+            slice_window,
+            loi_window,
+            peak_window,
+            lpf_cutoff,
+            lpf_order,
+        )
+        plot_individual_heatmaps(*features, experiment_id, output_folder)
+    except Exception as e:
+        logger.error(f"Error processing {tdms_file.name}: {str(e)}")
+        return
 
-    logger.info(f"All individual plots saved to: {output_folder}")
-
-    plot_summary_comparison(features_list, tdms_files, output_folder)
-
-    logger.info("Heatmap generation completed")
+    logger.info(f"Plot saved to: {output_folder}")
