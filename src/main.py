@@ -32,7 +32,6 @@ custom_css = """
 /* --- Align dropdown and button heights --- */
 .small-dropdown {
     height: 60px !important;
-    width: 120px !important;
 }
 """
 
