@@ -13,7 +13,7 @@ def tool_run_open_vi(run_vi: bool = True, log: bool = True) -> ToolResult:
     """
     Run open_vi.py in a subprocess to open and run the VI file.
     """
-    result = controller.run_open_vi_subprocess(run_vi=run_vi, log=log)
+    result = controller.run_open_vi_subprocess(run_vi, log)
     return ToolResult(
         name="tool_run_open_vi",
         success=result["success"],
@@ -32,7 +32,7 @@ def tool_connect_to_vi(
     """
     Connect to an existing LabVIEW VI and also opens the front panel if not already open.
     """
-    if controller.connect_to_existing_vi(vi_path):
+    if controller.connect_to_existing_vi(vi_path, log):
         return ToolResult(
             name="tool_connect_to_vi",
             success=True,
@@ -60,7 +60,7 @@ def tool_press_button(button_name: str, log: bool = True) -> ToolResult:
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.press_button(button_name, log=log):
+    if controller.press_button(button_name, log):
         return ToolResult(
             name="tool_press_button",
             success=True,
@@ -87,7 +87,7 @@ def tool_set_button_state(
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.set_button_state(button_name, state, log=log):
+    if controller.set_button_state(button_name, state, log):
         state_text = "pressed/on" if state else "released/off"
         return ToolResult(
             name="tool_set_button_state",
@@ -115,7 +115,7 @@ def tool_set_numeric_control(
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    if controller.set_control_value(control_name, float(value), log=log):
+    if controller.set_control_value(control_name, float(value), log):
         return ToolResult(
             name="tool_set_numeric_control",
             success=True,
@@ -145,7 +145,7 @@ def tool_get_numeric_indicator(
             output=None,
             error="No VI connection. Use connect_to_vi() first",
         )
-    value = controller.get_control_value(indicator_name, log=log)
+    value = controller.get_control_value(indicator_name, log)
     if value is not None:
         return ToolResult(
             name="tool_get_numeric_indicator",
@@ -297,7 +297,7 @@ def tool_handle_save_dialog(
 ) -> ToolResult:
     """Handle the Windows Save File dialog."""
     result = controller.handle_save_file_dialog(
-        save_directory=str(save_directory), filename=filename, **kwargs
+        save_directory=str(save_directory), filename=filename, log=log, **kwargs
     )
     return ToolResult(
         name="tool_handle_save_dialog",

@@ -305,6 +305,7 @@ def handle_save_file_dialog(
     ok_button_regex: str = r"(?i)^(ok|save)$",
     timeout_seconds: float = 15.0,
     settle_delay_seconds: float = 0.3,
+    log: bool = True,
 ) -> Dict[str, Any]:
     """Handle a Windows "Save File" dialog by navigating to directory and entering filename.
 
@@ -315,6 +316,7 @@ def handle_save_file_dialog(
         ok_button_regex: Regex to match OK/Save button
         timeout_seconds: How long to wait for dialog
         settle_delay_seconds: Delay between actions
+        log: Whether to log actions
 
     The method first tries UI Automation via pywinauto for robustness. If unavailable,
     it falls back to a lightweight win32 approach using window handles and keystrokes.
@@ -339,9 +341,10 @@ def handle_save_file_dialog(
                     settle_delay_seconds,
                 )
             except Exception as uia_error:
-                logger.warning(
-                    f"UIA path failed: {uia_error}; falling back to win32"
-                )
+                if log:
+                    logger.warning(
+                        f"UIA path failed: {uia_error}; falling back to win32"
+                    )
 
         # Fallback to win32
         if win32_available:

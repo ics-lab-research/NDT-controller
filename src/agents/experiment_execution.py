@@ -24,12 +24,12 @@ from ..baml_client.types import (
     WaitForOperationCompleteTool,
 )
 from ..core.models import (
+    BasicExpTool,
     ExperimentExecutionError,
-    ExperimentPlan,
     ExperimentMetadata,
+    ExperimentPlan,
     ExperimentStatus,
     ExperimentTool,
-    BasicExpTool,
     Mode,
 )
 from ..core.project_manager import ProjectManager
@@ -52,63 +52,124 @@ SCAN_COMPLETION_CHECK_INTERVAL = 1
 HARDWARE_SETTLE_DELAY = 5
 
 
-def tool_wait_for_operation_complete(
-    exp_type: ExpType, project_manager: ProjectManager
-) -> ToolResult:
-    if exp_type == ExpType.SCAN:
-        metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
-        if not isinstance(metadata, ExperimentMetadata):
+def wait_for_scan_complete(project_manager: ProjectManager) -> ToolResult:
+    """Wait for a scan operation to complete by polling the 'Completed' indicator."""
+    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
+    if not isinstance(metadata, ExperimentMetadata):
+        return ToolResult(
+            name="wait_for_operation_complete",
+            success=False,
+            output=None,
+            error="Not in experiment mode",
+        )
+
+    vi_path = metadata.vi_path
+    logger.info("Waiting for scan to complete...")
+    while True:
+        connect_result = tool_connect_to_vi(vi_path, log=False)
+        if not connect_result.success:
             return ToolResult(
                 name="wait_for_operation_complete",
                 success=False,
                 output=None,
-                error="Not in experiment mode",
+                error=connect_result.error,
             )
+        status_result = tool_get_numeric_indicator("Completed", log=False)
+        if not status_result.success:
+            return ToolResult(
+                name="wait_for_operation_complete",
+                success=False,
+                output=None,
+                error=status_result.error,
+            )
+        if (
+            status_result.output
+            and isinstance(status_result.output, dict)
+            and status_result.output.get("value") == "1.0"
+        ):
+            logger.info("Scan completed!")
+            break
+        time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
 
-        vi_path = metadata.vi_path
-        logger.info("Waiting for scan to complete...")
-        while True:
-            connect_result = tool_connect_to_vi(vi_path)
-            if not connect_result.success:
-                return ToolResult(
-                    name="wait_for_operation_complete",
-                    success=False,
-                    output=None,
-                    error=connect_result.error,
-                )
-            status_result = tool_get_numeric_indicator("Completed")
-            if not status_result.success:
-                return ToolResult(
-                    name="wait_for_operation_complete",
-                    success=False,
-                    output=None,
-                    error=status_result.error,
-                )
-            if (
-                status_result.output
-                and isinstance(status_result.output, dict)
-                and status_result.output.get("value") == "1.0"
-            ):
-                logger.info("Scan completed!")
-                break
+    return ToolResult(
+        name="wait_for_operation_complete",
+        success=True,
+        output=None,
+        error=None,
+    )
 
-            time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
 
+def wait_for_movement_complete() -> ToolResult:
+    """Wait for a movement operation to complete by calculating and sleeping for movement time."""
+    x_result = tool_get_numeric_indicator("X Distance")
+    if not x_result.success:
         return ToolResult(
             name="wait_for_operation_complete",
-            success=True,
+            success=False,
             output=None,
-            error=None,
+            error=x_result.error,
         )
+    if not x_result.output or not isinstance(x_result.output, dict):
+        return ToolResult(
+            name="wait_for_operation_complete",
+            success=False,
+            output=None,
+            error="Invalid output format for X Distance",
+        )
+    y_result = tool_get_numeric_indicator("Y Distance")
+    if not y_result.success:
+        return ToolResult(
+            name="wait_for_operation_complete",
+            success=False,
+            output=None,
+            error=y_result.error,
+        )
+    if not y_result.output or not isinstance(y_result.output, dict):
+        return ToolResult(
+            name="wait_for_operation_complete",
+            success=False,
+            output=None,
+            error="Invalid output format for Y Distance",
+        )
+    speed_result = tool_get_numeric_indicator("Speed (mm/s)")
+    if not speed_result.success:
+        return ToolResult(
+            name="wait_for_operation_complete",
+            success=False,
+            output=None,
+            error=speed_result.error,
+        )
+    if not speed_result.output or not isinstance(speed_result.output, dict):
+        return ToolResult(
+            name="wait_for_operation_complete",
+            success=False,
+            output=None,
+            error="Invalid output format for Speed (mm/s)",
+        )
+    x = float(x_result.output["value"])
+    y = float(y_result.output["value"])
+    speed = float(speed_result.output["value"])
 
+    distance = max(abs(x), abs(y))
+    movement_time = distance / speed
+    logger.info(f"Calculated movement time: {movement_time} seconds")
+    time.sleep(movement_time)
+    return ToolResult(
+        name="wait_for_operation_complete",
+        success=True,
+        output=None,
+        error=None,
+    )
+
+
+def tool_wait_for_operation_complete(
+    exp_type: ExpType, project_manager: ProjectManager
+) -> ToolResult:
+    """Wait for the specified experiment operation to complete."""
+    if exp_type == ExpType.SCAN:
+        return wait_for_scan_complete(project_manager)
     elif exp_type == ExpType.MOVEMENT:
-        time.sleep(HARDWARE_SETTLE_DELAY)
-        return ToolResult(
-            name="wait_for_operation_complete",
-            success=True,
-            output=None,
-            error=None,
-        )
+        return wait_for_movement_complete()
 
 
 def execute_tool(

@@ -99,26 +99,31 @@ class LabVIEWController:
         except Exception as e:
             return self.handle_error("run open_vi.py subprocess", e)
 
-    def _validate_existing_connection(self, vi_path: Path | None) -> bool:
+    def _validate_existing_connection(
+        self, vi_path: Path | None, log: bool = True
+    ) -> bool:
         """Validate and update existing VI connection if valid."""
         if not self.labview_app or not self.vi_reference:
             return False
         try:
             test_state = self.vi_reference.ExecState
-            logger.debug(
-                f"Existing connection is valid, VI state: {test_state}"
-            )
-            if vi_path and vi_path != self.vi_path:
+            if log:
                 logger.debug(
-                    f"Updating VI path from {self.vi_path} to {vi_path}"
+                    f"Existing connection is valid, VI state: {test_state}"
                 )
+            if vi_path and vi_path != self.vi_path:
+                if log:
+                    logger.debug(
+                        f"Updating VI path from {self.vi_path} to {vi_path}"
+                    )
                 self.vi_reference = self.labview_app.GetVIReference(
                     str(vi_path)
                 )
                 self.vi_path = vi_path
             if not self.vi_reference.FPWinOpen:
                 self.vi_reference.FPWinOpen = True
-                logger.debug("Reopened front panel for existing connection")
+                if log:
+                    logger.debug("Reopened front panel for existing connection")
             return True
         except Exception as validation_error:
             logger.warning(
@@ -129,9 +134,12 @@ class LabVIEWController:
             self.vi_path = None
             return False
 
-    def _create_new_connection(self, vi_path: Path | None) -> bool:
+    def _create_new_connection(
+        self, vi_path: Path | None, log: bool = True
+    ) -> bool:
         """Create a new LabVIEW connection."""
-        logger.debug("Creating new LabVIEW connection...")
+        if log:
+            logger.debug("Creating new LabVIEW connection...")
         if win32com is None:
             logger.warning(
                 "win32com is not available (likely on non-Windows platform)"
@@ -144,7 +152,8 @@ class LabVIEWController:
             self.labview_app = None
             return False
         if vi_path:
-            logger.debug(f"Connecting to VI: {vi_path}")
+            if log:
+                logger.debug(f"Connecting to VI: {vi_path}")
             try:
                 self.vi_reference = self.labview_app.GetVIReference(
                     str(vi_path)
@@ -161,14 +170,16 @@ class LabVIEWController:
                 self.vi_reference.FPWinOpen = True
                 time.sleep(0.5)
                 self.vi_reference.FPWinOpen = True
-                logger.debug(f"Front panel opened for VI: {vi_path}")
+                if log:
+                    logger.debug(f"Front panel opened for VI: {vi_path}")
             except Exception as fp_error:
                 logger.error(f"Could not open front panel: {fp_error}")
             try:
                 exec_state = self.vi_reference.ExecState
-                logger.debug(
-                    f"VI connection successful, execution state: {exec_state}"
-                )
+                if log:
+                    logger.debug(
+                        f"VI connection successful, execution state: {exec_state}"
+                    )
             except Exception as state_error:
                 logger.error(
                     f"VI connection failed - cannot get execution state: {state_error}"
@@ -176,10 +187,13 @@ class LabVIEWController:
                 return False
         else:
             logger.error("No VI path provided - connected to LabVIEW app only")
-        logger.debug("Successfully connected to LabVIEW application")
+        if log:
+            logger.debug("Successfully connected to LabVIEW application")
         return True
 
-    def connect_to_existing_vi(self, vi_path: Path | None = None) -> bool:
+    def connect_to_existing_vi(
+        self, vi_path: Path | None = None, log: bool = True
+    ) -> bool:
         """Connect to an already opened LabVIEW VI."""
         if win32com is None:
             logger.warning(
@@ -187,9 +201,9 @@ class LabVIEWController:
             )
             return False
         try:
-            if self._validate_existing_connection(vi_path):
+            if self._validate_existing_connection(vi_path, log):
                 return True
-            return self._create_new_connection(vi_path)
+            return self._create_new_connection(vi_path, log)
         except Exception as e:
             logger.error(f"Failed to connect to LabVIEW: {e}")
             self.labview_app = None
@@ -488,13 +502,15 @@ class LabVIEWController:
             logger.error(f"Failed to stop VI: {e}")
             return False
 
-    def handle_save_file_dialog(self, *args, **kwargs) -> Dict[str, Any]:
+    def handle_save_file_dialog(
+        self, *args, log: bool = True, **kwargs
+    ) -> Dict[str, Any]:
         """
         A wrapper that calls the dedicated save file dialog handler.
         This keeps the implementation separate while maintaining the method on the controller.
         """
         try:
             # Delegate the call to the imported function
-            return handle_save_file_dialog(*args, **kwargs)
+            return handle_save_file_dialog(*args, log=log, **kwargs)
         except Exception as e:
             return self.handle_error("handle save dialog", e)
