@@ -8,27 +8,33 @@ from .models import ExperimentMetadata, Mode, ModeMetadata
 def get_experiment_metadata(pwd_path: Path) -> ExperimentMetadata:
     """Build experiments metadata from env vars."""
     experiments_base = os.environ.get("EXPERIMENT_BASE")
-    vi_path = os.environ.get("EXPERIMENT_VI_PATH")
-    plans_path = os.environ.get("EXPERIMENT_PLANS_PATH")
-    data_path = os.environ.get("EXPERIMENT_DATA_PATH")
+    vi_file = os.environ.get("EXPERIMENT_VI_PATH")
+    plans_file = os.environ.get("EXPERIMENT_PLANS_PATH")
+    data_dir = os.environ.get("EXPERIMENT_DATA_PATH")
+    plot_dir = os.environ.get("EXPERIMENT_PLOTS_PATH")
 
     if experiments_base is None:
         raise ValueError("Environment variables EXPERIMENT_BASE must be set")
-    if vi_path is None:
+    if vi_file is None:
         raise ValueError("Environment variables EXPERIMENT_VI_PATH must be set")
-    if data_path is None:
+    if data_dir is None:
         raise ValueError(
             "Environment variables EXPERIMENT_DATA_PATH must be set"
         )
-    if plans_path is None:
+    if plans_file is None:
         raise ValueError(
             "Environment variables EXPERIMENT_PLANS_PATH must be set"
         )
+    if plot_dir is None:
+        raise ValueError(
+            "Environment variables EXPERIMENT_PLOTS_PATH must be set"
+        )
 
     return ExperimentMetadata(
-        data_dir_path=pwd_path / experiments_base / data_path,
-        plans_path=pwd_path / experiments_base / plans_path,
-        vi_path=Path(vi_path),
+        data_dir_path=pwd_path / experiments_base / data_dir,
+        plans_path=pwd_path / experiments_base / plans_file,
+        vi_path=Path(vi_file),
+        plots_dir_path=pwd_path / experiments_base / plot_dir,
     )
 
 

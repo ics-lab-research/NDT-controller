@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import gradio as gr
@@ -7,7 +8,6 @@ from ..core.models import (
     ExperimentMetadata,
     ExperimentStatus,
     MessageType,
-    Mode,
 )
 from ..core.project_manager import ProjectManager
 from .experiment_utils import (
@@ -33,11 +33,14 @@ def create_experiment_tab(
 ) -> gr.Tabs:
     plans = []
     plans_path = None
+    plots_dir = None
 
     project_manager: ProjectManager = project_state.value
     metadata = project_manager.get_mode_metadata
     if isinstance(metadata, ExperimentMetadata):
         plans_path = metadata.plans_path
+        plots_dir = metadata.plots_dir_path
+
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path, log=True)
 
@@ -201,6 +204,21 @@ def create_experiment_tab(
 
         # ================ View Data tab =============================
         with gr.TabItem("Data Viewer"):
-            pass
+            if isinstance(plots_dir, Path) and plots_dir.exists():
+                images = [
+                    os.path.join(plots_dir, f)
+                    for f in os.listdir(plots_dir)
+                    if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))
+                ]
+            else:
+                images = []
+
+            gallery = gr.Gallery(
+                value=images,
+                label="Data Viewer",
+                show_label=True,
+                columns=3,
+                height=400,
+            )
 
     return interface

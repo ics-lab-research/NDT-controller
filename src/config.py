@@ -38,19 +38,19 @@ def load_toml_config():
 
     # Set environment variables for the paths section.
     paths = config.get("paths", {})
-    if "experiment" in paths:
-        os.environ["EXPERIMENT_BASE"] = paths["experiment"]
+    if "experiment_dir" in paths:
+        os.environ["EXPERIMENT_BASE"] = paths["experiment_dir"]
 
     # Set environment variables for the experiment section.
     experiments = config.get("experiment", {})
-    if "data_path" in experiments:
-        os.environ["EXPERIMENT_DATA_PATH"] = experiments["data_path"]
-    if "plans_path" in experiments:
-        os.environ["EXPERIMENT_PLANS_PATH"] = experiments["plans_path"]
+    if "data_dir" in experiments:
+        os.environ["EXPERIMENT_DATA_PATH"] = experiments["data_dir"]
+    if "plans" in experiments:
+        os.environ["EXPERIMENT_PLANS_PATH"] = experiments["plans"]
     if "vi_path" in experiments:
         os.environ["EXPERIMENT_VI_PATH"] = experiments["vi_path"]
-    if "plots_path" in experiments:
-        os.environ["EXPERIMENT_PLOTS_PATH"] = experiments["plots_path"]
+    if "plots_dir" in experiments:
+        os.environ["EXPERIMENT_PLOTS_PATH"] = experiments["plots_dir"]
 
     set_env_vars_from_section(config, "models")
     set_env_vars_from_section(config, "logging")

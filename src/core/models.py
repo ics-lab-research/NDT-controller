@@ -79,7 +79,7 @@ class ExperimentMetadata:
     """Metadata for experiments mode."""
 
     data_dir_path: Path
-    # plots_dir_path: Path
+    plots_dir_path: Path
     plans_path: Path
     vi_path: Path
 

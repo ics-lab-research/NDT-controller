@@ -1,11 +1,11 @@
 [paths]
-experiment = "EXPERIMENT"
+experiment_dir = "EXPERIMENT"
 
 [experiment]
 vi_path = "D:\\Dat\\Pulsed Eddy Current - LLM\\MAIN - PECT - Autonics - Pulses - encoder  - LLM.vi"
-plans_path = "labview_experiment_plans.json"
-data_path = "data"
-plots_path = "plots"
+plans = "labview_experiment_plans.json"
+data_dir = "data"
+plots_dir = "plots"
 
 [models]
 exp_router = "openrouter/google/gemini-2.5-flash-preview-09-2025"
