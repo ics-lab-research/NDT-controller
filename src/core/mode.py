@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Dict
-from .metadata_utils import get_all_mode_metadata
-from .models import Mode, ModeMetadata, ExperimentMetadata
+
+from .metadata import get_all_mode_metadata
+from .models import ExperimentMetadata, Mode, ModeMetadata
 
 
 class ModeManager:

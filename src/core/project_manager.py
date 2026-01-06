@@ -2,11 +2,11 @@ import os
 from pathlib import Path
 from typing import List
 
-from .metadata_utils import get_all_mode_metadata
-from .mode_utils import ModeManager
+from .metadata import get_all_mode_metadata
+from .mode import ModeManager
 from .models import ExperimentMetadata, Mode, ModeMetadata
-from .path_utils import PathManager
-from .state_utils import StateManager
+from .path_manager import PathManager
+from .state_manager import StateManager
 
 
 class ProjectManager:
