@@ -1,5 +1,4 @@
 import dataclasses
-import os
 import shutil
 from pathlib import Path
 
@@ -11,36 +10,12 @@ class PathManager:
 
     def __init__(self, pwd_path: Path):
         self._pwd_path = pwd_path
-        self._experiment_data_path: Path | None = None
 
     @property
     def pwd_path(self) -> Path:
         return self._pwd_path
 
-    @property
-    def experiment_data_path(self) -> Path:
-        if self._experiment_data_path is not None:
-            return self._experiment_data_path
-
-        experiments_base = os.environ.get("EXPERIMENT_BASE")
-        data_path = os.environ.get("EXPERIMENT_DATA_PATH")
-
-        if experiments_base is None:
-            raise ValueError(
-                "Environment variables EXPERIMENT_BASE must be set"
-            )
-        if data_path is None:
-            raise ValueError(
-                "Environment variables EXPERIMENT_DATA_PATH must be set"
-            )
-
-        return self._pwd_path / experiments_base / data_path
-
-    def set_data_dir_path(self, path: Path) -> None:
-        logger.info(f"Setting data dir path to {path}")
-        self._experiment_data_path = path
-
-    def ensure_mode_specific_paths(self, all_metadata: dict) -> None:
+    def ensure_mode_specific_paths(self, all_metadata: dict):
         """Ensure paths exist for all modes."""
         logger.info("Ensuring mode-specific paths exist")
         for metadata in all_metadata.values():
@@ -57,7 +32,7 @@ class PathManager:
                         self._ensure_directory_exists(path)
         logger.info("Mode-specific paths ensured")
 
-    def _ensure_file_exists(self, file_path: Path) -> None:
+    def _ensure_file_exists(self, file_path: Path):
         if not file_path.exists():
             logger.debug(f"Ensuring file exists: {file_path}")
             file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -71,7 +46,7 @@ class PathManager:
             else:
                 file_path.touch()
 
-    def _ensure_directory_exists(self, dir_path: Path) -> None:
+    def _ensure_directory_exists(self, dir_path: Path):
         if dir_path:
             logger.debug(f"Ensuring directory exists: {dir_path}")
             dir_path.mkdir(parents=True, exist_ok=True)

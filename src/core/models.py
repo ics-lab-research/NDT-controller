@@ -86,14 +86,6 @@ class ExperimentMetadata:
 # TODO: metadata should have description of file
 
 
-# ============================== Orchestrator models ==========================
-@dataclass
-class OrchestratorMetadata:
-    """Metadata for orchestrator mode."""
-
-    pass
-
-
 # ============================== Idea models ==================================
 @dataclass
 class IdeaMetadata:
@@ -132,7 +124,6 @@ class ReportingMetadata:
 
 # Type alias for mode metadata
 ModeMetadata = Union[
-    OrchestratorMetadata,
     IdeaMetadata,
     ExperimentMetadata,
     DataScienceMetadata,

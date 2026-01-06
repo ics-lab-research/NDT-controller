@@ -21,7 +21,7 @@ class StateManager:
     def multimodal_uploads(self) -> List[Path]:
         return self._multimodal_uploads
 
-    def add_multimodal_upload(self, file_path: Path) -> None:
+    def add_multimodal_upload(self, file_path: Path):
         logger.info(f"Added multimodal upload: {file_path}")
         self._multimodal_uploads.append(file_path)
 
