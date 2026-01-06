@@ -54,7 +54,7 @@ HARDWARE_SETTLE_DELAY = 5
 
 def wait_for_scan_complete(project_manager: ProjectManager) -> ToolResult:
     """Wait for a scan operation to complete by polling the 'Completed' indicator."""
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
+    metadata = project_manager.get_mode_metadata
     if not isinstance(metadata, ExperimentMetadata):
         return ToolResult(
             name="wait_for_operation_complete",
@@ -176,7 +176,7 @@ def execute_tool(
     tool: BasicExpTool | ExperimentTool, project_manager: ProjectManager
 ) -> ToolResult:
     """Execute a single experiment tool."""
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
+    metadata = project_manager.get_mode_metadata
     if not isinstance(metadata, ExperimentMetadata):
         raise ValueError("Not in experiment mode")
 
@@ -262,7 +262,7 @@ def execute_multiple_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
 ) -> Generator[str, None, ExperimentExecutionError | None]:
     """Execute multiple experiment plans with system reinitialization after each plan."""
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
+    metadata = project_manager.get_mode_metadata
     for plan in plans:
         # Only execute plans that are pending or previously errored
         if plan.status in (ExperimentStatus.ERROR, ExperimentStatus.PENDING):

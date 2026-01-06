@@ -31,14 +31,16 @@ def create_experiment_tab(
     project_state: gr.State,
     chatbot: gr.Chatbot,
 ) -> gr.Tabs:
-    project_manager: ProjectManager = project_state.value
-    metadata = project_manager.get_mode_metadata(Mode.EXPERIMENT)
     plans = []
     plans_path = None
+
+    project_manager: ProjectManager = project_state.value
+    metadata = project_manager.get_mode_metadata
     if isinstance(metadata, ExperimentMetadata):
         plans_path = metadata.plans_path
         if isinstance(plans_path, Path):
             plans = load_experiment_plans(plans_path, log=True)
+
     filenames = [plan.filename for plan in plans]
     ids = [plan.id for plan in plans]
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []

@@ -33,7 +33,7 @@ def get_experiment_metadata(
     project_manager: ProjectManager,
 ) -> ExperimentMetadata:
     """Get and validate experiment metadata from project manager."""
-    metadata = project_manager.get_mode_metadata(project_manager.current_mode)
+    metadata = project_manager.get_mode_metadata
     if not isinstance(metadata, ExperimentMetadata):
         raise ValueError("Metadata is not ExperimentMetadata")
     return metadata

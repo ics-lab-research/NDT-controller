@@ -4,7 +4,7 @@ from typing import List
 
 from .metadata_utils import get_all_mode_metadata
 from .mode_utils import ModeManager
-from .models import ExperimentMetadata, Mode
+from .models import ExperimentMetadata, Mode, ModeMetadata
 from .path_utils import PathManager
 from .state_utils import StateManager
 
@@ -32,12 +32,13 @@ class ProjectManager:
     def multimodal_uploads(self) -> List[Path]:
         return self._state_mgr.multimodal_uploads
 
+    @property
+    def get_mode_metadata(self) -> ModeMetadata:
+        return self._mode_mgr.get_mode_metadata
+
     # ================ General function ================
     def add_multimodal_upload(self, file_path: Path):
         self._state_mgr.add_multimodal_upload(file_path)
-
-    def get_mode_metadata(self, mode: Mode):
-        return self._mode_mgr.get_mode_metadata(mode)
 
     def set_mode(self, mode: Mode):
         self._mode_mgr.set_mode(mode)
@@ -45,7 +46,7 @@ class ProjectManager:
     # ================ Experiment properties ================
     @property
     def experiment_data_path(self) -> Path:
-        metadata = self._mode_mgr.get_mode_metadata(Mode.EXPERIMENT)
+        metadata = self._mode_mgr.get_mode_metadata
         if isinstance(metadata, ExperimentMetadata):
             return metadata.data_dir_path
         else:
