@@ -27,6 +27,22 @@ from .experiment_utils import (
 )
 
 
+def approve_scan(selected_image):
+    if selected_image:
+        filename = os.path.basename(selected_image)
+        print(f"approve {filename}")
+
+
+def reject_scan(selected_image):
+    if selected_image:
+        filename = os.path.basename(selected_image)
+        print(f"reject {filename}")
+
+
+def select_image(evt: gr.SelectData, imgs):
+    return imgs[evt.index] if evt.index is not None else None
+
+
 def create_experiment_tab(
     project_state: gr.State,
     chatbot: gr.Chatbot,
@@ -202,29 +218,43 @@ def create_experiment_tab(
 
         # ================ View Data tab =============================
         with gr.TabItem("Data Viewer"):
+            images = []
             if isinstance(plots_dir, Path) and plots_dir.exists():
                 images = [
                     os.path.join(plots_dir, f)
                     for f in os.listdir(plots_dir)
                     if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))
                 ]
-            else:
-                images = []
 
-            current_image = gr.Image(
-                value=images[0] if images else None,
-                label="Current Image",
+            images_state = gr.State(images)
+            selected_image_state = gr.State(None)
+
+            gallery = gr.Gallery(
+                value=images,
+                label="Image Gallery",
                 height=400,
+                columns=3,
+                allow_preview=True,
             )
 
-            scan_status = gr.Dropdown(
-                choices=["Pending", "Approved", "Rejected"],
-                label="Scan Status",
-                value="Pending",
+            gallery.select(
+                select_image,
+                inputs=[images_state],
+                outputs=selected_image_state,
             )
 
             with gr.Row():
-                prev_button = gr.Button("⏮️ Prev")
-                next_button = gr.Button("⏭️ Next")
+                approve_scan_btn = gr.Button("✅ Approve Scan")
+                reject_scan_btn = gr.Button("❌ Reject Scan")
+
+            approve_scan_btn.click(
+                approve_scan,
+                inputs=[selected_image_state],
+            )
+
+            reject_scan_btn.click(
+                reject_scan,
+                inputs=[selected_image_state],
+            )
 
     return interface

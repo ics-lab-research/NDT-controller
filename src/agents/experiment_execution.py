@@ -270,6 +270,8 @@ def execute_single_plan(plan: ExperimentPlan, project_manager: ProjectManager):
                     filename=plan.filename,
                     error_message=result.error or "Unknown error",
                 )
+
+    # Generate heatmaps for check data quality
     if (
         saved_tdms_file
         and isinstance(saved_tdms_file, str)
