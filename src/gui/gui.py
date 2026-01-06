@@ -69,7 +69,7 @@ def create_main_interface() -> gr.Blocks:
                             mode_dropdown = gr.Dropdown(
                                 choices=Mode.get_values(),
                                 value=project_manager.current_mode.value,
-                                scale=1,
+                                scale=0,
                                 show_label=False,
                                 interactive=True,
                                 allow_custom_value=True,
@@ -88,7 +88,10 @@ def create_main_interface() -> gr.Blocks:
                     )
 
         # Wire up events (only for Chat tab)
-        clear_button.click(lambda: [], outputs=chat_interface.chatbot)
+        clear_button.click(
+            lambda: ([], []),
+            outputs=[chat_interface.chatbot_state, chat_interface.chatbot],
+        )
 
         mode_dropdown.select(
             handle_mode_change,
