@@ -47,8 +47,8 @@ from ..tools.labview_controller import (
     tool_stop_vi,
 )
 
-BUTTON_STATE_DELAY = 1
-SCAN_COMPLETION_CHECK_INTERVAL = 1
+# BUTTON_STATE_DELAY = 1
+# SCAN_COMPLETION_CHECK_INTERVAL = 1
 HARDWARE_SETTLE_DELAY = 5
 
 
@@ -89,7 +89,7 @@ def wait_for_scan_complete(project_manager: ProjectManager) -> ToolResult:
         ):
             logger.info("Scan completed!")
             break
-        time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
+        # time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
 
     return ToolResult(
         name="wait_for_operation_complete",
@@ -153,7 +153,7 @@ def wait_for_movement_complete() -> ToolResult:
     distance = max(abs(x), abs(y))
     movement_time = distance / speed
     logger.info(f"Calculated movement time: {movement_time} seconds")
-    time.sleep(movement_time)
+    time.sleep(movement_time + HARDWARE_SETTLE_DELAY)
     return ToolResult(
         name="wait_for_operation_complete",
         success=True,
@@ -226,7 +226,7 @@ def execute_tool(
         )
 
     elif isinstance(tool, SetButtonStateTool):
-        time.sleep(BUTTON_STATE_DELAY)
+        # time.sleep(BUTTON_STATE_DELAY)
         return tool_set_button_state(
             button_name=tool.button_name, state=tool.state
         )
@@ -288,7 +288,7 @@ def execute_multiple_plans(
             if isinstance(metadata, ExperimentMetadata):
                 save_experiment_plans(plans, metadata.plans_path)
             # Allow hardware to settle before next plan
-            time.sleep(HARDWARE_SETTLE_DELAY)
+            # time.sleep(HARDWARE_SETTLE_DELAY)
     # Final save of all plans
     if isinstance(metadata, ExperimentMetadata):
         save_experiment_plans(plans, metadata.plans_path)
