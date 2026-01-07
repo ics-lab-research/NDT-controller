@@ -32,6 +32,17 @@ from .experiment_utils import (
 )
 
 
+def get_scan_images(plots_dir: Path | None) -> Tuple[List[str], List[str]]:
+    images = []
+    if isinstance(plots_dir, Path) and plots_dir.exists():
+        images = [
+            str(plots_dir / f)
+            for f in plots_dir.iterdir()
+            if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".gif")
+        ]
+    return images, images
+
+
 def approve_scan(
     selected_scan_image: str,
     plans: List[ExperimentPlan],
@@ -106,6 +117,7 @@ def create_experiment_tab(
     # gradio states
     plans_state = gr.State(plans)
     plans_path_state = gr.State(plans_path)
+    plots_dir_state = gr.State(plots_dir)
     log_state = gr.State(False)
 
     with gr.Tabs() as interface:
@@ -261,24 +273,17 @@ def create_experiment_tab(
 
         # ================ View Data tab =============================
         with gr.TabItem("Data Viewer"):
-            scan_images = []
-            if isinstance(plots_dir, Path) and plots_dir.exists():
-                scan_images = [
-                    str(plots_dir / f)
-                    for f in plots_dir.iterdir()
-                    if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".gif")
-                ]
+            initial_scan_images, _ = get_scan_images(plots_dir)
 
-            scan_images_state = gr.State(scan_images)
+            scan_images_state = gr.State(initial_scan_images)
             selected_scan_image_state = gr.State(None)
 
             scan_image_gallery = gr.Gallery(
-                value=scan_images,
+                value=initial_scan_images,
                 label="Image Gallery",
                 height=400,
                 columns=3,
                 allow_preview=True,
-                every=1,
             )
 
             scan_image_gallery.select(
@@ -311,6 +316,13 @@ def create_experiment_tab(
                     chatbot,
                 ],
                 outputs=[plans_state, chatbot],
+            )
+
+            timer_data = gr.Timer(1)
+            timer_data.tick(
+                get_scan_images,
+                inputs=[plots_dir_state],
+                outputs=[scan_image_gallery, scan_images_state],
             )
 
     return interface
