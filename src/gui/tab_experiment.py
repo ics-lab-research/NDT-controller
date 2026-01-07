@@ -3,7 +3,10 @@ from pathlib import Path
 
 import gradio as gr
 
-from ..agents.experiment_planning import load_experiment_plans
+from ..agents.experiment_planning import (
+    load_experiment_plans,
+    save_experiment_plans,
+)
 from ..core.models import (
     ExperimentMetadata,
     ExperimentStatus,
@@ -27,16 +30,24 @@ from .experiment_utils import (
 )
 
 
-def approve_scan(selected_image):
-    if selected_image:
+def approve_scan(selected_image, plans, plans_path):
+    if selected_image and plans and plans_path:
         filename = os.path.basename(selected_image)
-        print(f"approve {filename}")
+        for plan in plans:
+            if plan.id == filename:
+                plan.status = ExperimentStatus.COMPLETED
+                break
+        save_experiment_plans(plans, plans_path)
 
 
-def reject_scan(selected_image):
-    if selected_image:
+def reject_scan(selected_image, plans, plans_path):
+    if selected_image and plans and plans_path:
         filename = os.path.basename(selected_image)
-        print(f"reject {filename}")
+        for plan in plans:
+            if plan.id == filename:
+                plan.status = ExperimentStatus.PENDING
+                break
+        save_experiment_plans(plans, plans_path)
 
 
 def select_image(evt: gr.SelectData, imgs):
@@ -249,12 +260,14 @@ def create_experiment_tab(
 
             approve_scan_btn.click(
                 approve_scan,
-                inputs=[selected_image_state],
+                inputs=[selected_image_state, plans_state, plans_path_state],
+                outputs=[plans_state],
             )
 
             reject_scan_btn.click(
                 reject_scan,
-                inputs=[selected_image_state],
+                inputs=[selected_image_state, plans_state, plans_path_state],
+                outputs=[plans_state],
             )
 
     return interface
