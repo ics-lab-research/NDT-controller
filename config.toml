@@ -8,12 +8,11 @@ data_dir = "data"
 plots_dir = "plots"
 
 [models]
-exp_router = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-exp_orchestrator = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-exp_planner = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-exp_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-exp_basic_executor = "openrouter/google/gemini-2.5-flash-preview-09-2025"
-
+exp_router = "openrouter/google/gemini-3-flash-preview"
+exp_orchestrator = "openrouter/google/gemini-3-flash-preview"
+exp_planner = "openrouter/google/gemini-3-flash-preview"
+exp_executor = "openrouter/google/gemini-3-flash-preview"
+exp_basic_executor = "openrouter/google/gemini-3-flash-preview"
 [logging]
 baml_log = "info"   # level logging for baml
 log_level = "debug" # level logging for loguru

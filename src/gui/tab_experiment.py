@@ -43,27 +43,27 @@ def get_scan_images(plots_dir: Path | None) -> Tuple[List[str], List[str]]:
     return images, images
 
 
-def approve_scan(
-    selected_scan_image: str,
-    plans: List[ExperimentPlan],
-    plans_path: Path | None,
-    chatbot: List[ChatMessage],
-) -> Tuple[List[ExperimentPlan], List[ChatMessage]]:
-    if not (selected_scan_image and plans and plans_path):
-        return plans, chatbot
+# def approve_scan(
+#     selected_scan_image: str,
+#     plans: List[ExperimentPlan],
+#     plans_path: Path | None,
+#     chatbot: List[ChatMessage],
+# ) -> Tuple[List[ExperimentPlan], List[ChatMessage]]:
+#     if not (selected_scan_image and plans and plans_path):
+#         return plans, chatbot
 
-    filename = Path(selected_scan_image).stem
-    plan = next((p for p in plans if p.id == filename), None)
-    if plan:
-        plan.status = ExperimentStatus.COMPLETED
-        save_experiment_plans(plans, plans_path)
-        return plans, chatbot + [
-            create_message(
-                content=f"Scan approved for `{plan.filename}`",
-                message_type=MessageType.STATUS,
-            )
-        ]
-    return plans, chatbot
+#     filename = Path(selected_scan_image).stem
+#     plan = next((p for p in plans if p.id == filename), None)
+#     if plan:
+#         plan.status = ExperimentStatus.COMPLETED
+#         save_experiment_plans(plans, plans_path)
+#         return plans, chatbot + [
+#             create_message(
+#                 content=f"Scan approved for `{plan.filename}`",
+#                 message_type=MessageType.STATUS,
+#             )
+#         ]
+#     return plans, chatbot
 
 
 def reject_scan(
@@ -295,16 +295,16 @@ def create_experiment_tab(
                 approve_scan_button = gr.Button("✅ Approve Scan")
                 reject_scan_button = gr.Button("❌ Reject Scan")
 
-            approve_scan_button.click(
-                approve_scan,
-                inputs=[
-                    selected_scan_image_state,
-                    plans_state,
-                    plans_path_state,
-                    chatbot,
-                ],
-                outputs=[plans_state, chatbot],
-            )
+            # approve_scan_button.click(
+            #     approve_scan,
+            #     inputs=[
+            #         selected_scan_image_state,
+            #         plans_state,
+            #         plans_path_state,
+            #         chatbot,
+            #     ],
+            #     outputs=[plans_state, chatbot],
+            # )
 
             reject_scan_button.click(
                 reject_scan,

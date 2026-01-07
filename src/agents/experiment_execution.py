@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Generator, List
 
 from loguru import logger
+from tqdm import tqdm
 
 from ..agents.experiment_dry_run import execute_tool_dry_run
 from ..agents.experiment_planning import (
@@ -50,8 +51,8 @@ from ..tools.labview_controller import (
 )
 from ..utils.heatmap_plotter import generate_heatmaps
 
-# BUTTON_STATE_DELAY = 1
-# SCAN_COMPLETION_CHECK_INTERVAL = 1
+BUTTON_STATE_DELAY = 1
+SCAN_COMPLETION_CHECK_INTERVAL = 1
 HARDWARE_SETTLE_DELAY = 5
 
 
@@ -92,7 +93,7 @@ def wait_for_scan_complete(project_manager: ProjectManager) -> ToolResult:
         ):
             logger.info("Scan completed!")
             break
-        # time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
+        time.sleep(SCAN_COMPLETION_CHECK_INTERVAL)
 
     return ToolResult(
         name="wait_for_operation_complete",
@@ -229,7 +230,7 @@ def execute_tool(
         )
 
     elif isinstance(tool, SetButtonStateTool):
-        # time.sleep(BUTTON_STATE_DELAY)
+        time.sleep(BUTTON_STATE_DELAY)
         return tool_set_button_state(
             button_name=tool.button_name, state=tool.state
         )
@@ -277,8 +278,14 @@ def execute_single_plan(plan: ExperimentPlan, project_manager: ProjectManager):
         and isinstance(saved_tdms_file, str)
         and isinstance(metadata, ExperimentMetadata)
     ):
+        # Ensure filename has .tdms extension
+        tdms_filename = (
+            saved_tdms_file
+            if saved_tdms_file.lower().endswith(".tdms")
+            else f"{saved_tdms_file}.tdms"
+        )
         generate_heatmaps(
-            metadata.data_dir_path / saved_tdms_file,
+            metadata.data_dir_path / tdms_filename,
             plan.id,
             metadata.plots_dir_path,
         )
@@ -290,22 +297,38 @@ def execute_multiple_plans(
     plans: List[ExperimentPlan], project_manager: ProjectManager
 ) -> Generator[str, None, ExperimentExecutionError | None]:
     """Execute multiple experiment plans with system reinitialization after each plan."""
+
+    # TODO: check if in experiment mode right here
     metadata = project_manager.get_mode_metadata
     runnable_statuses = ExperimentStatus.get_ongoing_runnable_statuses()
     while any(p.status in runnable_statuses for p in plans):
         # Find the next plan to execute
         plan = next((p for p in plans if p.status in runnable_statuses), None)
+
+        # print out filename and status in runable_statuses
+        for p in plans:
+            if p.status in runnable_statuses:
+                print(f"Runnable Plan: {p.filename}, Status: {p.status}")
+
+        print("===============================")
+        print(plan.filename)
+        print(plan.status)
         if not plan:
             break
         yield f"Executing plan: `{plan.filename}`"
         plan.status = ExperimentStatus.SCANNING
         # Save progress before execution
-        if isinstance(metadata, ExperimentMetadata):
-            save_experiment_plans(plans, metadata.plans_path)
+        # if isinstance(metadata, ExperimentMetadata):
+        save_experiment_plans(plans, metadata.plans_path)
+        
         try:
-            execute_single_plan(plan, project_manager)
+            # execute_single_plan(plan, project_manager)
+            for _ in tqdm(range(30), desc="Processing", unit="s"):
+                time.sleep(1)
+            # use tqdm
             yield f"Plan `{plan.filename}` completed"
             plan.status = ExperimentStatus.COMPLETED
+            save_experiment_plans(plans, metadata.plans_path)
         except ExperimentExecutionError as e:
             error_message = f"Plan {plan.filename} error: {e.error_message}"
             yield error_message
@@ -315,11 +338,15 @@ def execute_multiple_plans(
                 save_experiment_plans(plans, metadata.plans_path)
             return e
         # Save completion state
-        if isinstance(metadata, ExperimentMetadata):
-            save_experiment_plans(plans, metadata.plans_path)
-            # Reload plans to check for status updates (e.g., rescan requests)
-            plans = load_experiment_plans(metadata.plans_path, log=False)
+        # if isinstance(metadata, ExperimentMetadata):
+        
+        # Reload plans to check for status updates (e.g., rescan requests)
+        plans = load_experiment_plans(metadata.plans_path, log=False)
+        
+        # print out filename and status after of each plan execution
+        for p in plans:
+            print(f"Plan: {p.filename}, Status: {p.status}")
 
     # Final save of all plans
-    if isinstance(metadata, ExperimentMetadata):
-        save_experiment_plans(plans, metadata.plans_path)
+    # if isinstance(metadata, ExperimentMetadata):
+    #     save_experiment_plans(plans, metadata.plans_path)
