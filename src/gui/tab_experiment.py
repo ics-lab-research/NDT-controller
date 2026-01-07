@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+from typing import List, Tuple
 
 import gradio as gr
 
@@ -8,7 +8,9 @@ from ..agents.experiment_planning import (
     save_experiment_plans,
 )
 from ..core.models import (
+    ChatMessage,
     ExperimentMetadata,
+    ExperimentPlan,
     ExperimentStatus,
     MessageType,
 )
@@ -30,24 +32,50 @@ from .experiment_utils import (
 )
 
 
-def approve_scan(selected_image, plans, plans_path):
-    if selected_image and plans and plans_path:
-        filename = os.path.basename(selected_image)
-        for plan in plans:
-            if plan.id == filename:
-                plan.status = ExperimentStatus.COMPLETED
-                break
+def approve_scan(
+    selected_image: str,
+    plans: List[ExperimentPlan],
+    plans_path: Path | None,
+    chatbot: List[ChatMessage],
+) -> Tuple[List[ExperimentPlan], List[ChatMessage]]:
+    if not (selected_image and plans and plans_path):
+        return plans, chatbot
+
+    filename = Path(selected_image).name
+    plan = next((p for p in plans if p.id == filename), None)
+    if plan:
+        plan.status = ExperimentStatus.COMPLETED
         save_experiment_plans(plans, plans_path)
+        return plans, chatbot + [
+            create_message(
+                content=f"Scan approved for {plan.filename}",
+                message_type=MessageType.STATUS,
+            )
+        ]
+    return plans, chatbot
 
 
-def reject_scan(selected_image, plans, plans_path):
-    if selected_image and plans and plans_path:
-        filename = os.path.basename(selected_image)
-        for plan in plans:
-            if plan.id == filename:
-                plan.status = ExperimentStatus.PENDING
-                break
+def reject_scan(
+    selected_image: str,
+    plans: List[ExperimentPlan],
+    plans_path: Path | None,
+    chatbot: List[ChatMessage],
+) -> Tuple[List[ExperimentPlan], List[ChatMessage]]:
+    if not (selected_image and plans and plans_path):
+        return plans, chatbot
+
+    filename = Path(selected_image).name
+    plan = next((p for p in plans if p.id == filename), None)
+    if plan:
+        plan.status = ExperimentStatus.RESCAN
         save_experiment_plans(plans, plans_path)
+        return plans, chatbot + [
+            create_message(
+                content=f"Scan rejected for {plan.filename}",
+                message_type=MessageType.STATUS,
+            )
+        ]
+    return plans, chatbot
 
 
 def select_image(evt: gr.SelectData, imgs):
@@ -234,9 +262,9 @@ def create_experiment_tab(
             images = []
             if isinstance(plots_dir, Path) and plots_dir.exists():
                 images = [
-                    os.path.join(plots_dir, f)
-                    for f in os.listdir(plots_dir)
-                    if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))
+                    str(plots_dir / f)
+                    for f in plots_dir.iterdir()
+                    if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".gif")
                 ]
 
             images_state = gr.State(images)
@@ -248,6 +276,7 @@ def create_experiment_tab(
                 height=400,
                 columns=3,
                 allow_preview=True,
+                every=1,
             )
 
             gallery.select(
@@ -262,14 +291,24 @@ def create_experiment_tab(
 
             approve_scan_btn.click(
                 approve_scan,
-                inputs=[selected_image_state, plans_state, plans_path_state],
-                outputs=[plans_state],
+                inputs=[
+                    selected_image_state,
+                    plans_state,
+                    plans_path_state,
+                    chatbot,
+                ],
+                outputs=[plans_state, chatbot],
             )
 
             reject_scan_btn.click(
                 reject_scan,
-                inputs=[selected_image_state, plans_state, plans_path_state],
-                outputs=[plans_state],
+                inputs=[
+                    selected_image_state,
+                    plans_state,
+                    plans_path_state,
+                    chatbot,
+                ],
+                outputs=[plans_state, chatbot],
             )
 
     return interface
