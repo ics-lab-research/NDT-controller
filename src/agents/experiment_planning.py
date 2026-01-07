@@ -110,7 +110,7 @@ def load_experiment_plans(
                     experiment=steps,
                     status=ExperimentStatus(
                         plan_data.get(
-                            "status", ExperimentStatus.NOT_APPROVED.value
+                            "status", ExperimentStatus.NOT_STARTED.value
                         )
                     ),
                 )

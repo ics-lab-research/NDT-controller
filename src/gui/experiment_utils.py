@@ -219,26 +219,6 @@ def get_experiment_statuses(
     return [plan.status.value for plan in plans]
 
 
-def approve_all_plans(
-    plans: List[ExperimentPlan], plans_path: Path | None
-) -> gr.Dataframe:
-    if not plans_path:
-        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
-        return gr.Dataframe(value=[])
-    for plan in plans:
-        if plan.status == ExperimentStatus.NOT_APPROVED:
-            plan.status = ExperimentStatus.APPROVED
-    try:
-        save_experiment_plans(plans, plans_path)
-    except Exception as e:
-        error_msg = f"Error saving plans: {e}"
-        logger.error(error_msg)
-        gr.Info(error_msg, title="❌ Error")
-    filenames = [plan.filename for plan in plans]
-    statuses = get_experiment_statuses(plans)
-    return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
-
-
 def reload_plans(
     plans_path: Path | None,
 ) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
@@ -371,14 +351,10 @@ def start_execution(
             ],
         )
         return
-    runnable_statuses = [
-        ExperimentStatus.APPROVED,
-        ExperimentStatus.PENDING,
-        ExperimentStatus.ERROR,
-        ExperimentStatus.SCANNING,
-        ExperimentStatus.RESCAN,
-    ]
-    if not any(plan.status in runnable_statuses for plan in plans):
+    runnable_statuses = ExperimentStatus.get_initial_runnable_statuses()
+    if not runnable_statuses or not any(
+        plan.status in runnable_statuses for plan in plans
+    ):
         yield (
             gr.Dataframe(value=[]),
             current_chatbot
@@ -390,11 +366,9 @@ def start_execution(
             ],
         )
         return
-    plans_to_run = [
-        p
-        for p in plans
-        if p.status in [ExperimentStatus.APPROVED, ExperimentStatus.SCANNING]
-    ]
+
+    # set all runnable plans to pending status
+    plans_to_run = [p for p in plans if p.status in runnable_statuses]
     if plans_to_run:
         # Set to PENDING
         for plan in plans_to_run:
@@ -445,3 +419,23 @@ def start_execution(
                     f"Execution error: {error.error_message}"
                 )
             yield update_scan_status(plans_path), current_chatbot
+
+
+# def approve_all_plans(
+#     plans: List[ExperimentPlan], plans_path: Path | None
+# ) -> gr.Dataframe:
+#     if not plans_path:
+#         gr.Info("Error: Plans path not configured", title="⚠️ Warning")
+#         return gr.Dataframe(value=[])
+#     for plan in plans:
+#         if plan.status == ExperimentStatus.NOT_APPROVED:
+#             plan.status = ExperimentStatus.APPROVED
+#     try:
+#         save_experiment_plans(plans, plans_path)
+#     except Exception as e:
+#         error_msg = f"Error saving plans: {e}"
+#         logger.error(error_msg)
+#         gr.Info(error_msg, title="❌ Error")
+#     filenames = [plan.filename for plan in plans]
+#     statuses = get_experiment_statuses(plans)
+#     return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])

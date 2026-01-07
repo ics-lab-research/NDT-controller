@@ -291,13 +291,7 @@ def execute_multiple_plans(
 ) -> Generator[str, None, ExperimentExecutionError | None]:
     """Execute multiple experiment plans with system reinitialization after each plan."""
     metadata = project_manager.get_mode_metadata
-    runnable_statuses = [
-        ExperimentStatus.APPROVED,
-        ExperimentStatus.SCANNING,
-        ExperimentStatus.PENDING,
-        ExperimentStatus.ERROR,
-        ExperimentStatus.RESCAN,
-    ]
+    runnable_statuses = ExperimentStatus.get_ongoing_runnable_statuses()
     while any(p.status in runnable_statuses for p in plans):
         # Find the next plan to execute
         plan = next((p for p in plans if p.status in runnable_statuses), None)
@@ -313,7 +307,7 @@ def execute_multiple_plans(
             yield f"Plan `{plan.filename}` completed"
             plan.status = ExperimentStatus.COMPLETED
         except ExperimentExecutionError as e:
-            error_message = f"Plan {plan.filename} errored: {e.error_message}"
+            error_message = f"Plan {plan.filename} error: {e.error_message}"
             yield error_message
             plan.status = ExperimentStatus.ERROR
             # Save error state

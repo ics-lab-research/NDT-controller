@@ -29,13 +29,32 @@ class ExperimentExecutionError(Exception):
 
 
 class ExperimentStatus(Enum):
-    NOT_APPROVED = "❌ Not Approved"
-    APPROVED = "✅ Approved"
+    NOT_STARTED = "⏸️ Not Started"
     PENDING = "⏳ Pending"
     SCANNING = "⚡ Scanning"
     RESCAN = "🔄 Rescan"
     COMPLETED = "✅ Completed"
     ERROR = "❌ Error"
+
+    @classmethod
+    def get_initial_runnable_statuses(cls) -> List["ExperimentStatus"]:
+        """Get the list of statuses that allow an experiment to be run initially."""
+        return [
+            cls.NOT_STARTED,
+            cls.PENDING,
+            cls.ERROR,
+            cls.SCANNING,
+            cls.RESCAN,
+        ]
+
+    @classmethod
+    def get_ongoing_runnable_statuses(cls) -> List["ExperimentStatus"]:
+        """Get the list of statuses that allow an experiment to be run during scanning."""
+        return [
+            cls.PENDING,
+            cls.ERROR,
+            cls.RESCAN,
+        ]
 
 
 # Type alias for experiment tools
@@ -72,7 +91,7 @@ class ExperimentPlan:
     id: str
     filename: str
     experiment: List[ExperimentStep]
-    status: ExperimentStatus = ExperimentStatus.NOT_APPROVED
+    status: ExperimentStatus = ExperimentStatus.NOT_STARTED
 
 
 @dataclass
