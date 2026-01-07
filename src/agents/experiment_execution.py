@@ -257,7 +257,7 @@ def execute_single_plan(plan: ExperimentPlan, project_manager: ProjectManager):
         for tool in step.tool_sequence:
             result = execute_tool(tool, project_manager)
 
-            # NOTE: just tricky using output, we should find out other solution
+            # NOTE: just tricky using output of tool function, we should find out other solution
             if (
                 isinstance(tool, HandleSaveDialogTool)
                 and result.success
@@ -296,6 +296,7 @@ def execute_multiple_plans(
         ExperimentStatus.SCANNING,
         ExperimentStatus.PENDING,
         ExperimentStatus.ERROR,
+        ExperimentStatus.RESCAN,
     ]
     while any(p.status in runnable_statuses for p in plans):
         # Find the next plan to execute
