@@ -73,8 +73,10 @@ def create_experiment_tab(
     ids = [plan.id for plan in plans]
     initial_data = convert_plan_to_table_data(plans[0]) if plans else []
     initial_status = plans[0].status.value if plans else ""
-    plans_state = gr.State(plans)
     statuses = get_experiment_statuses(plans)
+
+    # gradio states
+    plans_state = gr.State(plans)
     plans_path_state = gr.State(plans_path)
     log_state = gr.State(False)
 
