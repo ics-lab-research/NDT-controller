@@ -12,9 +12,9 @@ from ..core.models import ExperimentPlan, ExperimentStatus, ExperimentStep
 def save_experiment_plans(
     plans: List[ExperimentPlan],
     filepath: Path,
+    log: bool = False,
 ) -> Dict[str, Union[bool, str]]:
     """Save experiment plans to a JSON file."""
-    logger.info(f"Saving experiment plans to {filepath}")
     try:
         formatted_plans = [
             {
@@ -36,27 +36,32 @@ def save_experiment_plans(
         ]
         with filepath.open("w") as f:
             json.dump(formatted_plans, f, indent=2)
-        logger.info(
-            f"Successfully saved {len(plans)} experiment plans to {filepath}"
-        )
+        if log:
+            logger.info(
+                f"Successfully saved {len(plans)} experiment plans to {filepath}"
+            )
         return {"success": True}
     except Exception as e:
-        logger.error(f"Failed to save experiment plans to {filepath}: {e}")
+        if log:
+            logger.error(f"Failed to save experiment plans to {filepath}: {e}")
         return {"success": False, "error": str(e)}
 
 
 def append_experiment_plans(
     plans: List[ExperimentPlan],
     filepath: Path,
+    log: bool = False,
 ) -> Dict[str, Union[bool, str]]:
     """Append experiment plans to an existing JSON file."""
-    logger.info(f"Appending experiment plans to {filepath}")
     try:
-        existing_plans = load_experiment_plans(filepath, log=True)
+        existing_plans = load_experiment_plans(filepath, log=log)
         combined_plans = existing_plans + plans
-        return save_experiment_plans(combined_plans, filepath)
+        return save_experiment_plans(combined_plans, filepath, log=log)
     except Exception as e:
-        logger.error(f"Failed to append experiment plans to {filepath}: {e}")
+        if log:
+            logger.error(
+                f"Failed to append experiment plans to {filepath}: {e}"
+            )
         return {"success": False, "error": str(e)}
 
 
@@ -64,8 +69,6 @@ def load_experiment_plans(
     filepath: Path, log: bool = False
 ) -> List[ExperimentPlan]:
     """Load experiment plans from a JSON file."""
-    if log:
-        logger.info(f"Loading experiment plans from {filepath}")
     if not filepath.exists():
         if log:
             logger.error(f"Experiment plans file {filepath} does not exist")
@@ -73,10 +76,6 @@ def load_experiment_plans(
     try:
         with filepath.open("r") as f:
             plans_data = json.load(f)
-        if log:
-            logger.info(
-                f"Successfully loaded {len(plans_data)} experiment plans from {filepath}"
-            )
         plans = []
         for plan_data in plans_data:
             steps = []
@@ -115,6 +114,12 @@ def load_experiment_plans(
                     ),
                 )
             )
+
+        if log:
+            logger.info(
+                f"Successfully loaded {len(plans_data)} experiment plans from {filepath}"
+            )
+
         return plans
     except (json.JSONDecodeError, KeyError) as e:
         if log:

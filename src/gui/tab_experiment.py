@@ -171,7 +171,6 @@ def create_experiment_tab(
             start_scan_button.click(
                 start_execution,
                 inputs=[
-                    plans_state,
                     plans_path_state,
                     chatbot,
                     project_state,
