@@ -33,15 +33,15 @@ from .experiment_utils import (
 
 
 def approve_scan(
-    selected_image: str,
+    selected_scan_image: str,
     plans: List[ExperimentPlan],
     plans_path: Path | None,
     chatbot: List[ChatMessage],
 ) -> Tuple[List[ExperimentPlan], List[ChatMessage]]:
-    if not (selected_image and plans and plans_path):
+    if not (selected_scan_image and plans and plans_path):
         return plans, chatbot
 
-    filename = Path(selected_image).stem
+    filename = Path(selected_scan_image).stem
     plan = next((p for p in plans if p.id == filename), None)
     if plan:
         plan.status = ExperimentStatus.COMPLETED
@@ -56,15 +56,15 @@ def approve_scan(
 
 
 def reject_scan(
-    selected_image: str,
+    selected_scan_image: str,
     plans: List[ExperimentPlan],
     plans_path: Path | None,
     chatbot: List[ChatMessage],
 ) -> Tuple[List[ExperimentPlan], List[ChatMessage]]:
-    if not (selected_image and plans and plans_path):
+    if not (selected_scan_image and plans and plans_path):
         return plans, chatbot
 
-    filename = Path(selected_image).stem
+    filename = Path(selected_scan_image).stem
     plan = next((p for p in plans if p.id == filename), None)
     if plan:
         plan.status = ExperimentStatus.RESCAN
@@ -78,8 +78,8 @@ def reject_scan(
     return plans, chatbot
 
 
-def select_image(evt: gr.SelectData, imgs):
-    return imgs[evt.index] if evt.index is not None else None
+def select_scan_image(evt: gr.SelectData, images):
+    return images[evt.index] if evt.index is not None else None
 
 
 def create_experiment_tab(
@@ -111,20 +111,22 @@ def create_experiment_tab(
     with gr.Tabs() as interface:
         # ================ Scan Status tab =============================
         with gr.TabItem("Scan Status"):
-            status_df = gr.Dataframe(
+            scan_status_table = gr.Dataframe(
                 headers=["Experiment Name", "Status"],
                 value=[[f, s] for f, s in zip(filenames, statuses)],
                 interactive=False,
             )
 
             with gr.Row():
-                approve_button = gr.Button("✅ Approve all plans")
-                start_button = gr.Button("▶️ Start scan")
+                approve_all_button = gr.Button("✅ Approve all plans")
+                start_scan_button = gr.Button("▶️ Start scan")
 
-            delete_all_button = gr.Button("🗑️ Delete all experiments")
+            delete_all_experiments_button = gr.Button(
+                "🗑️ Delete all experiments"
+            )
 
             # link to logic
-            approve_button.click(
+            approve_all_button.click(
                 lambda plans, plans_path, current_chatbot: (
                     approve_all_plans(plans, plans_path),
                     current_chatbot
@@ -136,10 +138,10 @@ def create_experiment_tab(
                     ],
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
-                outputs=[status_df, chatbot],
+                outputs=[scan_status_table, chatbot],
             )
 
-            delete_all_button.click(
+            delete_all_experiments_button.click(
                 lambda plans, plans_path, current_chatbot: (
                     delete_all_experiments(plans, plans_path),
                     [],
@@ -152,10 +154,10 @@ def create_experiment_tab(
                     ],
                 ),
                 inputs=[plans_state, plans_path_state, chatbot],
-                outputs=[status_df, plans_state, chatbot],
+                outputs=[scan_status_table, plans_state, chatbot],
             )
 
-            start_button.click(
+            start_scan_button.click(
                 start_execution,
                 inputs=[
                     plans_state,
@@ -163,34 +165,34 @@ def create_experiment_tab(
                     chatbot,
                     project_state,
                 ],
-                outputs=[status_df, chatbot],
+                outputs=[scan_status_table, chatbot],
             )
 
             timer = gr.Timer(0.1)
             timer.tick(
                 update_scan_status,
                 inputs=[plans_path_state, log_state],
-                outputs=status_df,
+                outputs=scan_status_table,
             )
 
         # ================ Plan Viewer tab =============================
         with gr.TabItem("Plan Viewer"):
             with gr.Row():
-                exp_dropdown = gr.Dropdown(
+                experiment_dropdown = gr.Dropdown(
                     choices=[(f, i) for f, i in zip(filenames, ids)],
                     label="Select Experiment",
                     value=ids[0] if ids else None,
                 )
 
-                status_dropdown = gr.Dropdown(
+                experiment_status_dropdown = gr.Dropdown(
                     choices=[status.value for status in ExperimentStatus],
                     label="Change Status",
                     value=initial_status,
                 )
 
-            delete_button = gr.Button("🗑️ Delete Experiment")
+            delete_experiment_button = gr.Button("🗑️ Delete Experiment")
 
-            details_df = gr.Dataframe(
+            experiment_details_table = gr.Dataframe(
                 headers=[
                     "Step Name",
                     "Tool Name",
@@ -202,76 +204,76 @@ def create_experiment_tab(
                 column_widths=[150, 100, 200, 200],
             )
             with gr.Row():
-                save_button = gr.Button("💾 Save Changes")
-                reload_button = gr.Button("🔄 Reload Plans")
-            exp_dropdown.change(
+                save_changes_button = gr.Button("💾 Save Changes")
+                reload_plans_button = gr.Button("🔄 Reload Plans")
+            experiment_dropdown.change(
                 lambda selected_id, current_plans: (
                     update_experiment_details(current_plans, selected_id),
                     get_experiment_status(current_plans, selected_id),
                 ),
-                inputs=[exp_dropdown, plans_state],
-                outputs=[details_df, status_dropdown],
+                inputs=[experiment_dropdown, plans_state],
+                outputs=[experiment_details_table, experiment_status_dropdown],
             )
 
             # link to logic
-            save_button.click(
+            save_changes_button.click(
                 save_experiment_changes,
                 inputs=[
                     plans_state,
                     plans_path_state,
-                    exp_dropdown,
-                    details_df,
+                    experiment_dropdown,
+                    experiment_details_table,
                 ],
                 outputs=[plans_state],
             )
-            reload_button.click(
+            reload_plans_button.click(
                 lambda: reload_plans(plans_path),
                 inputs=[],
                 outputs=[
-                    exp_dropdown,
-                    details_df,
-                    status_dropdown,
+                    experiment_dropdown,
+                    experiment_details_table,
+                    experiment_status_dropdown,
                     plans_state,
                 ],
             )
 
-            delete_button.click(
+            delete_experiment_button.click(
                 delete_experiment,
-                inputs=[plans_state, plans_path_state, exp_dropdown],
+                inputs=[plans_state, plans_path_state, experiment_dropdown],
                 outputs=[
-                    exp_dropdown,
-                    details_df,
-                    status_dropdown,
+                    experiment_dropdown,
+                    experiment_details_table,
+                    experiment_status_dropdown,
                     plans_state,
                 ],
             )
 
-            status_dropdown.change(
+            experiment_status_dropdown.change(
                 update_experiment_status,
                 inputs=[
                     plans_state,
                     plans_path_state,
-                    exp_dropdown,
-                    status_dropdown,
+                    experiment_dropdown,
+                    experiment_status_dropdown,
                 ],
                 outputs=[plans_state],
             )
 
         # ================ View Data tab =============================
         with gr.TabItem("Data Viewer"):
-            images = []
+            scan_images = []
             if isinstance(plots_dir, Path) and plots_dir.exists():
-                images = [
+                scan_images = [
                     str(plots_dir / f)
                     for f in plots_dir.iterdir()
                     if f.suffix.lower() in (".png", ".jpg", ".jpeg", ".gif")
                 ]
 
-            images_state = gr.State(images)
-            selected_image_state = gr.State(None)
+            scan_images_state = gr.State(scan_images)
+            selected_scan_image_state = gr.State(None)
 
-            gallery = gr.Gallery(
-                value=images,
+            scan_image_gallery = gr.Gallery(
+                value=scan_images,
                 label="Image Gallery",
                 height=400,
                 columns=3,
@@ -279,20 +281,20 @@ def create_experiment_tab(
                 every=1,
             )
 
-            gallery.select(
-                select_image,
-                inputs=[images_state],
-                outputs=selected_image_state,
+            scan_image_gallery.select(
+                select_scan_image,
+                inputs=[scan_images_state],
+                outputs=selected_scan_image_state,
             )
 
             with gr.Row():
-                approve_scan_btn = gr.Button("✅ Approve Scan")
-                reject_scan_btn = gr.Button("❌ Reject Scan")
+                approve_scan_button = gr.Button("✅ Approve Scan")
+                reject_scan_button = gr.Button("❌ Reject Scan")
 
-            approve_scan_btn.click(
+            approve_scan_button.click(
                 approve_scan,
                 inputs=[
-                    selected_image_state,
+                    selected_scan_image_state,
                     plans_state,
                     plans_path_state,
                     chatbot,
@@ -300,10 +302,10 @@ def create_experiment_tab(
                 outputs=[plans_state, chatbot],
             )
 
-            reject_scan_btn.click(
+            reject_scan_button.click(
                 reject_scan,
                 inputs=[
-                    selected_image_state,
+                    selected_scan_image_state,
                     plans_state,
                     plans_path_state,
                     chatbot,
