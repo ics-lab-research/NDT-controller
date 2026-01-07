@@ -41,14 +41,14 @@ def approve_scan(
     if not (selected_image and plans and plans_path):
         return plans, chatbot
 
-    filename = Path(selected_image).name
+    filename = Path(selected_image).stem
     plan = next((p for p in plans if p.id == filename), None)
     if plan:
         plan.status = ExperimentStatus.COMPLETED
         save_experiment_plans(plans, plans_path)
         return plans, chatbot + [
             create_message(
-                content=f"Scan approved for {plan.filename}",
+                content=f"Scan approved for `{plan.filename}`",
                 message_type=MessageType.STATUS,
             )
         ]
@@ -64,14 +64,14 @@ def reject_scan(
     if not (selected_image and plans and plans_path):
         return plans, chatbot
 
-    filename = Path(selected_image).name
+    filename = Path(selected_image).stem
     plan = next((p for p in plans if p.id == filename), None)
     if plan:
         plan.status = ExperimentStatus.RESCAN
         save_experiment_plans(plans, plans_path)
         return plans, chatbot + [
             create_message(
-                content=f"Scan rejected for {plan.filename}",
+                content=f"Scan rejected for `{plan.filename}`",
                 message_type=MessageType.STATUS,
             )
         ]

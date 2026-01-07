@@ -85,10 +85,14 @@ def plot_individual_heatmaps(
     X_feat_peak: np.ndarray,
     experiment_id: str,
     output_folder: Path,
+    tdms_file: Path,
 ):
     """Plot and save individual heatmaps for a single file."""
+    cleaned_name = tdms_file.stem.rsplit("_", 2)[0]
     logger.info(f"Plotting individual heatmaps for experiment: {experiment_id}")
-    # fig = plt.figure(figsize=(24, 8))
+    fig = plt.figure(figsize=(30, 10))
+
+    plt.suptitle(cleaned_name, fontsize=16)
 
     plt.subplot(1, 3, 1)
     plt.imshow(
@@ -121,6 +125,7 @@ def plot_individual_heatmaps(
     output_path = output_folder / output_filename
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close()
+    fig.clear()
     logger.info(f"Saved individual plot: {output_filename}")
 
 
@@ -202,7 +207,9 @@ def generate_heatmaps(tdms_file: Path, experiment_id: str, output_folder: Path):
             lpf_cutoff,
             lpf_order,
         )
-        plot_individual_heatmaps(*features, experiment_id, output_folder)
+        plot_individual_heatmaps(
+            *features, experiment_id, output_folder, tdms_file
+        )
     except Exception as e:
         logger.error(f"Error processing {tdms_file.name}: {str(e)}")
         return
