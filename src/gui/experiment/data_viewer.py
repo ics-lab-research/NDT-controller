@@ -19,7 +19,7 @@ from ..chat_utils import create_message
 
 def get_scan_images(plots_dir: Path | None) -> Tuple[List[str], List[str]]:
     images = []
-    if isinstance(plots_dir, Path) and plots_dir.exists():
+    if plots_dir and plots_dir.exists():
         images = [
             str(plots_dir / f)
             for f in plots_dir.iterdir()
@@ -30,11 +30,11 @@ def get_scan_images(plots_dir: Path | None) -> Tuple[List[str], List[str]]:
 
 def approve_scan(
     selected_scan_image: str,
-    plans_path: Path | None,
+    plans_path: Path,
     chatbot: List[ChatMessage],
-) -> Tuple[List[ExperimentPlan], List[ChatMessage]]:
+) -> List[ChatMessage]:
     if not (selected_scan_image and plans_path):
-        return [], chatbot
+        return chatbot
 
     # Reload plans to get latest state
     logger.debug("Reloading plans to get latest state before approving scan")
@@ -48,22 +48,22 @@ def approve_scan(
             "Saving plans after approving scan and updating status to COMPLETED"
         )
         save_experiment_plans(plans, plans_path)
-        return plans, chatbot + [
+        return chatbot + [
             create_message(
                 content=f"Scan approved for `{plan.filename}`",
                 message_type=MessageType.STATUS,
             )
         ]
-    return plans, chatbot
+    return chatbot
 
 
 def reject_scan(
     selected_scan_image: str,
-    plans_path: Path | None,
+    plans_path: Path,
     chatbot: List[ChatMessage],
-) -> Tuple[List[ExperimentPlan], List[ChatMessage]]:
+) -> List[ChatMessage]:
     if not (selected_scan_image and plans_path):
-        return [], chatbot
+        return chatbot
 
     # Reload plans to get latest state
     logger.debug("Reloading plans to get latest state before rejecting scan")
@@ -77,13 +77,13 @@ def reject_scan(
             "Saving plans after rejecting scan and updating status to RESCAN"
         )
         save_experiment_plans(plans, plans_path)
-        return plans, chatbot + [
+        return chatbot + [
             create_message(
                 content=f"Scan rejected for `{plan.filename}`",
                 message_type=MessageType.STATUS,
             )
         ]
-    return plans, chatbot
+    return chatbot
 
 
 def select_scan_image(evt: gr.SelectData, images: List[str]) -> str | None:

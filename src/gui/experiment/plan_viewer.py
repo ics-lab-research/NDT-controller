@@ -57,15 +57,23 @@ tool_name_map: Dict[str, str] = {
 
 
 def update_experiment_details(
-    plans: List[ExperimentPlan], selected_id: str
+    plans_path: Path, selected_id: str
 ) -> List[List[str]]:
     """Updates and returns table data for the selected experiment plan."""
     if not selected_id:
         return []
+    logger.debug(
+        f"Loading experiment plans from {plans_path} for selected_id: {selected_id}"
+    )
+    plans = load_experiment_plans(plans_path)
     plan = next((p for p in plans if p.id == selected_id), None)
     if not plan:
         logger.warning(f"Plan not found for id: {selected_id}")
-        return [["Error", "", ""]]
+        gr.Info(
+            "Plan not found. Please press 'Reload Plans' button.",
+            title="⚠️ Warning",
+        )
+        return []
     return convert_plan_to_table_data(plan)
 
 
@@ -132,45 +140,48 @@ def _convert_table_data_to_experiment_steps(
 
 
 def save_experiment_changes(
-    plans: List[ExperimentPlan],
-    plans_path: Path | None,
+    plans_path: Path,
     selected_id: str,
     table_data: pd.DataFrame,
-) -> List[ExperimentPlan]:
+):
     """Saves changes to the selected experiment plan from table data."""
-    if not plans_path:
-        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
-        return plans
     try:
+        logger.debug("Loading experiment plans to save changes")
+        plans = load_experiment_plans(plans_path)
         steps = _convert_table_data_to_experiment_steps(table_data)
         plan = next((p for p in plans if p.id == selected_id), None)
         if not plan:
-            gr.Info("Error: Plan not found", title="⚠️ Warning")
-            return plans
+            gr.Info(
+                "Plan not found. Please press 'Reload Plans' button.",
+                title="⚠️ Warning",
+            )
+            return
         plan.experiment = steps
         logger.debug("Saving experiment changes from GUI dataframe")
         save_experiment_plans(plans, plans_path)
         gr.Info(
             "Experiment changes saved successfully", duration=1, title="✅ Info"
         )
-        return plans
     except Exception as e:
         error_msg = f"Error saving changes: {str(e)}"
         logger.error(error_msg)
         gr.Info(error_msg, title="❌ Error")
-        return plans
 
 
 def update_experiment_status(
-    plans: List[ExperimentPlan],
-    plans_path: Path | None,
+    plans_path: Path,
     selected_id: str,
     new_status: str,
-) -> List[ExperimentPlan]:
-    if not plans_path:
-        gr.Info("Error: Plans path not configured", title="❌ Error")
-        return plans
+):
     try:
+        logger.debug("Loading experiment plans to update status")
+        plans = load_experiment_plans(plans_path)
+        if not any(plan.id == selected_id for plan in plans):
+            gr.Info(
+                "Plan not found. Please press 'Reload Plans' button.",
+                title="⚠️ Warning",
+            )
+            return
         for plan in plans:
             if plan.id == selected_id:
                 plan.status = ExperimentStatus(new_status)
@@ -182,20 +193,15 @@ def update_experiment_status(
             duration=1,
             title="✅ Info",
         )
-        return plans
     except Exception as e:
         error_msg = f"Error updating experiment status: {str(e)}"
         logger.error(error_msg)
         gr.Info(error_msg, title="❌ Error")
-        return plans
 
 
 def reload_plans(
-    plans_path: Path | None,
-) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
-    if not plans_path:
-        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
-        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
+    plans_path: Path,
+) -> Tuple[gr.Dropdown, gr.Dataframe, str]:
     try:
         logger.debug("Loading experiment plans for GUI reload")
         plans = load_experiment_plans(plans_path, log=True)
@@ -215,24 +221,27 @@ def reload_plans(
             ),
             gr.Dataframe(value=initial_data),
             initial_status,
-            plans,
         )
     except Exception as e:
         error_msg = f"Error reloading plans: {str(e)}"
         logger.error(error_msg)
         gr.Info(error_msg, title="❌ Error")
-        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), ""
 
 
 def delete_experiment(
-    plans: List[ExperimentPlan],
-    plans_path: Path | None,
+    plans_path: Path,
     selected_id: str,
-) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
-    if not plans_path:
-        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
-        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
+) -> Tuple[gr.Dropdown, gr.Dataframe, str]:
     try:
+        logger.debug("Loading experiment plans to delete experiment")
+        plans = load_experiment_plans(plans_path)
+        if not any(plan.id == selected_id for plan in plans):
+            gr.Info(
+                "Plan not found. Please press 'Reload Plans' button.",
+                title="⚠️ Warning",
+            )
+            return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), ""
         # Find and remove the plan
         plans = [p for p in plans if p.id != selected_id]
         logger.debug("Saving plans after deleting experiment")
@@ -249,16 +258,19 @@ def delete_experiment(
             ),
             gr.Dataframe(value=initial_data),
             initial_status,
-            plans,
         )
     except Exception as e:
         error_msg = f"Error deleting experiment: {str(e)}"
         logger.error(error_msg)
         gr.Info(error_msg, title="❌ Error")
-        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), ""
 
 
-def get_experiment_status(plans: List[ExperimentPlan], selected_id: str) -> str:
+def get_experiment_status(plans_path: Path, selected_id: str) -> str:
     """Gets the status value for the selected experiment."""
+    logger.debug(
+        f"Loading experiment plans from {plans_path} to get status for selected_id: {selected_id}"
+    )
+    plans = load_experiment_plans(plans_path)
     plan = next((p for p in plans if p.id == selected_id), None)
     return plan.status.value if plan else ""

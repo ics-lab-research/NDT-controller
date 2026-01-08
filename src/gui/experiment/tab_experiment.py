@@ -61,7 +61,7 @@ def create_experiment_tab(
     statuses = get_experiment_statuses(plans)
 
     # gradio states
-    plans_state = gr.State(plans)
+    # plans_state = gr.State(plans)
     plans_path_state = gr.State(plans_path)
     plots_dir_state = gr.State(plots_dir)
     log_state = gr.State(False)
@@ -84,9 +84,8 @@ def create_experiment_tab(
 
             # link to logic
             delete_all_experiments_button.click(
-                lambda plans, plans_path, current_chatbot: (
-                    delete_all_experiments(plans, plans_path),
-                    [],
+                lambda plans_path, current_chatbot: (
+                    delete_all_experiments(plans_path),
                     current_chatbot
                     + [
                         create_message(
@@ -95,8 +94,8 @@ def create_experiment_tab(
                         )
                     ],
                 ),
-                inputs=[plans_state, plans_path_state, chatbot],
-                outputs=[scan_status_table, plans_state, chatbot],
+                inputs=[plans_path_state, chatbot],
+                outputs=[scan_status_table, chatbot],
             )
 
             start_scan_button.click(
@@ -147,57 +146,54 @@ def create_experiment_tab(
             with gr.Row():
                 save_changes_button = gr.Button("💾 Save Changes")
                 reload_plans_button = gr.Button("🔄 Reload Plans")
-            experiment_dropdown.change(
-                lambda selected_id, current_plans: (
-                    update_experiment_details(current_plans, selected_id),
-                    get_experiment_status(current_plans, selected_id),
-                ),
-                inputs=[experiment_dropdown, plans_state],
-                outputs=[experiment_details_table, experiment_status_dropdown],
-            )
 
             # link to logic
-            save_changes_button.click(
-                save_experiment_changes,
-                inputs=[
-                    plans_state,
-                    plans_path_state,
-                    experiment_dropdown,
-                    experiment_details_table,
-                ],
-                outputs=[plans_state],
-            )
-            reload_plans_button.click(
-                lambda: reload_plans(plans_path),
-                inputs=[],
-                outputs=[
-                    experiment_dropdown,
-                    experiment_details_table,
-                    experiment_status_dropdown,
-                    plans_state,
-                ],
-            )
-
-            delete_experiment_button.click(
-                delete_experiment,
-                inputs=[plans_state, plans_path_state, experiment_dropdown],
-                outputs=[
-                    experiment_dropdown,
-                    experiment_details_table,
-                    experiment_status_dropdown,
-                    plans_state,
-                ],
+            experiment_dropdown.change(
+                lambda selected_id, current_plans_path: (
+                    update_experiment_details(current_plans_path, selected_id),
+                    get_experiment_status(current_plans_path, selected_id),
+                ),
+                inputs=[experiment_dropdown, plans_path_state],
+                outputs=[experiment_details_table, experiment_status_dropdown],
             )
 
             experiment_status_dropdown.change(
                 update_experiment_status,
                 inputs=[
-                    plans_state,
                     plans_path_state,
                     experiment_dropdown,
                     experiment_status_dropdown,
                 ],
-                outputs=[plans_state],
+                outputs=[],
+            )
+
+            save_changes_button.click(
+                save_experiment_changes,
+                inputs=[
+                    plans_path_state,
+                    experiment_dropdown,
+                    experiment_details_table,
+                ],
+                outputs=[],
+            )
+            reload_plans_button.click(
+                reload_plans,
+                inputs=[plans_path_state],
+                outputs=[
+                    experiment_dropdown,
+                    experiment_details_table,
+                    experiment_status_dropdown,
+                ],
+            )
+
+            delete_experiment_button.click(
+                delete_experiment,
+                inputs=[plans_path_state, experiment_dropdown],
+                outputs=[
+                    experiment_dropdown,
+                    experiment_details_table,
+                    experiment_status_dropdown,
+                ],
             )
 
         # ================ View Data tab =============================
@@ -223,7 +219,7 @@ def create_experiment_tab(
             scan_image_gallery.select(
                 select_scan_image,
                 inputs=[scan_images_state],
-                outputs=selected_scan_image_state,
+                outputs=[selected_scan_image_state],
             )
 
             approve_scan_button.click(
@@ -233,7 +229,7 @@ def create_experiment_tab(
                     plans_path_state,
                     chatbot,
                 ],
-                outputs=[plans_state, chatbot],
+                outputs=chatbot,
             )
 
             reject_scan_button.click(
@@ -243,10 +239,10 @@ def create_experiment_tab(
                     plans_path_state,
                     chatbot,
                 ],
-                outputs=[plans_state, chatbot],
+                outputs=[chatbot],
             )
 
-            timer_data = gr.Timer(1)
+            timer_data = gr.Timer(0.1)
             timer_data.tick(
                 get_scan_images,
                 inputs=[plots_dir_state],

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Generator, List, Optional, Tuple
+from typing import Any, Generator, List, Tuple
 
 import gradio as gr
 from loguru import logger
@@ -25,9 +25,7 @@ def get_experiment_statuses(
     return [plan.status.value for plan in plans]
 
 
-def update_scan_status(
-    plans_path: Path | None, log: bool = False
-) -> gr.Dataframe:
+def update_scan_status(plans_path: Path, log: bool = False) -> gr.Dataframe:
     if not plans_path:
         return gr.Dataframe(value=[])
     try:
@@ -43,13 +41,9 @@ def update_scan_status(
         return gr.Dataframe(value=[])
 
 
-def delete_all_experiments(
-    plans: List[ExperimentPlan], plans_path: Path | None
-) -> gr.Dataframe:
-    if not plans_path:
-        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
-        return gr.Dataframe(value=[])
+def delete_all_experiments(plans_path: Path) -> gr.Dataframe:
     try:
+        plans = load_experiment_plans(plans_path)
         plans.clear()
         logger.debug("Saving empty plans after deleting all experiments")
         save_experiment_plans(plans, plans_path)
@@ -65,7 +59,7 @@ def delete_all_experiments(
 
 
 def _yield_error(
-    plans_path: Path | None,
+    plans_path: Path,
     current_chatbot: ChatHistory,
     error_message: str,
 ) -> Generator[Tuple[gr.Dataframe, ChatHistory], None, None]:
@@ -91,7 +85,7 @@ def _load_plans_safely(
 
 
 def _get_runnable_plans(
-    plans: Optional[List[ExperimentPlan]],
+    plans: List[ExperimentPlan],
 ) -> List[ExperimentPlan]:
     """Filters plans that can be executed."""
     if plans is None:
@@ -101,7 +95,7 @@ def _get_runnable_plans(
 
 
 def _set_plans_to_pending(
-    plans: Optional[List[ExperimentPlan]],
+    plans: List[ExperimentPlan],
     plans_to_run: List[ExperimentPlan],
     plans_path: Path,
 ) -> str | None:
@@ -160,7 +154,7 @@ def _handle_execution_error(
 
 
 def start_execution(
-    plans_path: Path | None,
+    plans_path: Path,
     current_chatbot: ChatHistory,
     project_manager: ProjectManager,
 ) -> Generator[Tuple[gr.Dataframe, ChatHistory], None, None]:
