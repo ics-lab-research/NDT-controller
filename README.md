@@ -3,8 +3,9 @@
 # TODO:
 
 1. [x] data folder (now project manager not update)
-2. [ ] clear button not works
-3. [ ] data viewer
+2. [x] clear button not works
+3. [x] data viewer
+4. [ ] better plan viewer
 
 # NOTE:
 
