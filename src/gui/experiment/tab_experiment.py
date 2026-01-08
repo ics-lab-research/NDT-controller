@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import gradio as gr
+from loguru import logger
 
 from ...agents.experiment_planning import (
     load_experiment_plans,
@@ -50,6 +51,7 @@ def create_experiment_tab(
         plots_dir = metadata.plots_dir_path
 
         if isinstance(plans_path, Path):
+            logger.debug("Loading experiment plans during tab creation")
             plans = load_experiment_plans(plans_path, log=True)
 
     filenames = [plan.filename for plan in plans]
@@ -228,7 +230,6 @@ def create_experiment_tab(
                 approve_scan,
                 inputs=[
                     selected_scan_image_state,
-                    plans_state,
                     plans_path_state,
                     chatbot,
                 ],

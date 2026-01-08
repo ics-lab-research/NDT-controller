@@ -299,6 +299,9 @@ def execute_multiple_plans(
     """Execute multiple experiment plans with system reinitialization after each plan."""
     while True:
         # Reload plans to check for status updates (e.g., rescan requests)
+        logger.debug(
+            "Reloading plans at the start of each while loop to check for status updates (e.g., rescan requests)"
+        )
         plans = load_experiment_plans(plans_path, log=True)
 
         runnable_statuses = ExperimentStatus.get_ongoing_runnable_statuses()
@@ -311,6 +314,7 @@ def execute_multiple_plans(
             break
         yield f"Executing plan: `{plan.filename}`"
         plan.status = ExperimentStatus.SCANNING
+        logger.debug("Saving plans after updating plan status to SCANNING")
         save_experiment_plans(plans, plans_path, log=True)
 
         try:
@@ -318,6 +322,9 @@ def execute_multiple_plans(
             yield f"Plan `{plan.filename}` completed"
 
             # Reload plans to get latest state before modifying
+            logger.debug(
+                "Reloading plans after plan execution to get the latest state before modifying"
+            )
             plans = load_experiment_plans(plans_path, log=True)
 
             # Find and update the completed plan
@@ -325,6 +332,7 @@ def execute_multiple_plans(
             if completed_plan:
                 completed_plan.status = ExperimentStatus.COMPLETED
 
+            logger.debug("Saving plans after updating completed plan status")
             save_experiment_plans(plans, plans_path, log=True)
         except ExperimentExecutionError as e:
             error_message = f"Plan {plan.filename} error: {e.error_message}"
@@ -332,5 +340,6 @@ def execute_multiple_plans(
 
             # Save error state
             plan.status = ExperimentStatus.ERROR
+            logger.debug("Saving plans after setting plan status to ERROR")
             save_experiment_plans(plans, plans_path, log=True)
             return e

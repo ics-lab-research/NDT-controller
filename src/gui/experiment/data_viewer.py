@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import gradio as gr
+from loguru import logger
 
 from ...agents.experiment_planning import (
     load_experiment_plans,
@@ -36,12 +37,16 @@ def approve_scan(
         return [], chatbot
 
     # Reload plans to get latest state
+    logger.debug("Reloading plans to get latest state before approving scan")
     plans = load_experiment_plans(plans_path, log=True)
 
     filename = Path(selected_scan_image).stem
     plan = next((p for p in plans if p.id == filename), None)
     if plan:
         plan.status = ExperimentStatus.COMPLETED
+        logger.debug(
+            "Saving plans after approving scan and updating status to COMPLETED"
+        )
         save_experiment_plans(plans, plans_path)
         return plans, chatbot + [
             create_message(
@@ -61,12 +66,16 @@ def reject_scan(
         return [], chatbot
 
     # Reload plans to get latest state
+    logger.debug("Reloading plans to get latest state before rejecting scan")
     plans = load_experiment_plans(plans_path, log=True)
 
     filename = Path(selected_scan_image).stem
     plan = next((p for p in plans if p.id == filename), None)
     if plan:
         plan.status = ExperimentStatus.RESCAN
+        logger.debug(
+            "Saving plans after rejecting scan and updating status to RESCAN"
+        )
         save_experiment_plans(plans, plans_path)
         return plans, chatbot + [
             create_message(

@@ -176,7 +176,7 @@ def update_experiment_status(
                 plan.status = ExperimentStatus(new_status)
                 break
         logger.debug("Saving plans after updating experiment status")
-        save_experiment_plans(plans, plans_path)
+        save_experiment_plans(plans, plans_path, log=True)
         gr.Info(
             "Experiment status updated successfully",
             duration=1,
@@ -236,7 +236,7 @@ def delete_experiment(
         # Find and remove the plan
         plans = [p for p in plans if p.id != selected_id]
         logger.debug("Saving plans after deleting experiment")
-        save_experiment_plans(plans, plans_path)
+        save_experiment_plans(plans, plans_path, log=True)
         filenames = [plan.filename for plan in plans]
         ids = [plan.id for plan in plans]
         initial_data = convert_plan_to_table_data(plans[0]) if plans else []
