@@ -13,6 +13,7 @@ from ...core.models import (
 from ...core.project_manager import ProjectManager
 from ..chat_utils import create_message
 from .data_viewer import (
+    approve_scan,
     get_scan_images,
     reject_scan,
     select_scan_image,
@@ -80,21 +81,6 @@ def create_experiment_tab(
                 )
 
             # link to logic
-            # approve_all_button.click(
-            #     lambda plans, plans_path, current_chatbot: (
-            #         approve_all_plans(plans, plans_path),
-            #         current_chatbot
-            #         + [
-            #             create_message(
-            #                 content="All plans approved",
-            #                 message_type=MessageType.STATUS,
-            #             )
-            #         ],
-            #     ),
-            #     inputs=[plans_state, plans_path_state, chatbot],
-            #     outputs=[scan_status_table, chatbot],
-            # )
-
             delete_all_experiments_button.click(
                 lambda plans, plans_path, current_chatbot: (
                     delete_all_experiments(plans, plans_path),
@@ -227,26 +213,27 @@ def create_experiment_tab(
                 allow_preview=True,
             )
 
+            with gr.Row():
+                approve_scan_button = gr.Button("✅ Approve Scan")
+                reject_scan_button = gr.Button("❌ Reject Scan")
+
+            # link to logic
             scan_image_gallery.select(
                 select_scan_image,
                 inputs=[scan_images_state],
                 outputs=selected_scan_image_state,
             )
 
-            with gr.Row():
-                approve_scan_button = gr.Button("✅ Approve Scan")
-                reject_scan_button = gr.Button("❌ Reject Scan")
-
-            # approve_scan_button.click(
-            #     approve_scan,
-            #     inputs=[
-            #         selected_scan_image_state,
-            #         plans_state,
-            #         plans_path_state,
-            #         chatbot,
-            #     ],
-            #     outputs=[plans_state, chatbot],
-            # )
+            approve_scan_button.click(
+                approve_scan,
+                inputs=[
+                    selected_scan_image_state,
+                    plans_state,
+                    plans_path_state,
+                    chatbot,
+                ],
+                outputs=[plans_state, chatbot],
+            )
 
             reject_scan_button.click(
                 reject_scan,
