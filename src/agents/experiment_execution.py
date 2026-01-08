@@ -1,10 +1,9 @@
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Generator, List
+from typing import Generator
 
 from loguru import logger
-from tqdm import tqdm
 
 from ..agents.experiment_dry_run import execute_tool_dry_run
 from ..agents.experiment_planning import (
