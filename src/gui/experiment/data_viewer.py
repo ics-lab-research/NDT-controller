@@ -75,5 +75,6 @@ def reject_scan(
     return plans, chatbot
 
 
+# TODO: add type hint
 def select_scan_image(evt: gr.SelectData, images):
     return images[evt.index] if evt.index is not None else None

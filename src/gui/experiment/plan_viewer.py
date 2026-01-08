@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import gradio as gr
 import pandas as pd
 from loguru import logger
 
 from ...agents.experiment_planning import (
+    load_experiment_plans,
     save_experiment_plans,
 )
 from ...baml_client.types import (
@@ -187,3 +188,77 @@ def update_experiment_status(
         logger.error(error_msg)
         gr.Info(error_msg, title="❌ Error")
         return plans
+
+
+def reload_plans(
+    plans_path: Path | None,
+) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
+    if not plans_path:
+        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
+    try:
+        logger.debug("Loading experiment plans for GUI reload")
+        plans = load_experiment_plans(plans_path, log=True)
+        filenames = [plan.filename for plan in plans]
+        ids = [plan.id for plan in plans]
+        initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+        initial_status = plans[0].status.value if plans else ""
+        gr.Info(
+            "Successfully reloaded experiment plans",
+            duration=1,
+            title="✅ Info",
+        )
+        return (
+            gr.Dropdown(
+                choices=[(f, i) for f, i in zip(filenames, ids)],
+                value=ids[0] if ids else None,
+            ),
+            gr.Dataframe(value=initial_data),
+            initial_status,
+            plans,
+        )
+    except Exception as e:
+        error_msg = f"Error reloading plans: {str(e)}"
+        logger.error(error_msg)
+        gr.Info(error_msg, title="❌ Error")
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
+
+
+def delete_experiment(
+    plans: List[ExperimentPlan],
+    plans_path: Path | None,
+    selected_id: str,
+) -> Tuple[gr.Dropdown, gr.Dataframe, str, List[ExperimentPlan]]:
+    if not plans_path:
+        gr.Info("Error: Plans path not configured", title="⚠️ Warning")
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
+    try:
+        # Find and remove the plan
+        plans = [p for p in plans if p.id != selected_id]
+        logger.debug("Saving plans after deleting experiment")
+        save_experiment_plans(plans, plans_path)
+        filenames = [plan.filename for plan in plans]
+        ids = [plan.id for plan in plans]
+        initial_data = convert_plan_to_table_data(plans[0]) if plans else []
+        initial_status = plans[0].status.value if plans else ""
+        gr.Info("Experiment deleted successfully", duration=1, title="✅ Info")
+        return (
+            gr.Dropdown(
+                choices=[(f, i) for f, i in zip(filenames, ids)],
+                value=ids[0] if ids else None,
+            ),
+            gr.Dataframe(value=initial_data),
+            initial_status,
+            plans,
+        )
+    except Exception as e:
+        error_msg = f"Error deleting experiment: {str(e)}"
+        logger.error(error_msg)
+        gr.Info(error_msg, title="❌ Error")
+        return gr.Dropdown(choices=[]), gr.Dataframe(value=[]), "", []
+
+
+def get_experiment_status(plans: List[ExperimentPlan], selected_id: str) -> str:
+    """Gets the status value for the selected experiment."""
+    plan = next((p for p in plans if p.id == selected_id), None)
+    return plan.status.value if plan else ""
