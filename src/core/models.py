@@ -52,7 +52,6 @@ class ExperimentStatus(Enum):
         """Get the list of statuses that allow an experiment to be run during scanning."""
         return [
             cls.PENDING,
-            cls.ERROR,
             cls.RESCAN,
         ]
 

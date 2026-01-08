@@ -1,6 +1,6 @@
 import gradio as gr
 
-from .tab_experiment import create_experiment_tab
+from .experiment import create_experiment_tab
 
 
 def create_sidebar(

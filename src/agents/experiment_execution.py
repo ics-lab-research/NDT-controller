@@ -294,59 +294,44 @@ def execute_single_plan(plan: ExperimentPlan, project_manager: ProjectManager):
 # BUG: can be bug, check carefully
 # TODO: we should check error during scan
 def execute_multiple_plans(
-    plans: List[ExperimentPlan], project_manager: ProjectManager
+    plans_path: Path,
+    project_manager: ProjectManager,
 ) -> Generator[str, None, ExperimentExecutionError | None]:
     """Execute multiple experiment plans with system reinitialization after each plan."""
+    while True:
+        # Reload plans to check for status updates (e.g., rescan requests)
+        plans = load_experiment_plans(plans_path, log=True)
 
-    # TODO: check if in experiment mode right here
-    metadata = project_manager.get_mode_metadata
-    runnable_statuses = ExperimentStatus.get_ongoing_runnable_statuses()
-    while any(p.status in runnable_statuses for p in plans):
+        runnable_statuses = ExperimentStatus.get_ongoing_runnable_statuses()
+        if not any(p.status in runnable_statuses for p in plans):
+            break
         # Find the next plan to execute
         plan = next((p for p in plans if p.status in runnable_statuses), None)
 
-        # print out filename and status in runable_statuses
-        for p in plans:
-            if p.status in runnable_statuses:
-                print(f"Runnable Plan: {p.filename}, Status: {p.status}")
-
-        print("===============================")
-        print(plan.filename)
-        print(plan.status)
         if not plan:
             break
         yield f"Executing plan: `{plan.filename}`"
         plan.status = ExperimentStatus.SCANNING
-        # Save progress before execution
-        # if isinstance(metadata, ExperimentMetadata):
-        save_experiment_plans(plans, metadata.plans_path)
-        
+        save_experiment_plans(plans, plans_path, log=True)
+
         try:
-            # execute_single_plan(plan, project_manager)
-            for _ in tqdm(range(30), desc="Processing", unit="s"):
-                time.sleep(1)
-            # use tqdm
+            execute_single_plan(plan, project_manager)
             yield f"Plan `{plan.filename}` completed"
-            plan.status = ExperimentStatus.COMPLETED
-            save_experiment_plans(plans, metadata.plans_path)
+
+            # Reload plans to get latest state before modifying
+            plans = load_experiment_plans(plans_path, log=True)
+
+            # Find and update the completed plan
+            completed_plan = next((p for p in plans if p.id == plan.id), None)
+            if completed_plan:
+                completed_plan.status = ExperimentStatus.COMPLETED
+
+            save_experiment_plans(plans, plans_path, log=True)
         except ExperimentExecutionError as e:
             error_message = f"Plan {plan.filename} error: {e.error_message}"
             yield error_message
-            plan.status = ExperimentStatus.ERROR
-            # Save error state
-            if isinstance(metadata, ExperimentMetadata):
-                save_experiment_plans(plans, metadata.plans_path)
-            return e
-        # Save completion state
-        # if isinstance(metadata, ExperimentMetadata):
-        
-        # Reload plans to check for status updates (e.g., rescan requests)
-        plans = load_experiment_plans(metadata.plans_path, log=False)
-        
-        # print out filename and status after of each plan execution
-        for p in plans:
-            print(f"Plan: {p.filename}, Status: {p.status}")
 
-    # Final save of all plans
-    # if isinstance(metadata, ExperimentMetadata):
-    #     save_experiment_plans(plans, metadata.plans_path)
+            # Save error state
+            plan.status = ExperimentStatus.ERROR
+            save_experiment_plans(plans, plans_path, log=True)
+            return e
