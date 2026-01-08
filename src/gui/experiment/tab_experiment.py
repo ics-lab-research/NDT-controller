@@ -24,10 +24,10 @@ from .experiment_utils import (
 )
 from .plan_viewer import (
     delete_experiment,
+    get_experiment_details,
     get_experiment_status,
     reload_plans,
     save_experiment_changes,
-    update_experiment_details,
     update_experiment_status,
 )
 from .scan_status import (
@@ -150,7 +150,7 @@ def create_experiment_tab(
             # link to logic
             experiment_dropdown.change(
                 lambda selected_id, current_plans_path: (
-                    update_experiment_details(current_plans_path, selected_id),
+                    get_experiment_details(current_plans_path, selected_id),
                     get_experiment_status(current_plans_path, selected_id),
                 ),
                 inputs=[experiment_dropdown, plans_path_state],

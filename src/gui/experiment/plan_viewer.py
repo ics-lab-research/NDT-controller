@@ -22,7 +22,6 @@ from ...baml_client.types import (
     WaitForOperationCompleteTool,
 )
 from ...core.models import (
-    ExperimentPlan,
     ExperimentStatus,
     ExperimentStep,
     ExperimentTool,
@@ -56,7 +55,7 @@ tool_name_map: Dict[str, str] = {
 }
 
 
-def update_experiment_details(
+def get_experiment_details(
     plans_path: Path, selected_id: str
 ) -> List[List[str]]:
     """Updates and returns table data for the selected experiment plan."""
