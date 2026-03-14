@@ -13,7 +13,6 @@
 import typing
 import typing_extensions
 
-import baml_py
 
 from . import stream_types, types
 from .runtime import DoNotUseDirectlyCallManager, BamlCallOptions
@@ -30,16 +29,28 @@ class LlmResponseParser:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpBasicExecutor", llm_response=llm_response, mode="request")
         return typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.GetNumericIndicatorTool", "types.GetViStatusTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool"]], "types.ResponseError"], __result__)
 
-    def ExpExecutor(
+    def ExpExecutorDualSensor(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="request")
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutorDualSensor", llm_response=llm_response, mode="request")
+        return typing.cast(typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"], __result__)
+
+    def ExpExecutorSingleSensor(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutorSingleSensor", llm_response=llm_response, mode="request")
         return typing.cast(typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"], __result__)
 
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"]:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpOrchestrator", llm_response=llm_response, mode="request")
+        return typing.cast(typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"], __result__)
+
+    def ExpOrchestratorDualSensor(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"]:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpOrchestratorDualSensor", llm_response=llm_response, mode="request")
         return typing.cast(typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"], __result__)
 
     def ExpPlanner(
@@ -68,16 +79,28 @@ class LlmStreamParser:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpBasicExecutor", llm_response=llm_response, mode="stream")
         return typing.cast(typing.Union[typing.List[typing.Union["stream_types.ConnectToViTool", "stream_types.GetNumericIndicatorTool", "stream_types.GetViStatusTool", "stream_types.HandleSaveDialogTool", "stream_types.PressButtonTool", "stream_types.RunOpenViTool", "stream_types.SelectComboBoxTool", "stream_types.SelectTabTool", "stream_types.SetButtonStateTool", "stream_types.SetNumericControlTool", "stream_types.StopViTool"]], "stream_types.ResponseError"], __result__)
 
-    def ExpExecutor(
+    def ExpExecutorDualSensor(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"]:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutor", llm_response=llm_response, mode="stream")
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutorDualSensor", llm_response=llm_response, mode="stream")
+        return typing.cast(typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"], __result__)
+
+    def ExpExecutorSingleSensor(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"]:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpExecutorSingleSensor", llm_response=llm_response, mode="stream")
         return typing.cast(typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"], __result__)
 
     def ExpOrchestrator(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"]:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpOrchestrator", llm_response=llm_response, mode="stream")
+        return typing.cast(typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"], __result__)
+
+    def ExpOrchestratorDualSensor(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"]:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpOrchestratorDualSensor", llm_response=llm_response, mode="stream")
         return typing.cast(typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"], __result__)
 
     def ExpPlanner(
@@ -92,4 +115,4 @@ class LlmStreamParser:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExpRouter", llm_response=llm_response, mode="stream")
         return typing.cast(stream_types.ExpRouterOutput, __result__)
 
-    
+    

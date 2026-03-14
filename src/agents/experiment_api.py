@@ -71,14 +71,34 @@ def call_exp_planner(
     return response
 
 
-def call_exp_executor(
-    plan: str, filename: str
-) -> List[ExperimentStep] | ResponseError:
-    """Call the experiment executor with a plan and filename."""
-    cr = get_client_registry("exp-executor")
-    response = b.ExpExecutor(
-        plan,
-        filename,
+def call_exp_orchestrator_dual_sensor(
+    reformatted_message: str,
+) -> ExpOrchestratorOutput | ResponseError:
+    """Call the dual-sensor orchestrator agent with a reformatted message."""
+    cr = get_client_registry("exp-orchestrator")
+
+    response = b.ExpOrchestratorDualSensor(
+        reformatted_message,
         baml_options={"client_registry": cr},
     )
+
+    return response
+
+
+def call_exp_executor(
+    plan: str,
+    filename: str,
+    hardware_type: str = "single_sensor",
+    filename_2: str | None = None,
+) -> List[ExperimentStep] | ResponseError:
+    """Call the experiment executor with a plan and filename(s)."""
+    cr = get_client_registry("exp-executor")
+    if hardware_type == "dual_sensor":
+        response = b.ExpExecutorDualSensor(
+            plan, filename, filename_2, baml_options={"client_registry": cr}
+        )
+    else:
+        response = b.ExpExecutorSingleSensor(
+            plan, filename, baml_options={"client_registry": cr}
+        )
     return response

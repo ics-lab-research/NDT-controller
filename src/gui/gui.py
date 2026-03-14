@@ -4,7 +4,7 @@ from tkinter import filedialog
 
 import gradio as gr
 
-from ..core.models import Mode
+from ..core.models import ExperimentMetadata, Mode
 from ..core.project_manager import ProjectManager, init_project_context
 from .artifacts import create_sidebar
 from .chat import (
@@ -124,5 +124,30 @@ def create_main_interface() -> gr.Blocks:
                 inputs=[project_state],
                 outputs=[data_dir_textbox, project_state],
             )
+
+            # Hardware type selector (shown only when multiple vi_paths are configured)
+            _metadata = project_manager.get_mode_metadata
+            if isinstance(_metadata, ExperimentMetadata) and _metadata.vi_paths:
+                _hw_types = list(_metadata.vi_paths.keys())
+                _current_hw = next(
+                    (k for k, v in _metadata.vi_paths.items() if v == _metadata.vi_path),
+                    _hw_types[0],
+                )
+                hardware_dropdown = gr.Dropdown(
+                    choices=_hw_types,
+                    value=_current_hw,
+                    label="Hardware type",
+                    interactive=True,
+                )
+
+                def _change_hardware(hw_type: str, pm: ProjectManager) -> ProjectManager:
+                    pm.set_hardware_type(hw_type)
+                    return pm
+
+                hardware_dropdown.change(
+                    _change_hardware,
+                    inputs=[hardware_dropdown, project_state],
+                    outputs=[project_state],
+                )
 
     return iface

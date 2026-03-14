@@ -62,12 +62,22 @@ class ProjectManager:
     def experiment_dry_run(self) -> bool:
         return os.environ.get("DRY_RUN", "false").lower() == "true"
 
+    @property
+    def hardware_type(self) -> str | None:
+        metadata = self._mode_mgr.get_mode_metadata
+        if isinstance(metadata, ExperimentMetadata):
+            return metadata.hardware_type
+        return None
+
     # ================ Experiment functions ================
     def update_experiment_state(self, relative_offset_mm):
         self._state_mgr.update_experiment_state(relative_offset_mm)
 
     def set_experiment_data_path(self, path: Path):
         self._mode_mgr.set_experiment_data_path(path)
+
+    def set_hardware_type(self, hardware_type: str):
+        self._mode_mgr.set_hardware_type(hardware_type)
 
     # ================ init default ================
     @classmethod

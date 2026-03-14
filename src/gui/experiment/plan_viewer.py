@@ -204,7 +204,7 @@ def reload_plans(
     try:
         logger.debug("Loading experiment plans for GUI reload")
         plans = load_experiment_plans(plans_path, log=True)
-        filenames = [plan.filename for plan in plans]
+        display_names = [plan.experiment_name or plan.filename for plan in plans]
         ids = [plan.id for plan in plans]
         initial_data = convert_plan_to_table_data(plans[0]) if plans else []
         initial_status = plans[0].status.value if plans else ""
@@ -215,7 +215,7 @@ def reload_plans(
         )
         return (
             gr.Dropdown(
-                choices=[(f, i) for f, i in zip(filenames, ids)],
+                choices=[(n, i) for n, i in zip(display_names, ids)],
                 value=ids[0] if ids else None,
             ),
             gr.Dataframe(value=initial_data),
@@ -245,14 +245,14 @@ def delete_experiment(
         plans = [p for p in plans if p.id != selected_id]
         logger.debug("Saving plans after deleting experiment")
         save_experiment_plans(plans, plans_path, log=True)
-        filenames = [plan.filename for plan in plans]
+        display_names = [plan.experiment_name or plan.filename for plan in plans]
         ids = [plan.id for plan in plans]
         initial_data = convert_plan_to_table_data(plans[0]) if plans else []
         initial_status = plans[0].status.value if plans else ""
         gr.Info("Experiment deleted successfully", duration=1, title="✅ Info")
         return (
             gr.Dropdown(
-                choices=[(f, i) for f, i in zip(filenames, ids)],
+                choices=[(n, i) for n, i in zip(display_names, ids)],
                 value=ids[0] if ids else None,
             ),
             gr.Dataframe(value=initial_data),

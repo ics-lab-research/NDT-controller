@@ -32,9 +32,9 @@ def update_scan_status(plans_path: Path, log: bool = False) -> gr.Dataframe:
         if log:
             logger.debug("Loading experiment plans for scan status update")
         plans = load_experiment_plans(plans_path, log=log)
-        filenames = [plan.filename for plan in plans]
+        display_names = [plan.experiment_name or plan.filename for plan in plans]
         statuses = get_experiment_statuses(plans)
-        return gr.Dataframe(value=[[f, s] for f, s in zip(filenames, statuses)])
+        return gr.Dataframe(value=[[n, s] for n, s in zip(display_names, statuses)])
     except Exception as e:
         if log:
             logger.error(f"Error updating scan status: {e}")

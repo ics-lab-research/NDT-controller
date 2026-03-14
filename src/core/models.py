@@ -91,6 +91,7 @@ class ExperimentPlan:
     filename: str
     experiment: List[ExperimentStep]
     status: ExperimentStatus = ExperimentStatus.NOT_STARTED
+    experiment_name: str | None = None
 
 
 @dataclass
@@ -101,6 +102,8 @@ class ExperimentMetadata:
     plots_dir_path: Path
     plans_path: Path
     vi_path: Path
+    vi_paths: dict[str, Path] = None  # all named hardware paths from config
+    hardware_type: str = None          # currently active hardware key
 
 
 # TODO: metadata should have description of file

@@ -36,6 +36,8 @@ class Experiment {
   signal SignalParameter[]
   relative_offset_mm RelativeOffset
   filename string
+  filename_2 string? @description("Second sensor filename for dual-sensor hardware. Null for single-sensor.")
+  experiment_name string? @description("Logical name for the experiment (e.g., 'gaussian_20x20_100hz_dual'). Used as a human-readable label. For dual-sensor, ends with '_dual'.")
 }
 
 enum ScanStatus {
@@ -53,6 +55,11 @@ enum ExpType {
 class State {
   current_position RelativeOffset
   home_position RelativeOffset
+}
+
+class ExperimentStep {
+  step_name string
+  tool_sequence (ConnectToViTool | HandleSaveDialogTool | PressButtonTool | RunOpenViTool | SelectComboBoxTool | SelectTabTool | SetButtonStateTool | SetNumericControlTool | StopViTool | WaitForOperationCompleteTool)[]
 }
 
 // ==================Output models===================

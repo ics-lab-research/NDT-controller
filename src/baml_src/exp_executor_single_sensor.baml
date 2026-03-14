@@ -1,9 +1,4 @@
-class ExperimentStep {
-  step_name string
-  tool_sequence (ConnectToViTool | HandleSaveDialogTool | PressButtonTool | RunOpenViTool | SelectComboBoxTool | SelectTabTool | SetButtonStateTool | SetNumericControlTool | StopViTool | WaitForOperationCompleteTool)[]
-}
-
-function ExpExecutor(
+function ExpExecutorSingleSensor(
     plan: string, filename: string?
 ) -> ExperimentStep[] | ResponseError {
   client GroqRouter
@@ -41,7 +36,7 @@ Coordinates: X: left(-)/right(+), Y: backward(-)/forward(+), Z: down(-)/up(+)
 2. CONFIG: Configure signal params, scan distances, tabs/modes (BEFORE run_open_vi)
 3. START: run_open_vi → handle_save_dialog
 4. OPERATIONS: Movements/scans with wait_for_operation_complete after each
-5. CLEANUP: stop_vi
+5. CLEANUP: stop_vi (close_labview=false) → stop_vi (close_labview=true)
 
 Critical: ALL configs BEFORE run_open_vi. Grid scans need separate pre-config and execution steps.
 </execution_order>
@@ -72,7 +67,7 @@ EXECUTE (after handle_save_dialog): set_button_state (Scan, true) → wait_for_o
 "Step N - [Plan Description]" (main operations)
 "Step N.M - Pre-configure [Op]" (configs before VI start)
 "Step N.P - Start VI and Configure Save" (run_open_vi + handle_save_dialog)
-"Step FINAL - Cleanup" (stop_vi)
+"Step FINAL - Cleanup" (stop_vi close_labview=false → stop_vi close_labview=true)
 
 Use substep numbering (N.M) when splitting/reordering operations.
 </step_naming>
@@ -120,6 +115,7 @@ Output:
     {"tool_name": "wait_for_operation_complete", "exp_type": "MOVEMENT"}
   ]},
   {"step_name": "Step FINAL - Cleanup", "tool_sequence": [
+    {"tool_name": "stop_vi", "close_labview": false},
     {"tool_name": "stop_vi", "close_labview": true}
   ]}
 ]
@@ -132,7 +128,7 @@ Now translate the given plan into tool sequences with step-by-step mapping.
 
 // Test Case 1: Basic signal configuration with simple movement (no scan)
 test TestSimpleMovementNoScan {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-002:
@@ -146,7 +142,7 @@ PLAN EXP-002:
 
 // Test Case 2: Gaussian pulse type with grid scan
 test TestGaussianPulseWithScan {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-003:
@@ -159,7 +155,7 @@ PLAN EXP-003:
 
 // Test Case 3: Chirp pulse type with movements and scan
 test TestChirpPulseWithScan {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-004:
@@ -174,7 +170,7 @@ PLAN EXP-004:
 
 // Test Case 4: Multiple movements in all directions
 test TestMultiDirectionalMovements {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-005:
@@ -192,7 +188,7 @@ PLAN EXP-005:
 
 // Test Case 5: Large grid scan with pre and post movements
 test TestLargeGridScanWithMovements {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-006:
@@ -210,7 +206,7 @@ PLAN EXP-006:
 
 // Test Case 6: Scan only (minimal setup)
 test TestScanOnly {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-007:
@@ -223,7 +219,7 @@ PLAN EXP-007:
 
 // Test Case 7: Complex Z-axis movements with scan
 test TestZAxisComplexity {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-008:
@@ -240,7 +236,7 @@ PLAN EXP-008:
 
 // Test Case 8: High frequency signal with small grid
 test TestHighFrequencySmallGrid {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-009:
@@ -257,7 +253,7 @@ PLAN EXP-009:
 
 // Test Case 9: Gaussian pulse with complex movements
 test TestGaussianComplexMovements {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-010:
@@ -276,7 +272,7 @@ PLAN EXP-010:
 
 // Test Case 10: Chirp with minimal movements
 test TestChirpMinimalMovements {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-011:
@@ -291,7 +287,7 @@ PLAN EXP-011:
 
 // Test Case 11: Return to origin pattern
 test TestReturnToOriginPattern {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-012:
@@ -308,7 +304,7 @@ PLAN EXP-012:
 
 // Test Case 12: Single axis movement with scan
 test TestSingleAxisMovement {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-013:
@@ -323,7 +319,7 @@ PLAN EXP-013:
 
 // Test Case 13: Asymmetric grid scan
 test TestAsymmetricGridScan {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-014:
@@ -340,7 +336,7 @@ PLAN EXP-014:
 
 // Test Case 14: All waveform types coverage
 test TestSquareWaveform {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-015:
@@ -353,7 +349,7 @@ PLAN EXP-015:
 
 // Test Case 15: Movement only (no scan)
 test TestMovementOnlyNoScan {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-016:
@@ -372,7 +368,7 @@ PLAN EXP-016:
 // ====================================================== ERROR HANDLING TEST CASES ===============================================
 // Test Case 2: Unknown control - Invalid frequency parameter name
 test TestUnknownFrequencyControl {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-003:
@@ -386,7 +382,7 @@ PLAN EXP-003:
 
 // Test Case 3: Unknown waveform type
 test TestUnknownWaveform {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-004:
@@ -400,7 +396,7 @@ PLAN EXP-004:
 
 // Test Case 4: Invalid movement direction
 test TestInvalidMovementDirection {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-005:
@@ -414,7 +410,7 @@ PLAN EXP-005:
 
 // Test Case 6: Invalid pulse type
 test TestInvalidPulseType {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-007:
@@ -428,7 +424,7 @@ PLAN EXP-007:
 
 // Test Case 7: Missing required signal parameters for Basic pulse
 test TestMissingSignalParameters {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-008:
@@ -442,7 +438,7 @@ PLAN EXP-008:
 
 // Test Case 8: Invalid scan dimensions format
 test TestInvalidScanFormat {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-009:
@@ -456,7 +452,7 @@ PLAN EXP-009:
 
 // Test Case 9: Unknown measurement mode
 test TestUnknownMeasurementMode {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-010:
@@ -470,7 +466,7 @@ PLAN EXP-010:
 
 // Test Case 10: Invalid button name
 test TestInvalidButtonName {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-011:
@@ -484,7 +480,7 @@ PLAN EXP-011:
 
 // Test Case 11: Invalid numeric control name
 test TestInvalidNumericControl {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-012:
@@ -498,7 +494,7 @@ PLAN EXP-012:
 
 // Test Case 12: Missing distance for movement
 test TestMissingDistance {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-013:
@@ -512,7 +508,7 @@ PLAN EXP-013:
 
 // Test Case 13: Invalid combo box option
 test TestInvalidComboBoxOption {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-014:
@@ -526,7 +522,7 @@ PLAN EXP-014:
 
 // Test Case 14: Conflicting pulse type parameters
 test TestConflictingPulseParameters {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-015:
@@ -539,7 +535,7 @@ PLAN EXP-015:
 
 // Test Case 15: Invalid state value for button
 test TestInvalidButtonState {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-016:
@@ -553,7 +549,7 @@ PLAN EXP-016:
 
 // Test Case 16: Unknown Gaussian pulse parameter
 test TestUnknownGaussianParameter {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-017:
@@ -566,7 +562,7 @@ PLAN EXP-017:
 
 // Test Case 17: Invalid Chirp parameters
 test TestInvalidChirpParameters {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-018:
@@ -580,7 +576,7 @@ PLAN EXP-018:
 
 // Test Case 18: Ambiguous movement instruction
 test TestAmbiguousMovement {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-019:
@@ -594,7 +590,7 @@ PLAN EXP-019:
 
 // Test Case 19: Invalid speed value context
 test TestInvalidSpeedContext {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-020:
@@ -608,7 +604,7 @@ PLAN EXP-020:
 
 // Test Case 20: Missing filename parameter
 test TestMissingFilename {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-021:
@@ -622,7 +618,7 @@ PLAN EXP-021:
 
 // Test Case 21: Invalid tab index reference
 test TestInvalidTabIndex {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-022:
@@ -636,7 +632,7 @@ PLAN EXP-022:
 
 // Test Case 22: Unrecognized operation type
 test TestUnrecognizedOperation {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-023:
@@ -650,7 +646,7 @@ PLAN EXP-023:
 
 // Test Case 23: Empty or malformed plan
 test TestEmptyPlan {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan ""
     filename "empty_plan.tdms"
@@ -660,7 +656,7 @@ test TestEmptyPlan {
 
 // Test Case 24: Invalid distance units
 test TestInvalidDistanceUnits {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-024:
@@ -674,7 +670,7 @@ PLAN EXP-024:
 
 // Test Case 25: Multiple conflicting operations
 test TestConflictingOperations {
-  functions [ExpExecutor]
+  functions [ExpExecutorSingleSensor]
   args {
     plan #"
 PLAN EXP-025:

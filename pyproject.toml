@@ -5,18 +5,18 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-  "baml-py==0.216.0",
-  "dotenv>=0.9.9",
-  "gradio>=6.2.0",
-  "loguru>=0.7.3",
-  "matplotlib>=3.10.8",
-  "nptdms>=1.10.0",
-  "pydantic>=2.12.5",
-  "pywavelets>=1.9.0",
-  "pywin32>=311; sys_platform == 'win32'",
-  "pywinauto>=0.6.9; sys_platform == 'win32'",
-  "scikit-learn>=1.8.0",
-  "scipy>=1.16.3",
+    "baml-py>=0.220.0",
+    "dotenv>=0.9.9",
+    "gradio>=6.9.0",
+    "loguru>=0.7.3",
+    "matplotlib>=3.10.8",
+    "nptdms>=1.10.0",
+    "pydantic>=2.12.5",
+    "pywavelets>=1.9.0",
+    "pywin32>=311; sys_platform == 'win32'",
+    "pywinauto>=0.6.9; sys_platform == 'win32'",
+    "scikit-learn>=1.8.0",
+    "scipy>=1.17.1",
 ]
 
 

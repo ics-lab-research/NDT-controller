@@ -56,5 +56,5 @@ class SetNumericControlTool {
 
 class StopViTool {
     tool_name "stop_vi" @description("Use this tool to stop the currently running VI, optionally closing the front panel")
-    close_labview bool @description("Set to true to close the front panel after stopping the VI")
+    close_labview bool @description("Set to false to keep the front panel open after stopping the VI (default: false)")
 }

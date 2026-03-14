@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import Dict
@@ -30,11 +31,17 @@ def get_experiment_metadata(pwd_path: Path) -> ExperimentMetadata:
             "Environment variables EXPERIMENT_PLOTS_PATH must be set"
         )
 
+    vi_paths_raw = os.environ.get("EXPERIMENT_VI_PATHS", "{}")
+    vi_paths = {k: Path(v) for k, v in json.loads(vi_paths_raw).items()}
+    hardware_type = os.environ.get("EXPERIMENT_HARDWARE_TYPE")
+
     return ExperimentMetadata(
         data_dir_path=pwd_path / experiments_base / data_dir,
         plans_path=pwd_path / experiments_base / plans_file,
         vi_path=Path(vi_file),
         plots_dir_path=pwd_path / experiments_base / plot_dir,
+        vi_paths=vi_paths,
+        hardware_type=hardware_type,
     )
 
 

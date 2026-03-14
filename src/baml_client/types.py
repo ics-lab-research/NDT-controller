@@ -15,7 +15,7 @@ import typing_extensions
 from enum import Enum
 
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 import baml_py
@@ -61,8 +61,8 @@ class ScanStatus(str, Enum):
 # #########################################################################
 
 class ConnectToViTool(BaseModel):
-    tool_name: typing_extensions.Literal['connect_to_vi']
-    vi_path: str
+    tool_name: typing_extensions.Literal['connect_to_vi'] = Field(description='Use this tool to connect to a LabVIEW VI and also opens the front panel if not already open')
+    vi_path: str = Field(description='Path to the LabVIEW VI to connect to')
 
 class ConversationMessage(BaseModel):
     role: typing.Union[typing_extensions.Literal['user'], typing_extensions.Literal['assistant']]
@@ -74,8 +74,8 @@ class ExpOrchestratorOutput(BaseModel):
 
 class ExpRouterOutput(BaseModel):
     action: typing.Optional[ExpAction] = None
-    response: typing.Optional[str] = None
-    reformatted_message: typing.Optional[str] = None
+    response: typing.Optional[str] = Field(default=None, description='only for ASK_CLARIFICATION')
+    reformatted_message: typing.Optional[str] = Field(default=None, description='for all except ASK_CLARIFICATION')
 
 class Experiment(BaseModel):
     id: str
@@ -83,30 +83,32 @@ class Experiment(BaseModel):
     signal: typing.List["SignalParameter"]
     relative_offset_mm: "RelativeOffset"
     filename: str
+    filename_2: typing.Optional[str] = Field(default=None, description='Second sensor filename for dual-sensor hardware. Null for single-sensor.')
+    experiment_name: typing.Optional[str] = Field(default=None, description='Logical name for the experiment (e.g., \'gaussian_20x20_100hz_dual\'). Used as a human-readable label. For dual-sensor, ends with \'_dual\'.')
 
 class ExperimentStep(BaseModel):
     step_name: str
     tool_sequence: typing.List[typing.Union["ConnectToViTool", "HandleSaveDialogTool", "PressButtonTool", "RunOpenViTool", "SelectComboBoxTool", "SelectTabTool", "SetButtonStateTool", "SetNumericControlTool", "StopViTool", "WaitForOperationCompleteTool"]]
 
 class GetNumericIndicatorTool(BaseModel):
-    tool_name: typing_extensions.Literal['get_numeric_indicator']
-    indicator_name: str
+    tool_name: typing_extensions.Literal['get_numeric_indicator'] = Field(description='Use this tool to get a numeric indicator value from the front panel.')
+    indicator_name: str = Field(description='Name of the numeric indicator to get')
 
 class GetViStatusTool(BaseModel):
-    tool_name: typing_extensions.Literal['get_vi_status']
+    tool_name: typing_extensions.Literal['get_vi_status'] = Field(description='Use this tool to get the current status of the connected VI.')
 
 class Grid(BaseModel):
     rows: int
     cols: int
 
 class HandleSaveDialogTool(BaseModel):
-    tool_name: typing_extensions.Literal['handle_save_dialog']
-    save_directory: str
-    file_name: str
+    tool_name: typing_extensions.Literal['handle_save_dialog'] = Field(description='Use this tool to handle the save dialog in LabVIEW')
+    save_directory: str = Field(description='Directory to save the file to')
+    file_name: str = Field(description='Name of the file to save')
 
 class PressButtonTool(BaseModel):
-    tool_name: typing_extensions.Literal['press_button']
-    button_name: str
+    tool_name: typing_extensions.Literal['press_button'] = Field(description='Use this tool to press a button on the VI front panel')
+    button_name: str = Field(description='Name of the button to press')
 
 class RelativeOffset(BaseModel):
     x: int
@@ -114,31 +116,31 @@ class RelativeOffset(BaseModel):
     z: int
 
 class ResponseError(BaseModel):
-    error: str
+    error: str = Field(description='Error message describing what went wrong')
 
 class RunOpenViTool(BaseModel):
-    tool_name: typing_extensions.Literal['run_open_vi']
-    run_vi: bool
+    tool_name: typing_extensions.Literal['run_open_vi'] = Field(description='Use this tool to open and run a LabVIEW VI')
+    run_vi: bool = Field(description='Set to true to run the VI after opening it')
 
 class SelectComboBoxTool(BaseModel):
-    tool_name: typing_extensions.Literal['select_combo_box']
-    combo_box_name: str
-    index: int
+    tool_name: typing_extensions.Literal['select_combo_box'] = Field(description='Use this tool to select an item from a combo box control on the VI front panel')
+    combo_box_name: str = Field(description='Name of the combo box control')
+    index: int = Field(description='Index of the item to select from the combo box')
 
 class SelectTabTool(BaseModel):
-    tool_name: typing_extensions.Literal['select_tab']
-    tab_control_name: str
-    index: int
+    tool_name: typing_extensions.Literal['select_tab'] = Field(description='Use this tool to select a tab in a tab control on the VI front panel')
+    tab_control_name: str = Field(description='Name of the tab control')
+    index: int = Field(description='Index of the tab to select (0-based)')
 
 class SetButtonStateTool(BaseModel):
-    tool_name: typing_extensions.Literal['set_button_state']
-    button_name: str
-    state: bool
+    tool_name: typing_extensions.Literal['set_button_state'] = Field(description='Use this tool to set the state of a button on the VI front panel')
+    button_name: str = Field(description='Name of the button to set')
+    state: bool = Field(description='State to set the button to (true for pressed, false for unpressed)')
 
 class SetNumericControlTool(BaseModel):
-    tool_name: typing_extensions.Literal['set_numeric_control']
-    control_name: str
-    value: float
+    tool_name: typing_extensions.Literal['set_numeric_control'] = Field(description='Use this tool to set the value of a numeric control on the VI front panel')
+    control_name: str = Field(description='Name of the numeric control to set')
+    value: float = Field(description='Value to set the numeric control to')
 
 class SignalParameter(BaseModel):
     key: str
@@ -149,8 +151,8 @@ class State(BaseModel):
     home_position: "RelativeOffset"
 
 class StopViTool(BaseModel):
-    tool_name: typing_extensions.Literal['stop_vi']
-    close_labview: bool
+    tool_name: typing_extensions.Literal['stop_vi'] = Field(description='Use this tool to stop the currently running VI, optionally closing the front panel')
+    close_labview: bool = Field(description='Set to false to keep the front panel open after stopping the VI (default: false)')
 
 class ToolResult(BaseModel):
     name: str
@@ -159,7 +161,7 @@ class ToolResult(BaseModel):
     error: typing.Optional[str] = None
 
 class WaitForOperationCompleteTool(BaseModel):
-    tool_name: typing_extensions.Literal['wait_for_operation_complete']
+    tool_name: typing_extensions.Literal['wait_for_operation_complete'] = Field(description='Use this tool to wait until a specific operation is complete by monitoring an indicator on the VI front panel')
     exp_type: ExpType
 
 # #########################################################################

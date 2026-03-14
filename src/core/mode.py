@@ -40,3 +40,15 @@ class ModeManager:
             raise ValueError("Metadata is not ExperimentMetadata")
 
         metadata.data_dir_path = path
+
+    def set_hardware_type(self, hardware_type: str) -> None:
+        metadata = self.get_mode_metadata
+        if not isinstance(metadata, ExperimentMetadata):
+            raise ValueError("Metadata is not ExperimentMetadata")
+        if not metadata.vi_paths or hardware_type not in metadata.vi_paths:
+            raise ValueError(
+                f"Unknown hardware type '{hardware_type}'. "
+                f"Available: {list(metadata.vi_paths or {})}"
+            )
+        metadata.vi_path = metadata.vi_paths[hardware_type]
+        metadata.hardware_type = hardware_type

@@ -16,6 +16,7 @@ from .experiment_api import (
     call_exp_basic_executor,
     call_exp_executor,
     call_exp_orchestrator,
+    call_exp_orchestrator_dual_sensor,
     call_exp_planner,
     call_exp_router,
 )
@@ -65,8 +66,9 @@ def process_single_experiment(
     project_manager: ProjectManager,
 ) -> Generator[AgentResponse, None, ExperimentPlan | ResponseError]:
     """Process a single experiment through planning and execution."""
+    display_name = experiment.experiment_name or experiment.filename
     yield AgentResponse(
-        intermediate_step=f"Generating abstract plan for `{experiment.filename}`"
+        intermediate_step=f"Generating abstract plan for `{display_name}`"
     )
     logger.debug(
         f"Calling ExpPlanner with experiment: {experiment}, experiment_state: {project_manager.experiment_state}"
@@ -78,19 +80,24 @@ def process_single_experiment(
         return plan
 
     yield AgentResponse(
-        intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
+        intermediate_step=f"Calling ExpExecutor for `{display_name}` with abstract plan:\n {plan}"
     )
     logger.debug(
-        f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
+        f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}', filename_2: '{experiment.filename_2}'"
     )
 
-    tools = call_exp_executor(plan, experiment.filename)
+    tools = call_exp_executor(
+        plan, experiment.filename, project_manager.hardware_type, experiment.filename_2
+    )
     if isinstance(tools, ResponseError):
         yield from yield_error(tools)
         return tools
 
     return ExperimentPlan(
-        id=str(uuid.uuid4()), filename=experiment.filename, experiment=tools
+        id=str(uuid.uuid4()),
+        filename=experiment.filename,
+        experiment_name=experiment.experiment_name,
+        experiment=tools,
     )
 
 
@@ -131,6 +138,7 @@ def handle_multiple_scan(
         experiment: Experiment,
     ) -> Generator[AgentResponse, None, ExperimentPlan | None]:
         logger.debug(f"Processing experiment: {experiment.filename}")
+        display_name = experiment.experiment_name or experiment.filename
 
         plan = call_exp_planner(experiment, project_manager.experiment_state)
         if isinstance(plan, ResponseError):
@@ -138,13 +146,15 @@ def handle_multiple_scan(
             return None
 
         yield AgentResponse(
-            intermediate_step=f"Calling ExpExecutor with filename: `{experiment.filename}` and abstract plan:\n {plan}"
+            intermediate_step=f"Calling ExpExecutor for `{display_name}` with abstract plan:\n {plan}"
         )
         logger.debug(
-            f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}'"
+            f"Calling ExpExecutor with plan: '{plan}', filename: '{experiment.filename}', filename_2: '{experiment.filename_2}'"
         )
 
-        tools = call_exp_executor(plan, experiment.filename)
+        tools = call_exp_executor(
+            plan, experiment.filename, project_manager.hardware_type, experiment.filename_2
+        )
         if isinstance(tools, ResponseError):
             yield from yield_error(tools)
             return None
@@ -154,7 +164,10 @@ def handle_multiple_scan(
         project_manager.update_experiment_state(new_position)
 
         exp_plan = ExperimentPlan(
-            id=str(uuid.uuid4()), filename=experiment.filename, experiment=tools
+            id=str(uuid.uuid4()),
+            filename=experiment.filename,
+            experiment_name=experiment.experiment_name,
+            experiment=tools,
         )
         return exp_plan
 
@@ -187,7 +200,10 @@ def orchestrate_experiments(
         f"Calling ExpOrchestrator with reformatted_message: '{reformatted_message}'"
     )
 
-    orchestrator_output = call_exp_orchestrator(reformatted_message)
+    if project_manager.hardware_type == "dual_sensor":
+        orchestrator_output = call_exp_orchestrator_dual_sensor(reformatted_message)
+    else:
+        orchestrator_output = call_exp_orchestrator(reformatted_message)
     if isinstance(orchestrator_output, ResponseError):
         yield from yield_error(orchestrator_output)
         return

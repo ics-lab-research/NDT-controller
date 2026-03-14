@@ -2,10 +2,14 @@
 experiment_dir = "EXPERIMENT"
 
 [experiment]
-vi_path = "D:\\Dat\\Pulsed Eddy Current - LLM\\MAIN - PECT - Autonics - Pulses - encoder  - LLM.vi"
+hardware_type = "single_sensor"   # default hardware on startup: select key from [experiment.vi_paths]
 plans = "labview_experiment_plans.json"
 data_dir = "data"
 plots_dir = "plots"
+
+[experiment.vi_paths]
+single_sensor = "D:\\Dat\\Pulsed Eddy Current - LLM\\MAIN - PECT - Autonics - Pulses - encoder  - LLM.vi"
+dual_sensor   = "D:\\Dat\\Pulsed Eddy Current - LLM - Dual sensors\\MAIN - PECT - Autonics - Pulses - encoder - Multi-sensors.vi"
 
 [models]
 exp_router = "openrouter/google/gemini-3-flash-preview"
@@ -16,4 +20,4 @@ exp_basic_executor = "openrouter/google/gemini-3-flash-preview"
 [logging]
 baml_log = "info"   # level logging for baml
 log_level = "debug" # level logging for loguru
-dry_run = true      # dry_run mode when execute tool functions
+dry_run = false     # dry_run mode when execute tool functions

@@ -20,6 +20,7 @@ def save_experiment_plans(
             {
                 "id": plan.id,
                 "filename": plan.filename,
+                "experiment_name": plan.experiment_name,
                 "steps": [
                     {
                         "step_name": step.step_name,
@@ -106,6 +107,7 @@ def load_experiment_plans(
                 ExperimentPlan(
                     id=plan_data.get("id", str(uuid.uuid4())),
                     filename=plan_data["filename"],
+                    experiment_name=plan_data.get("experiment_name"),
                     experiment=steps,
                     status=ExperimentStatus(
                         plan_data.get(

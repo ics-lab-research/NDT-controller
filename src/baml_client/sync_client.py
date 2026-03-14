@@ -108,17 +108,31 @@ class BamlSyncClient:
                 "user_message": user_message,
             })
             return typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.GetNumericIndicatorTool", "types.GetViStatusTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool"]], "types.ResponseError"], __result__.cast_to(types, types, stream_types, False, __runtime__))
-    def ExpExecutor(self, plan: str,filename: typing.Optional[str] = None,
+    def ExpExecutorDualSensor(self, plan: str,filename_1: typing.Optional[str] = None,filename_2: typing.Optional[str] = None,
         baml_options: BamlCallOptions = {},
     ) -> typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]:
         # Check if on_tick is provided
         if 'on_tick' in baml_options:
-            __stream__ = self.stream.ExpExecutor(plan=plan,filename=filename,
+            __stream__ = self.stream.ExpExecutorDualSensor(plan=plan,filename_1=filename_1,filename_2=filename_2,
                 baml_options=baml_options)
             return __stream__.get_final_response()
         else:
             # Original non-streaming code
-            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="ExpExecutor", args={
+            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="ExpExecutorDualSensor", args={
+                "plan": plan,"filename_1": filename_1,"filename_2": filename_2,
+            })
+            return typing.cast(typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"], __result__.cast_to(types, types, stream_types, False, __runtime__))
+    def ExpExecutorSingleSensor(self, plan: str,filename: typing.Optional[str] = None,
+        baml_options: BamlCallOptions = {},
+    ) -> typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            __stream__ = self.stream.ExpExecutorSingleSensor(plan=plan,filename=filename,
+                baml_options=baml_options)
+            return __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="ExpExecutorSingleSensor", args={
                 "plan": plan,"filename": filename,
             })
             return typing.cast(typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"], __result__.cast_to(types, types, stream_types, False, __runtime__))
@@ -133,6 +147,20 @@ class BamlSyncClient:
         else:
             # Original non-streaming code
             __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="ExpOrchestrator", args={
+                "reformatted_message": reformatted_message,
+            })
+            return typing.cast(typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"], __result__.cast_to(types, types, stream_types, False, __runtime__))
+    def ExpOrchestratorDualSensor(self, reformatted_message: str,
+        baml_options: BamlCallOptions = {},
+    ) -> typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"]:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            __stream__ = self.stream.ExpOrchestratorDualSensor(reformatted_message=reformatted_message,
+                baml_options=baml_options)
+            return __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="ExpOrchestratorDualSensor", args={
                 "reformatted_message": reformatted_message,
             })
             return typing.cast(typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"], __result__.cast_to(types, types, stream_types, False, __runtime__))
@@ -185,10 +213,22 @@ class BamlStreamClient:
           lambda x: typing.cast(typing.Union[typing.List[typing.Union["types.ConnectToViTool", "types.GetNumericIndicatorTool", "types.GetViStatusTool", "types.HandleSaveDialogTool", "types.PressButtonTool", "types.RunOpenViTool", "types.SelectComboBoxTool", "types.SelectTabTool", "types.SetButtonStateTool", "types.SetNumericControlTool", "types.StopViTool"]], "types.ResponseError"], x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
-    def ExpExecutor(self, plan: str,filename: typing.Optional[str] = None,
+    def ExpExecutorDualSensor(self, plan: str,filename_1: typing.Optional[str] = None,filename_2: typing.Optional[str] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlSyncStream[typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"], typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]]:
-        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="ExpExecutor", args={
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="ExpExecutorDualSensor", args={
+            "plan": plan,"filename_1": filename_1,"filename_2": filename_2,
+        })
+        return baml_py.BamlSyncStream[typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"], typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]](
+          __result__,
+          lambda x: typing.cast(typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"], x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"], x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
+    def ExpExecutorSingleSensor(self, plan: str,filename: typing.Optional[str] = None,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlSyncStream[typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"], typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="ExpExecutorSingleSensor", args={
             "plan": plan,"filename": filename,
         })
         return baml_py.BamlSyncStream[typing.Union[typing.List["stream_types.ExperimentStep"], "stream_types.ResponseError"], typing.Union[typing.List["types.ExperimentStep"], "types.ResponseError"]](
@@ -201,6 +241,18 @@ class BamlStreamClient:
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlSyncStream[typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"], typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"]]:
         __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="ExpOrchestrator", args={
+            "reformatted_message": reformatted_message,
+        })
+        return baml_py.BamlSyncStream[typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"], typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"]](
+          __result__,
+          lambda x: typing.cast(typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"], x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"], x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
+    def ExpOrchestratorDualSensor(self, reformatted_message: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlSyncStream[typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"], typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"]]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="ExpOrchestratorDualSensor", args={
             "reformatted_message": reformatted_message,
         })
         return baml_py.BamlSyncStream[typing.Union["stream_types.ExpOrchestratorOutput", "stream_types.ResponseError"], typing.Union["types.ExpOrchestratorOutput", "types.ResponseError"]](
@@ -248,10 +300,17 @@ class BamlHttpRequestClient:
             "user_message": user_message,
         }, mode="request")
         return __result__
-    def ExpExecutor(self, plan: str,filename: typing.Optional[str] = None,
+    def ExpExecutorDualSensor(self, plan: str,filename_1: typing.Optional[str] = None,filename_2: typing.Optional[str] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
-        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpExecutor", args={
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpExecutorDualSensor", args={
+            "plan": plan,"filename_1": filename_1,"filename_2": filename_2,
+        }, mode="request")
+        return __result__
+    def ExpExecutorSingleSensor(self, plan: str,filename: typing.Optional[str] = None,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpExecutorSingleSensor", args={
             "plan": plan,"filename": filename,
         }, mode="request")
         return __result__
@@ -259,6 +318,13 @@ class BamlHttpRequestClient:
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpOrchestrator", args={
+            "reformatted_message": reformatted_message,
+        }, mode="request")
+        return __result__
+    def ExpOrchestratorDualSensor(self, reformatted_message: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpOrchestratorDualSensor", args={
             "reformatted_message": reformatted_message,
         }, mode="request")
         return __result__
@@ -291,10 +357,17 @@ class BamlHttpStreamRequestClient:
             "user_message": user_message,
         }, mode="stream")
         return __result__
-    def ExpExecutor(self, plan: str,filename: typing.Optional[str] = None,
+    def ExpExecutorDualSensor(self, plan: str,filename_1: typing.Optional[str] = None,filename_2: typing.Optional[str] = None,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
-        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpExecutor", args={
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpExecutorDualSensor", args={
+            "plan": plan,"filename_1": filename_1,"filename_2": filename_2,
+        }, mode="stream")
+        return __result__
+    def ExpExecutorSingleSensor(self, plan: str,filename: typing.Optional[str] = None,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpExecutorSingleSensor", args={
             "plan": plan,"filename": filename,
         }, mode="stream")
         return __result__
@@ -302,6 +375,13 @@ class BamlHttpStreamRequestClient:
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpOrchestrator", args={
+            "reformatted_message": reformatted_message,
+        }, mode="stream")
+        return __result__
+    def ExpOrchestratorDualSensor(self, reformatted_message: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ExpOrchestratorDualSensor", args={
             "reformatted_message": reformatted_message,
         }, mode="stream")
         return __result__
@@ -321,4 +401,4 @@ class BamlHttpStreamRequestClient:
         return __result__
     
 
-b = BamlSyncClient(DoNotUseDirectlyCallManager({}))
+b = BamlSyncClient(DoNotUseDirectlyCallManager({}))

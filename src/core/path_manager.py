@@ -20,11 +20,15 @@ class PathManager:
         logger.info("Ensuring mode-specific paths exist")
         for metadata in all_metadata.values():
             for field in dataclasses.fields(metadata):
-                if field.name == "vi_path":
+                if field.name in ("vi_path", "vi_paths"):
                     continue
                 paths = getattr(metadata, field.name)
+                if paths is None:
+                    continue
                 if isinstance(paths, Path):
                     paths = [paths]
+                elif not isinstance(paths, (list, tuple)):
+                    continue
                 for path in paths:
                     if path.suffix:  # File
                         self._ensure_file_exists(path)

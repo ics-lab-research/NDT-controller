@@ -50,7 +50,7 @@ from ..tools.labview_controller import (
 )
 from ..utils.heatmap_plotter import generate_heatmaps
 
-BUTTON_STATE_DELAY = 1
+BUTTON_STATE_DELAY = 3
 SCAN_COMPLETION_CHECK_INTERVAL = 1
 HARDWARE_SETTLE_DELAY = 5
 
@@ -240,6 +240,7 @@ def execute_tool(
         )
 
     elif isinstance(tool, StopViTool):
+        time.sleep(HARDWARE_SETTLE_DELAY)
         return tool_stop_vi(close_labview=tool.close_labview)
 
     elif isinstance(tool, WaitForOperationCompleteTool):

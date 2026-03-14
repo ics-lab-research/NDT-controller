@@ -262,7 +262,7 @@ def tool_select_tab(
         )
 
 
-def tool_stop_vi(close_labview: bool = True, log: bool = True) -> ToolResult:
+def tool_stop_vi(close_labview: bool = False, log: bool = True) -> ToolResult:
     """Stop the VI, and optionally close LabVIEW."""
     if not controller.vi_reference:
         return ToolResult(

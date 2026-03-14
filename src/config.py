@@ -47,10 +47,19 @@ def load_toml_config():
         os.environ["EXPERIMENT_DATA_PATH"] = experiments["data_dir"]
     if "plans" in experiments:
         os.environ["EXPERIMENT_PLANS_PATH"] = experiments["plans"]
-    if "vi_path" in experiments:
-        os.environ["EXPERIMENT_VI_PATH"] = experiments["vi_path"]
     if "plots_dir" in experiments:
         os.environ["EXPERIMENT_PLOTS_PATH"] = experiments["plots_dir"]
+
+    # Support both legacy single vi_path and new vi_paths dict.
+    vi_paths: dict = experiments.get("vi_paths", {})
+    if vi_paths:
+        import json
+        os.environ["EXPERIMENT_VI_PATHS"] = json.dumps(vi_paths)
+        hardware_type = experiments.get("hardware_type", next(iter(vi_paths)))
+        os.environ["EXPERIMENT_HARDWARE_TYPE"] = hardware_type
+        os.environ["EXPERIMENT_VI_PATH"] = vi_paths[hardware_type]
+    elif "vi_path" in experiments:
+        os.environ["EXPERIMENT_VI_PATH"] = experiments["vi_path"]
 
     set_env_vars_from_section(config, "models")
     set_env_vars_from_section(config, "logging")
